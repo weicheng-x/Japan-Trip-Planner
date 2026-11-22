@@ -1,0 +1,64 @@
+name: Build & Publish Windows Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Syntax check JS files
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem -Path src, electron, scripts -Filter *.js -Recurse
+          foreach ($f in $files) {
+            node --check $f.FullName
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          Write-Host "Checked $($files.Count) JS files."
+
+      - name: Build Standalone HTML & Portable Windows EXE
+        run: npm run build:win
+
+      - name: Publish Release Assets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq "tag") {
+            $tag = $env:GITHUB_REF_NAME
+          } else {
+            $ver = node -p "require('./package.json').version"
+            $tag = "v$ver"
+          }
+          $exe = (Get-ChildItem -Path "dist" -Filter "*.exe" | Select-Object -First 1).FullName
+          $html = (Resolve-Path "dist-web/JP_Trip_Planner.html").Path
+          if (-not $exe -or -not (Test-Path $exe)) { throw "Built .exe not found in dist/" }
+          if (-not $html -or -not (Test-Path $html)) { throw "Built HTML not found in dist-web/" }
+
+          $ErrorActionPreference = "Continue"
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag $exe $html --clobber
+          } else {
+            gh release create $tag $exe $html --title "Japan Trip Planner $tag" --generate-notes
+          }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

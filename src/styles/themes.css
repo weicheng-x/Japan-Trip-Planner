@@ -1,0 +1,198 @@
+/* Unified 4-Season Theme Tokens & Vivid Light/Dark Hero Backdrop System */
+
+:root,
+body[data-season="sakura"] {
+  --bg: #FDF9FB;
+  --bg-pattern: radial-gradient(circle at 18% 12%, rgba(214, 51, 108, 0.05) 0%, transparent 48%),
+                radial-gradient(circle at 86% 84%, rgba(244, 114, 182, 0.06) 0%, transparent 48%);
+  --surface: #FFFFFF;
+  --surface-alt: #FAF0F5;
+  --surface-elevated: rgba(255, 255, 255, 0.94);
+  --ink: #24161F;
+  --ink-muted: #654B5A;
+  --ink-light: #937486;
+  --accent: #C92A67;
+  --accent-dark: #9C1B4D;
+  --accent-soft: #FCE7F3;
+  --gold: #D97706;
+  --gold-soft: #FEF3C7;
+  --indigo: #334669;
+  --indigo-soft: #E5EBF6;
+  --forest: #246347;
+  --forest-soft: #DCFCE7;
+  --border: #EFD5E2;
+  --border-strong: #DFB5CB;
+  --hero-fallback: linear-gradient(135deg, #FCE7F3 0%, #FBCFE8 50%, #E0E7FF 100%);
+  --hero-glass-bg: rgba(255, 252, 254, 0.89);
+  --hero-glass-border: rgba(255, 255, 255, 0.92);
+  --hero-glass-shadow: 0 8px 30px rgba(36, 22, 31, 0.14);
+  --hero-ink: #1E1520;
+  --hero-ink-muted: #4E3949;
+}
+
+body[data-season="summer"] {
+  --bg: #F5F8FC;
+  --bg-pattern: radial-gradient(circle at 18% 12%, rgba(225, 29, 72, 0.045) 0%, transparent 48%),
+                radial-gradient(circle at 86% 84%, rgba(3, 105, 161, 0.055) 0%, transparent 48%);
+  --surface: #FFFFFF;
+  --surface-alt: #ECF2F9;
+  --surface-elevated: rgba(255, 255, 255, 0.94);
+  --ink: #0F172A;
+  --ink-muted: #475569;
+  --ink-light: #64748B;
+  --accent: #E11D48;
+  --accent-dark: #BE123C;
+  --accent-soft: #FFE4E6;
+  --gold: #D97706;
+  --gold-soft: #FEF3C7;
+  --indigo: #0369A1;
+  --indigo-soft: #E0F2FE;
+  --forest: #0F766E;
+  --forest-soft: #CCFBF1;
+  --border: #CBD5E1;
+  --border-strong: #94A3B8;
+  --hero-fallback: linear-gradient(135deg, #090D1E 0%, #162248 52%, #2B1A4E 100%);
+  /* Keep light-mode Summer controls crisp frosted white so night river Hanabi remains bold & vivid behind */
+  --hero-glass-bg: rgba(255, 255, 255, 0.90);
+  --hero-glass-border: rgba(255, 255, 255, 0.94);
+  --hero-glass-shadow: 0 8px 30px rgba(9, 13, 30, 0.28);
+  --hero-ink: #0F172A;
+  --hero-ink-muted: #334155;
+}
+
+body[data-season="autumn"] {
+  --bg: #FAF7F2;
+  --bg-pattern: radial-gradient(circle at 18% 12%, rgba(200, 62, 43, 0.05) 0%, transparent 48%),
+                radial-gradient(circle at 86% 84%, rgba(217, 119, 6, 0.05) 0%, transparent 48%);
+  --surface: #FFFFFF;
+  --surface-alt: #F4EDE2;
+  --surface-elevated: rgba(255, 255, 255, 0.94);
+  --ink: #1A2228;
+  --ink-muted: #56636D;
+  --ink-light: #82909B;
+  --accent: #C83E2B;
+  --accent-dark: #9E2B1C;
+  --accent-soft: #FDECE9;
+  --gold: #D97706;
+  --gold-soft: #FEF3C7;
+  --indigo: #1E3A5F;
+  --indigo-soft: #E0E7FF;
+  --forest: #246347;
+  --forest-soft: #DCFCE7;
+  --border: #E4DCCB;
+  --border-strong: #D0C4AE;
+  --hero-fallback: linear-gradient(135deg, #431407 0%, #7C2D12 52%, #9A3412 100%);
+  --hero-glass-bg: rgba(255, 251, 245, 0.90);
+  --hero-glass-border: rgba(255, 248, 240, 0.94);
+  --hero-glass-shadow: 0 8px 30px rgba(45, 20, 12, 0.20);
+  --hero-ink: #1A2228;
+  --hero-ink-muted: #4B5563;
+}
+
+body[data-season="winter"] {
+  --bg: #F4F8FC;
+  --bg-pattern: radial-gradient(circle at 18% 12%, rgba(2, 132, 199, 0.05) 0%, transparent 48%),
+                radial-gradient(circle at 86% 84%, rgba(30, 58, 138, 0.05) 0%, transparent 48%);
+  --surface: #FFFFFF;
+  --surface-alt: #E7F0F8;
+  --surface-elevated: rgba(255, 255, 255, 0.94);
+  --ink: #0F1E2E;
+  --ink-muted: #4A607A;
+  --ink-light: #748BA7;
+  --accent: #0284C7;
+  --accent-dark: #0369A1;
+  --accent-soft: #E0F2FE;
+  --gold: #D97706;
+  --gold-soft: #FEF3C7;
+  --indigo: #1E3A8A;
+  --indigo-soft: #DBEAFE;
+  --forest: #0F766E;
+  --forest-soft: #CCFBF1;
+  --border: #CFE0EE;
+  --border-strong: #ACC6DE;
+  --hero-fallback: linear-gradient(135deg, #DBEAFE 0%, #93C5FD 55%, #3B82F6 100%);
+  --hero-glass-bg: rgba(255, 255, 255, 0.89);
+  --hero-glass-border: rgba(255, 255, 255, 0.94);
+  --hero-glass-shadow: 0 8px 30px rgba(15, 30, 46, 0.16);
+  --hero-ink: #0F1E2E;
+  --hero-ink-muted: #334E68;
+}
+
+/* Dark Mode Overrides Across All 4 Seasons */
+body.dark-mode {
+  --bg: #0E141B;
+  --bg-pattern: radial-gradient(circle at 18% 12%, rgba(224, 90, 71, 0.08) 0%, transparent 48%),
+                radial-gradient(circle at 86% 84%, rgba(56, 189, 248, 0.07) 0%, transparent 48%);
+  --surface: #17202A;
+  --surface-alt: #202B38;
+  --surface-elevated: rgba(23, 32, 42, 0.97);
+  --ink: #F1F5F9;
+  --ink-muted: #94A3B8;
+  --ink-light: #64748B;
+  --border: #2C394A;
+  --border-strong: #3E4F65;
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.48);
+  --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.62);
+  --hero-glass-bg: rgba(13, 19, 29, 0.86);
+  --hero-glass-border: rgba(255, 255, 255, 0.22);
+  --hero-glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.50);
+  --hero-ink: #F8FAFC;
+  --hero-ink-muted: #CBD5E1;
+}
+
+body.dark-mode[data-season] {
+  --hero-glass-bg: rgba(13, 19, 29, 0.86);
+  --hero-glass-border: rgba(255, 255, 255, 0.22);
+  --hero-glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.50);
+  --hero-ink: #F8FAFC;
+  --hero-ink-muted: #CBD5E1;
+}
+
+body.dark-mode[data-season="sakura"] {
+  --accent: #F472B6;
+  --accent-dark: #DB2777;
+  --accent-soft: rgba(244, 114, 182, 0.18);
+  --gold: #FB923C;
+  --gold-soft: rgba(251, 146, 60, 0.18);
+  --indigo: #818CF8;
+  --indigo-soft: rgba(129, 140, 248, 0.18);
+  --forest: #34D399;
+  --forest-soft: rgba(52, 211, 153, 0.18);
+}
+
+body.dark-mode[data-season="summer"] {
+  --accent: #FB7185;
+  --accent-dark: #E11D48;
+  --accent-soft: rgba(251, 113, 133, 0.18);
+  --gold: #FBBF24;
+  --gold-soft: rgba(251, 191, 36, 0.18);
+  --indigo: #38BDF8;
+  --indigo-soft: rgba(56, 189, 248, 0.18);
+  --forest: #2DD4BF;
+  --forest-soft: rgba(45, 212, 191, 0.18);
+}
+
+body.dark-mode[data-season="autumn"] {
+  --accent: #F06449;
+  --accent-dark: #C83E2B;
+  --accent-soft: rgba(240, 100, 73, 0.18);
+  --gold: #F59E0B;
+  --gold-soft: rgba(245, 158, 11, 0.18);
+  --indigo: #60A5FA;
+  --indigo-soft: rgba(96, 165, 250, 0.18);
+  --forest: #34D399;
+  --forest-soft: rgba(52, 211, 153, 0.18);
+}
+
+body.dark-mode[data-season="winter"] {
+  --accent: #38BDF8;
+  --accent-dark: #0284C7;
+  --accent-soft: rgba(56, 189, 248, 0.18);
+  --gold: #FBBF24;
+  --gold-soft: rgba(251, 191, 36, 0.18);
+  --indigo: #93C5FD;
+  --indigo-soft: rgba(147, 197, 253, 0.18);
+  --forest: #2DD4BF;
+  --forest-soft: rgba(45, 212, 191, 0.18);
+}

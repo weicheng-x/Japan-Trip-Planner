@@ -1,0 +1,42 @@
+{
+  "name": "jp-trip-planner",
+  "version": "2.0.0",
+  "description": "Japan Master Trip & Budget Planner (EN <-> JP) Desktop Application",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "smoke": "electron . --smoke-test",
+    "build:html": "node scripts/build-standalone.js",
+    "build:win": "node scripts/build-standalone.js && electron-builder --win portable"
+  },
+  "author": "JP Trip Planner",
+  "license": "MIT",
+  "homepage": "https://weicheng-x.github.io/Japan-Trip-Planner/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weicheng-x/Japan-Trip-Planner.git"
+  },
+  "devDependencies": {
+    "electron": "^35.1.5",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.jptripplanner.desktop",
+    "productName": "JP Trip Planner",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        "portable"
+      ],
+      "icon": "electron/icon.ico"
+    }
+  }
+}

@@ -1,0 +1,3435 @@
+{
+  "schema": "jp-trip-planner-preset-v2",
+  "exportedAt": "2026-11-22T10:28:00.574Z",
+  "appVersion": "2.0.0",
+  "preset": {
+    "id": "userpreset_1795343280573_475",
+    "labelEn": "[Winter] Tokyo, Kawazu Sakura, Fujikawa SA, Kyoto, Kanazawa, Takayama & Kusatsu (16 days)",
+    "labelJa": "[冬] 東京・河津桜・富士川SA・京都・金沢・飛騨高山＆草津温泉 (16日間)",
+    "startDate": "2027-02-21",
+    "endDate": "2027-03-08",
+    "customTitleEn": "Tokyo, Kawazu Sakura, Fujikawa SA, Kyoto, Kanazawa, Takayama & Kusatsu",
+    "customTitleJa": "東京・河津桜・富士川SA・京都・金沢・飛騨高山＆草津温泉",
+    "customSubtitleEn": "Feb 21 – Mar 8, 2027 • 16 Days / 15 Nights • Early Sakura + Winter Snow Alps • APA Hotel Focus",
+    "customSubtitleJa": "2027年2月21日(日)〜3月8日(月) • 16日間15泊 • 早咲き河津桜＆雪アルプス・温泉周遊（APAホテル拠点）",
+    "currencyCode": "SGD",
+    "fxRate": 122,
+    "paxCount": 1,
+    "budgetMode": "group",
+    "shareHotelRoom": true,
+    "budgetTargetJpy": 0,
+    "taxFreeEnabled": false,
+    "selectedPassId": "none",
+    "passStartDay": 1,
+    "customPassPrice": null,
+    "syncedLocalTransit": false,
+    "prepDone": {},
+    "dataEn": {
+      "days": [
+        {
+          "day": 1,
+          "date": "2027-02-21",
+          "stay": 15500,
+          "travelBase": 46500,
+          "travelActualAdd": 0,
+          "fun": 8500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 1500,
+          "totalAllLegs": 1500,
+          "dow": "Sun",
+          "region": "Tokyo",
+          "routeJp": "Arrive Tokyo (HND / NRT) → APA Hotel Shinjuku Kabukicho & Omoide Yokocho",
+          "routeEn": "Check in beside JR Shinjuku Station, pick up IC card & enjoy Tokyo Metropolitan Gov't Bldg night views",
+          "hotel": "APA Hotel & Resort Shinjuku Kabukicho Tower",
+          "legs": [
+            "Flight to Tokyo (¥45,000 est.)",
+            "Haneda Monorail / N'EX / Yamanote to Shinjuku (¥1,500)"
+          ],
+          "tip": "Add Apple Wallet Suica/PASMO before landing. Stay at APA Kabukicho Tower (public bath on top floor) steps from Shinjuku Bus & JR West Exit.",
+          "timeSlots": [
+            {
+              "id": "f1_1",
+              "timeFrom": "13:30",
+              "timeTo": "15:15",
+              "locFrom": "Haneda / Narita",
+              "locTo": "Shinjuku",
+              "category": "travel",
+              "desc": "Airport train/monorail transfer to JR Shinjuku Station (Suica/PASMO)"
+            },
+            {
+              "id": "f1_2",
+              "timeFrom": "15:30",
+              "timeTo": "16:30",
+              "locFrom": "JR Shinjuku",
+              "locTo": "APA Kabukicho",
+              "category": "stay",
+              "desc": "Check in at APA Hotel Shinjuku Kabukicho Tower & unpack"
+            },
+            {
+              "id": "f1_3",
+              "timeFrom": "17:30",
+              "timeTo": "20:00",
+              "locFrom": "Shinjuku",
+              "locTo": "Omoide Yokocho",
+              "category": "meal",
+              "desc": "Evening view at Tokyo Metropolitan Gov't Bldg South Deck & yakitori dinner"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 2,
+          "date": "2027-02-22",
+          "stay": 15500,
+          "travelBase": 8260,
+          "travelActualAdd": 1500,
+          "fun": 10000,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 4400,
+          "totalAllLegs": 9760,
+          "dow": "Mon",
+          "region": "Mt. Fuji",
+          "routeJp": "Tokyo ↔ Lake Kawaguchiko Winter Day Trip (Oishi Park, Ropeway & Hoto Fudo)",
+          "routeEn": "Timed on Monday before Japan's Tue Feb 23 Emperor's Birthday holiday for clearer snow views & smaller crowds",
+          "hotel": "APA Hotel & Resort Shinjuku Kabukicho Tower",
+          "legs": [
+            "Shinjuku ↔ Otsuki (JR Fuji Excursion Ltd Exp ¥4,400 RT)",
+            "Otsuki ↔ Kawaguchiko (Fujikyuko Line ¥3,860 RT • Non-JR)",
+            "Kawaguchiko Sightseeing Red Line Bus 1-Day Pass (¥1,500 • Non-JR)"
+          ],
+          "tip": "Reserve JR Fuji Excursion seats 1 month ahead (sold out fast); backup option is Keio Highway Bus from Busta Shinjuku (~¥4,400 RT). Lunch at Hoto Fudo (Tabelog ★3.57).",
+          "timeSlots": [
+            {
+              "id": "f2_1",
+              "timeFrom": "07:30",
+              "timeTo": "09:25",
+              "locFrom": "JR Shinjuku",
+              "locTo": "Kawaguchiko Stn",
+              "category": "travel",
+              "desc": "Direct JR Fuji Excursion Limited Express to Kawaguchiko"
+            },
+            {
+              "id": "f2_2",
+              "timeFrom": "09:45",
+              "timeTo": "12:15",
+              "locFrom": "Kawaguchiko Stn",
+              "locTo": "Oishi Park",
+              "category": "sightseeing",
+              "desc": "Red Line Bus to Oishi Park northern shore & Mt. Fuji Panoramic Ropeway"
+            },
+            {
+              "id": "f2_3",
+              "timeFrom": "12:30",
+              "timeTo": "13:45",
+              "locFrom": "Kawaguchiko",
+              "locTo": "Hoto Fudo",
+              "category": "meal",
+              "desc": "Pumpkin miso Hoto noodles at Hoto Fudo (Tabelog ★3.57)"
+            },
+            {
+              "id": "f2_4",
+              "timeFrom": "16:45",
+              "timeTo": "18:45",
+              "locFrom": "Kawaguchiko Stn",
+              "locTo": "JR Shinjuku",
+              "category": "travel",
+              "desc": "Evening Fuji Excursion return train to Shinjuku APA Hotel"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 3,
+          "date": "2027-02-23",
+          "stay": 15500,
+          "travelBase": 900,
+          "travelActualAdd": 0,
+          "fun": 12000,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 400,
+          "totalAllLegs": 900,
+          "dow": "Tue",
+          "region": "Tokyo",
+          "routeJp": "Tokyo Highlights (Holiday): Asakusa Senso-ji, Ueno Plum Blossoms & Shibuya Sky",
+          "routeEn": "Catch late-Feb plum blossoms & early kanzakura in Ueno Park before Shibuya Sky sunset skyline",
+          "hotel": "APA Hotel & Resort Shinjuku Kabukicho Tower",
+          "legs": [
+            "Tokyo Metro 24-Hour Pass / IC Rides (¥900)"
+          ],
+          "tip": "Book Shibuya Sky 16:40 sunset slot 4 weeks prior (~¥2,500). Try Unagi Irokawa / Hatsuogawa in Asakusa (Tabelog ★3.72).",
+          "timeSlots": [
+            {
+              "id": "f3_1",
+              "timeFrom": "09:00",
+              "timeTo": "11:30",
+              "locFrom": "Shinjuku",
+              "locTo": "Asakusa",
+              "category": "sightseeing",
+              "desc": "Asakusa Senso-ji Kaminarimon, Nakamise Street & early Sumida riverside blooms"
+            },
+            {
+              "id": "f3_2",
+              "timeFrom": "12:00",
+              "timeTo": "14:00",
+              "locFrom": "Asakusa",
+              "locTo": "Ueno Park",
+              "category": "meal",
+              "desc": "Asakusa Unagi lunch (★3.72), then Ueno Toshogu plum trees & kanzakura"
+            },
+            {
+              "id": "f3_3",
+              "timeFrom": "16:15",
+              "timeTo": "18:30",
+              "locFrom": "Ueno",
+              "locTo": "Shibuya Sky",
+              "category": "sightseeing",
+              "desc": "Sunset panorama from Shibuya Sky 46F rooftop over Tokyo & Mt. Fuji twilight"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 4,
+          "date": "2027-02-24",
+          "stay": 9200,
+          "travelBase": 9900,
+          "travelActualAdd": 920,
+          "fun": 11500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 7400,
+          "totalAllLegs": 10820,
+          "dow": "Wed",
+          "region": "Atami & Kawazu",
+          "routeJp": "Tokyo → Atami Plum Garden & Peak Kawazu Sakura Festival → Shizuoka",
+          "routeEn": "Winter meets full spring! 460 plum trees at Atami Baien + 850 vivid pink Kawazu-zakura lining Kawazu River",
+          "hotel": "APA Hotel Shizuoka-eki Kita",
+          "legs": [
+            "Tokyo → Atami → Kawazu → Atami → Shizuoka (JR Odoriko + Ito Line ¥7,400 JR / ¥3,420 Izukyu Non-JR)"
+          ],
+          "tip": "Ship main luggage from Shinjuku APA to Kyoto APA via Yamato (~¥2,200 included in fun/logistics) and stash small packs in Atami Station coin lockers! Lunch at Atami Ginza Osakana Shokudo (Tabelog ★3.50).",
+          "timeSlots": [
+            {
+              "id": "f4_1",
+              "timeFrom": "08:00",
+              "timeTo": "09:15",
+              "locFrom": "Tokyo Stn",
+              "locTo": "Atami",
+              "category": "travel",
+              "desc": "Drop bags at Atami coin lockers after morning Tokaido train; bus to Atami Baien"
+            },
+            {
+              "id": "f4_2",
+              "timeFrom": "09:30",
+              "timeTo": "12:15",
+              "locFrom": "Atami Baien",
+              "locTo": "Atami Ginza",
+              "category": "meal",
+              "desc": "Atami Plum Garden late-Feb blooms & seafood bowl lunch at Atami Ginza Osakana Shokudo (★3.50)"
+            },
+            {
+              "id": "f4_3",
+              "timeFrom": "12:40",
+              "timeTo": "17:15",
+              "locFrom": "Atami",
+              "locTo": "Kawazu River",
+              "category": "sightseeing",
+              "desc": "JR Odoriko/Izukyu down to Kawazu Cherry Blossom Festival (4km vibrant pink river tunnel)"
+            },
+            {
+              "id": "f4_4",
+              "timeFrom": "17:45",
+              "timeTo": "20:00",
+              "locFrom": "Kawazu",
+              "locTo": "APA Shizuoka",
+              "category": "stay",
+              "desc": "JR Tokaido Line back via Atami to Shizuoka & check in APA Hotel Shizuoka-eki Kita"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 5,
+          "date": "2027-02-25",
+          "stay": 9200,
+          "travelBase": 2840,
+          "travelActualAdd": 1200,
+          "fun": 9500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 1440,
+          "totalAllLegs": 4040,
+          "dow": "Thu",
+          "region": "Shizuoka & Fujikawa",
+          "routeJp": "Shizuoka ↔ Starbucks EXPASA Fujikawa (Morning Mt. Fuji 絶景) & Miho-no-Matsubara",
+          "routeEn": "07:15 AM clear sky Mt. Fuji coffee overlooking Fuji River, afternoon Nihondaira Ropeway & Shizuoka dark-broth oden",
+          "hotel": "APA Hotel Shizuoka-eki Kita",
+          "legs": [
+            "Shizuoka ↔ JR Fujikawa ↔ Shimizu (JR Tokaido Line ¥1,440)",
+            "JR Fujikawa Stn → EXPASA Fujikawa SA Taxi (¥1,200 morning 絶景) + Bus Return (¥200)",
+            "Shizuoka–Nihondaira–Miho Bus & Kunozan Ropeway Shuttle (¥1,200 • Non-JR)"
+          ],
+          "tip": "Because Fujikawa SA is on the Tomei Expressway, staying in Shizuoka cuts morning travel to just 28 min by JR! Take an early 5-min taxi uphill (~¥1,200) to Starbucks EXPASA Fujikawa before 08:30 while Mt. Fuji is cloud-free; take public Yamanashi Bus from 'Fujikawa Rakuza Mae' back down. Dinner at Aoba Oden Alley (Tabelog ★3.56).",
+          "timeSlots": [
+            {
+              "id": "f5_1",
+              "timeFrom": "06:45",
+              "timeTo": "09:15",
+              "locFrom": "JR Shizuoka",
+              "locTo": "EXPASA Fujikawa SA",
+              "category": "sightseeing",
+              "desc": "JR train to Fujikawa + 5-min uphill taxi for crisp 07:30 AM coffee & Mt. Fuji view at Starbucks terrace (local bus/25-min downhill walk back)"
+            },
+            {
+              "id": "f5_2",
+              "timeFrom": "10:45",
+              "timeTo": "16:30",
+              "locFrom": "Nihondaira",
+              "locTo": "Miho-no-Matsubara",
+              "category": "sightseeing",
+              "desc": "Nihondaira Yume Terrace, Kunozan Ropeway & UNESCO Miho Pine Grove overlooking Suruga Bay"
+            },
+            {
+              "id": "f5_3",
+              "timeFrom": "18:00",
+              "timeTo": "20:00",
+              "locFrom": "Shizuoka City",
+              "locTo": "Aoba Oden Alley",
+              "category": "meal",
+              "desc": "Shizuoka dark-broth oden skewers & grilled black hanpen at Aoba Oden Alley (★3.56)"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 6,
+          "date": "2027-02-26",
+          "stay": 13500,
+          "travelBase": 10450,
+          "travelActualAdd": 300,
+          "fun": 10500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 10750,
+          "totalAllLegs": 10750,
+          "dow": "Fri",
+          "region": "Kyoto",
+          "routeJp": "Shizuoka → Kyoto (Hikari Shinkansen) & Dusk Fushimi Inari Shrine",
+          "routeEn": "Morning Shinkansen straight into Kyoto Station, check in at APA Kyoto Ekimae & sunset vermilion torii gates",
+          "hotel": "APA Hotel Kyoto Ekimae",
+          "legs": [
+            "Shizuoka → Kyoto (Tokaido Shinkansen Hikari ¥10,450)",
+            "Kyoto ↔ Inari (JR Nara Line ¥300 RT)"
+          ],
+          "tip": "Sit on right-hand E seats from Shizuoka for Hamamatsu lake & Ibuki views. Your shipped luggage awaits at APA Hotel Kyoto Ekimae (3-min walk from JR Kyoto Central Exit). Dinner at Katsukura Kyoto Station Cube (Tabelog ★3.64).",
+          "timeSlots": [
+            {
+              "id": "f6_1",
+              "timeFrom": "09:10",
+              "timeTo": "11:00",
+              "locFrom": "Shizuoka",
+              "locTo": "Kyoto Stn",
+              "category": "travel",
+              "desc": "Direct Tokaido Shinkansen Hikari from Shizuoka to JR Kyoto Station"
+            },
+            {
+              "id": "f6_2",
+              "timeFrom": "11:15",
+              "timeTo": "15:00",
+              "locFrom": "APA Kyoto Ekimae",
+              "locTo": "Kyoto Station",
+              "category": "stay",
+              "desc": "Drop bags / retrieve Yamato luggage at APA Kyoto Ekimae & explore Nishikikouji / Station"
+            },
+            {
+              "id": "f6_3",
+              "timeFrom": "16:15",
+              "timeTo": "19:30",
+              "locFrom": "JR Inari",
+              "locTo": "Kyoto Station",
+              "category": "meal",
+              "desc": "Golden-hour Fushimi Inari Taisha climb, then crispy tonkatsu at Katsukura (★3.64)"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 7,
+          "date": "2027-02-27",
+          "stay": 13500,
+          "travelBase": 0,
+          "travelActualAdd": 1100,
+          "fun": 13500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 0,
+          "totalAllLegs": 1100,
+          "dow": "Sat",
+          "region": "Kyoto",
+          "routeJp": "Kyoto Weekend Day 1 (Sat): Kiyomizu-dera, Kitano Tenmangu Plum Grove & Gion",
+          "routeEn": "Beat weekend crowds at 07:30 Kiyomizu-dera, feast at Nishiki Market & enjoy peak late-Feb 1,500 plum blossoms at Kitano Tenmangu",
+          "hotel": "APA Hotel Kyoto Ekimae",
+          "legs": [
+            "Kyoto City Subway & Bus 1-Day Pass (¥1,100 • Non-JR)"
+          ],
+          "tip": "Kitano Tenmangu's Baien Plum Garden peaks around Feb 25–early March with over 1,500 red & white blossoms! Try Kyoto obanzai & matcha treats at Nishiki Market (Tabelog ★3.75).",
+          "timeSlots": [
+            {
+              "id": "f7_1",
+              "timeFrom": "07:30",
+              "timeTo": "10:30",
+              "locFrom": "Kyoto Stn",
+              "locTo": "Kiyomizu-dera",
+              "category": "sightseeing",
+              "desc": "Early taxi/bus up to Kiyomizu-dera -> Sannenzaka -> Ninenzaka -> Yasaka Shrine"
+            },
+            {
+              "id": "f7_2",
+              "timeFrom": "11:30",
+              "timeTo": "13:15",
+              "locFrom": "Gion",
+              "locTo": "Nishiki Market",
+              "category": "meal",
+              "desc": "Kyoto Obanzai tasting & fresh yuba skewers at 400-year-old Nishiki Market"
+            },
+            {
+              "id": "f7_3",
+              "timeFrom": "14:00",
+              "timeTo": "17:00",
+              "locFrom": "Nishiki",
+              "locTo": "Kitano Tenmangu",
+              "category": "sightseeing",
+              "desc": "Subway/bus to Kitano Tenmangu Shrine's blooming 1,500-tree Plum Blossom Grove"
+            },
+            {
+              "id": "f7_4",
+              "timeFrom": "18:00",
+              "timeTo": "20:30",
+              "locFrom": "Pontocho",
+              "locTo": "Gion",
+              "category": "meal",
+              "desc": "Lantern-lit Gion Hanamikoji stroll & Pontocho alley dinner (duck ramen ★3.70)"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 8,
+          "date": "2027-02-28",
+          "stay": 13500,
+          "travelBase": 480,
+          "travelActualAdd": 700,
+          "fun": 12500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 480,
+          "totalAllLegs": 1180,
+          "dow": "Sun",
+          "region": "Kyoto",
+          "routeJp": "Kyoto Weekend Day 2 (Sun): Arashiyama Bamboo Grove, Yudofu & Kinkaku-ji",
+          "routeEn": "Beat Sunday crowds at 07:30 Arashiyama Bamboo Grove & Tenryu-ji, silken yudofu lunch & afternoon Kinkaku-ji",
+          "hotel": "APA Hotel Kyoto Ekimae",
+          "legs": [
+            "Kyoto ↔ Saga-Arashiyama (JR Sagano Line ¥480)",
+            "Arashiyama → Kinkaku-ji → Kyoto Station (Randen Tram & City Bus ¥700 • Non-JR)"
+          ],
+          "tip": "Savor bamboo-basket Yudofu kaiseki at Sagano / Junsei (Tabelog ★3.68) and cap the afternoon with Nakamura Tokichi Uji Matcha parfait in Kyoto Station (★3.75).",
+          "timeSlots": [
+            {
+              "id": "f8_1",
+              "timeFrom": "07:30",
+              "timeTo": "11:00",
+              "locFrom": "JR Kyoto",
+              "locTo": "Arashiyama",
+              "category": "sightseeing",
+              "desc": "JR Sagano Line 16 min to Saga-Arashiyama: Bamboo Grove, Tenryu-ji Garden & Togetsukyo"
+            },
+            {
+              "id": "f8_2",
+              "timeFrom": "11:30",
+              "timeTo": "13:00",
+              "locFrom": "Arashiyama",
+              "locTo": "Yudofu Sagano",
+              "category": "meal",
+              "desc": "Simmered Kyoto Yudofu tofu lunch in Arashiyama (Tabelog ★3.68)"
+            },
+            {
+              "id": "f8_3",
+              "timeFrom": "13:30",
+              "timeTo": "17:00",
+              "locFrom": "Randen Arashiyama",
+              "locTo": "Kinkaku-ji",
+              "category": "sightseeing",
+              "desc": "Scenic Randen tram + bus to Kinkaku-ji Golden Pavilion & return to Kyoto Stn for Nakamura Tokichi matcha (★3.75)"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 9,
+          "date": "2027-03-01",
+          "stay": 9500,
+          "travelBase": 6500,
+          "travelActualAdd": 800,
+          "fun": 13500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 6500,
+          "totalAllLegs": 7300,
+          "dow": "Mon",
+          "region": "Kanazawa",
+          "routeJp": "Kyoto → Kanazawa (Thunderbird + Hokuriku Shinkansen) & Kenrokuen Snow Ropes",
+          "routeEn": "Travel north to APA's birthplace city! Winter snow crabs at Omicho Market, Kenrokuen Yukitsuri & Higashi Chaya",
+          "hotel": "APA Hotel Kanazawa Ekimae",
+          "legs": [
+            "Kyoto → Tsuruga (JR Thunderbird) → Kanazawa (Hokuriku Shinkansen • Tourist One-Way ¥6,500; Std ¥9,460)",
+            "Kanazawa Loop Bus 1-Day Pass (¥800 • Non-JR)"
+          ],
+          "tip": "Use JR West's foreign-visitor Hokuriku One-Way Ticket (¥6,500 vs ¥9,460 standard!). APA Hotel Kanazawa Ekimae (just outside East Exit) has natural onsen baths. Lunch at Omicho Market (Ikiiki-tei ★3.64) & dinner nodoguro/oden (Itaru/Kuroyuri ★3.71).",
+          "timeSlots": [
+            {
+              "id": "f9_1",
+              "timeFrom": "08:40",
+              "timeTo": "11:00",
+              "locFrom": "JR Kyoto",
+              "locTo": "JR Kanazawa",
+              "category": "travel",
+              "desc": "Thunderbird Limited Express to Tsuruga + easy cross-platform Hokuriku Shinkansen to Kanazawa"
+            },
+            {
+              "id": "f9_2",
+              "timeFrom": "11:30",
+              "timeTo": "13:30",
+              "locFrom": "APA Kanazawa",
+              "locTo": "Omicho Market",
+              "category": "meal",
+              "desc": "Drop bags at APA Hotel Kanazawa Ekimae, then winter snow crab & nodoguro kaisen-don at Omicho Market (★3.64)"
+            },
+            {
+              "id": "f9_3",
+              "timeFrom": "14:00",
+              "timeTo": "18:00",
+              "locFrom": "Kenrokuen",
+              "locTo": "Higashi Chaya",
+              "category": "sightseeing",
+              "desc": "Walk Kenrokuen Garden under iconic winter yukitsuri pine ropes + Kanazawa Castle & Higashi Chaya gold-leaf soft serve (★3.55)"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 10,
+          "date": "2027-03-02",
+          "stay": 11500,
+          "travelBase": 5400,
+          "travelActualAdd": 0,
+          "fun": 12000,
+          "hotelUrl": "https://www.wathotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 0,
+          "totalAllLegs": 5400,
+          "dow": "Tue",
+          "region": "Shirakawa-go & Takayama",
+          "routeJp": "Kanazawa → UNESCO Shirakawa-go Snow Village → Hida Takayama & A5 Hida Beef",
+          "routeEn": "Reserve Nohi Highway Bus through snow-blanketed thatched roofs & overnight in a central Hida Takayama hot-spring station hotel",
+          "hotel": "Wat Hotel & Spa Hida Takayama (Closest APA-Tier Onsen Hotel)",
+          "legs": [
+            "Kanazawa Station → Shirakawa-go (Nohi/Hokutetsu Bus ¥2,600 • Non-JR)",
+            "Shirakawa-go → Takayama Nohi Bus Center (¥2,800 • Non-JR)"
+          ],
+          "tip": "Reserve Kanazawa→Shirakawa-go→Takayama highway bus 1 month early via JapanBusOnline / Willer (coin lockers available at Shirakawa-go Bus Terminal). Note: APA has no branch in Takayama, so Wat Hotel & Spa offers the same convenient station proximity + rooftop natural onsen. Dinner: Hidagyu Maruaki (Tabelog ★3.69).",
+          "timeSlots": [
+            {
+              "id": "f10_1",
+              "timeFrom": "08:40",
+              "timeTo": "10:05",
+              "locFrom": "Kanazawa Stn",
+              "locTo": "Shirakawa-go",
+              "category": "travel",
+              "desc": "Hokutetsu/Nohi Express Bus into snow-covered Shirakawa-go; store bags at terminal"
+            },
+            {
+              "id": "f10_2",
+              "timeFrom": "10:15",
+              "timeTo": "13:50",
+              "locFrom": "Ogimachi",
+              "locTo": "Shiroyama Deck",
+              "category": "sightseeing",
+              "desc": "Walk Gassho-zukuri thatched farmhouses, Shiroyama snowy viewpoint & hearth irori tofu lunch (★3.52)"
+            },
+            {
+              "id": "f10_3",
+              "timeFrom": "14:00",
+              "timeTo": "15:00",
+              "locFrom": "Shirakawa-go",
+              "locTo": "Takayama",
+              "category": "travel",
+              "desc": "Highway bus south to Takayama Nohi Bus Center & check into Wat Hotel & Spa Hida Takayama"
+            },
+            {
+              "id": "f10_4",
+              "timeFrom": "17:30",
+              "timeTo": "19:45",
+              "locFrom": "Takayama Stn",
+              "locTo": "Hidagyu Maruaki",
+              "category": "meal",
+              "desc": "Butcher-direct A5 Hida Wagyu grill & Hoba Miso dinner at Hidagyu Maruaki (Tabelog ★3.69)"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 11,
+          "date": "2027-03-03",
+          "stay": 11500,
+          "travelBase": 4400,
+          "travelActualAdd": 0,
+          "fun": 11800,
+          "hotelUrl": "https://www.wathotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 0,
+          "totalAllLegs": 4400,
+          "dow": "Wed",
+          "region": "Takayama & Shinhotaka",
+          "routeJp": "Takayama ↔ Shinhotaka Ropeway (2,156m Winter Snow Alps) & Sanmachi Old Town",
+          "routeEn": "Ascend Japan's only double-decker gondola into 2,156m alpine winter peaks, plus Hirayu Onsen & Takayama ramen",
+          "hotel": "Wat Hotel & Spa Hida Takayama",
+          "legs": [
+            "Takayama ↔ Shinhotaka Ropeway via Hirayu Onsen (Nohi Bus 2-Day Open Pass ¥4,400 • Non-JR)"
+          ],
+          "tip": "Shinhotaka Ropeway Round-Trip (¥3,800 in Dining/Activities budget) climbs to 2,156m Nishihotakaguchi snow deck. Back in town by 15:30 for Sanmachi Old Town & soy-bonito ramen at Menya Shirakawa (Tabelog ★3.74).",
+          "timeSlots": [
+            {
+              "id": "f11_1",
+              "timeFrom": "08:40",
+              "timeTo": "10:25",
+              "locFrom": "Takayama Bus Ctr",
+              "locTo": "Shinhotaka",
+              "category": "travel",
+              "desc": "Nohi Bus scenic mountain ride past Hirayu Onsen up to Shinhotaka Ropeway base"
+            },
+            {
+              "id": "f11_2",
+              "timeFrom": "10:30",
+              "timeTo": "13:30",
+              "locFrom": "Shinhotaka Base",
+              "locTo": "2,156m Summit",
+              "category": "sightseeing",
+              "desc": "Double-decker alpine gondola, Northern Alps 360° snow peaks & snow wall walk"
+            },
+            {
+              "id": "f11_3",
+              "timeFrom": "15:15",
+              "timeTo": "19:30",
+              "locFrom": "Sanmachi Suji",
+              "locTo": "Menya Shirakawa",
+              "category": "meal",
+              "desc": "Return to Takayama for historic merchant streets, Takayama Jinya & Chuka Soba dinner (★3.74)"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 12,
+          "date": "2027-03-04",
+          "stay": 9000,
+          "travelBase": 11720,
+          "travelActualAdd": 0,
+          "fun": 9500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 7320,
+          "totalAllLegs": 11720,
+          "dow": "Thu",
+          "region": "Matsumoto & Takasaki",
+          "routeJp": "Takayama → Matsumoto Castle Snow Alps → JR to Takasaki (Gunma APA)",
+          "routeEn": "Direct trans-mountain bus via Abo Tunnel straight to snowy Matsumoto Castle, ★3.72 soba & Takasaki natural onsen base",
+          "hotel": "APA Hotel Takasaki Ekimae",
+          "legs": [
+            "Takayama → Matsumoto Bus Terminal (Alpico/Nohi Bus ¥4,400 • Non-JR)",
+            "Matsumoto → Nagano (JR Shinano Ltd Exp ¥2,370)",
+            "Nagano → Takasaki (Hokuriku Shinkansen ¥4,950)"
+          ],
+          "tip": "Lunch at Matsumoto soba gem Nomugi (Tabelog ★3.72 — arrive before 12:30 as handmade kyuwari-soba sells out early!). APA Hotel Takasaki Ekimae connects directly to JR Takasaki Station & has natural hot spring baths.",
+          "timeSlots": [
+            {
+              "id": "f12_1",
+              "timeFrom": "07:40",
+              "timeTo": "10:15",
+              "locFrom": "Miyagawa Market",
+              "locTo": "Matsumoto Stn",
+              "category": "travel",
+              "desc": "Stroll Takayama Miyagawa Morning Market, then 07:50 Alpico/Nohi Bus through Northern Alps to Matsumoto"
+            },
+            {
+              "id": "f12_2",
+              "timeFrom": "10:30",
+              "timeTo": "14:45",
+              "locFrom": "Matsumoto Castle",
+              "locTo": "Nomugi Soba",
+              "category": "meal",
+              "desc": "Store luggage at Matsumoto Stn; photograph Black Crow Castle against snow peaks + Nomugi soba lunch (★3.72) & Nawate Street"
+            },
+            {
+              "id": "f12_3",
+              "timeFrom": "15:10",
+              "timeTo": "18:05",
+              "locFrom": "JR Matsumoto",
+              "locTo": "APA Takasaki",
+              "category": "travel",
+              "desc": "JR Shinano to Nagano + Hokuriku Shinkansen to Takasaki & check in APA Hotel Takasaki Ekimae (Gunma Torimeshi dinner ★3.54)"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 13,
+          "date": "2027-03-05",
+          "stay": 9000,
+          "travelBase": 4020,
+          "travelActualAdd": 0,
+          "fun": 10500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 2460,
+          "totalAllLegs": 4020,
+          "dow": "Fri",
+          "region": "Gunma & Kusatsu Onsen",
+          "routeJp": "Takasaki ↔ Kusatsu Onsen Snow Town (Yubatake, Yumomi & Sainokawara Bath)",
+          "routeEn": "Easy JR Agatsuma Line + JR Bus up to steaming volcanic sulfur spring conduits in snow & top-rated stone-milled soba",
+          "hotel": "APA Hotel Takasaki Ekimae",
+          "legs": [
+            "Takasaki ↔ Naganoharakusatsuguchi (JR Agatsuma Line ¥2,460 RT)",
+            "Naganoharakusatsuguchi ↔ Kusatsu Onsen Bus Terminal (JR Bus Kanto ¥1,560 RT • Non-JR)"
+          ],
+          "tip": "Lunch at Ishiusubiki Soba Mikuniya (2 min from Yubatake, Tabelog ★3.49), enjoy warm steamed Matsumura Manju (★3.58), watch Netsunoyu Yumomi dance & soak in open-air Sainokawara Rotenburo surrounded by snow.",
+          "timeSlots": [
+            {
+              "id": "f13_1",
+              "timeFrom": "08:20",
+              "timeTo": "10:25",
+              "locFrom": "JR Takasaki",
+              "locTo": "Kusatsu Bus Term",
+              "category": "travel",
+              "desc": "JR Agatsuma Line mountain train + seamless JR Bus transfer up into snowy Kusatsu"
+            },
+            {
+              "id": "f13_2",
+              "timeFrom": "10:35",
+              "timeTo": "13:30",
+              "locFrom": "Yubatake",
+              "locTo": "Mikuniya Soba",
+              "category": "meal",
+              "desc": "Steaming Yubatake sulfur field, Netsunoyu Yumomi stirring show & stone-milled soba at Mikuniya (★3.49)"
+            },
+            {
+              "id": "f13_3",
+              "timeFrom": "13:45",
+              "timeTo": "16:30",
+              "locFrom": "Sainokawara Park",
+              "locTo": "JR Bus / Takasaki",
+              "category": "sightseeing",
+              "desc": "Huge open-air Sainokawara snow hot spring soak, Yubatake dusk lights & return to Takasaki APA"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 14,
+          "date": "2027-03-06",
+          "stay": 15500,
+          "travelBase": 5500,
+          "travelActualAdd": 0,
+          "fun": 12000,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 4990,
+          "totalAllLegs": 5500,
+          "dow": "Sat",
+          "region": "Tokyo",
+          "routeJp": "Takasaki → Tokyo (Shinkansen): Meiji Jingu, Harajuku, Omotesando & Nakameguro",
+          "routeEn": "50-min bullet train back to Tokyo Day 4! Forested Meiji Jingu Shrine, Harajuku/Omotesando shopping & craft ramen",
+          "hotel": "APA Hotel & Resort Nishishinjuku Gochome Eki Tower",
+          "legs": [
+            "Takasaki → Tokyo (Joetsu/Hokuriku Shinkansen ¥4,990)",
+            "Tokyo Metro / Yamanote Line (¥510)"
+          ],
+          "tip": "APA Nishishinjuku Gochome Eki Tower has an expansive outdoor/indoor onsen bath right beside Oedo Line. Try Ginza Hachigou or Shinjuku Fuunji ramen (Tabelog ★3.86) or Tonkatsu Maisen Omotesando (★3.68).",
+          "timeSlots": [
+            {
+              "id": "f14_1",
+              "timeFrom": "09:15",
+              "timeTo": "10:10",
+              "locFrom": "JR Takasaki",
+              "locTo": "JR Tokyo",
+              "category": "travel",
+              "desc": "Morning Shinkansen Takasaki → Tokyo; hop Oedo Line to APA Nishishinjuku Gochome to drop bags"
+            },
+            {
+              "id": "f14_2",
+              "timeFrom": "11:30",
+              "timeTo": "16:30",
+              "locFrom": "Meiji Jingu",
+              "locTo": "Omotesando",
+              "category": "sightseeing",
+              "desc": "Meiji Jingu Shrine, Yoyogi Park plum blossoms, Omotesando architecture & Tonkatsu Maisen (★3.68)"
+            },
+            {
+              "id": "f14_3",
+              "timeFrom": "17:00",
+              "timeTo": "20:00",
+              "locFrom": "Shibuya",
+              "locTo": "Shinjuku",
+              "category": "meal",
+              "desc": "Shibuya / Nakameguro evening stroll & Shinjuku Fuunji tsukemen dinner (★3.86)"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 15,
+          "date": "2027-03-07",
+          "stay": 15500,
+          "travelBase": 900,
+          "travelActualAdd": 0,
+          "fun": 15000,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 300,
+          "totalAllLegs": 900,
+          "dow": "Sun",
+          "region": "Tokyo",
+          "routeJp": "Tokyo Day 5 (Sun): Toyosu Market Sushi, Ginza, Akihabara & Farewell Feast",
+          "routeEn": "Fresh Toyosu morning sushi (Sushi Dai / Daiwa ★3.78), Imperial East Gardens plum/sakura & Ginza/Akihabara Sunday pedestrian paradise",
+          "hotel": "APA Hotel & Resort Nishishinjuku Gochome Eki Tower",
+          "legs": [
+            "Tokyo Metro / Yurikamome / JR Loop (¥900)"
+          ],
+          "tip": "Sundays turn Ginza Chuo-dori into a pedestrian promenade (Hokosha Tengoku). Enjoy Toyosu Market Edomae sushi (Tabelog ★3.78) in the morning and tax-free Ginza/Tokyo Station shopping in the afternoon!",
+          "timeSlots": [
+            {
+              "id": "f15_1",
+              "timeFrom": "07:30",
+              "timeTo": "10:15",
+              "locFrom": "Shinjuku",
+              "locTo": "Toyosu Market",
+              "category": "meal",
+              "desc": "Early sushi breakfast at Toyosu Market / Tsukiji Outer Market (Tabelog ★3.78)"
+            },
+            {
+              "id": "f15_2",
+              "timeFrom": "11:00",
+              "timeTo": "14:30",
+              "locFrom": "Tsukiji",
+              "locTo": "Ginza",
+              "category": "sightseeing",
+              "desc": "Imperial Palace East Gardens winter plum blossoms + Ginza Sunday pedestrian avenue"
+            },
+            {
+              "id": "f15_3",
+              "timeFrom": "15:00",
+              "timeTo": "19:30",
+              "locFrom": "Akihabara",
+              "locTo": "Tokyo Stn",
+              "category": "shopping",
+              "desc": "Akihabara electronics/pop-culture browsing & farewell Tokyo Station ramen street / Ginza Hachigou (★3.86)"
+            }
+          ],
+          "_unrecognizedPlace": false
+        },
+        {
+          "day": 16,
+          "date": "2027-03-08",
+          "stay": 0,
+          "travelBase": 48070,
+          "travelActualAdd": 0,
+          "fun": 8000,
+          "hotelUrl": "",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 3070,
+          "totalAllLegs": 3070,
+          "dow": "Mon",
+          "region": "Tokyo",
+          "routeJp": "Tokyo Last Morning Shopping → Haneda / Narita Airport (HND / NRT) Departure",
+          "routeEn": "Check out at 10:00, final Tokyo Station souvenir sweets & seamless express train to airport",
+          "hotel": "Departure Day (Tokyo Airport)",
+          "legs": [
+            "Tokyo / Shinjuku → Narita Express or Haneda Monorail (¥3,070 + Return Flight ¥45,000 est.)"
+          ],
+          "tip": "Tab 5 Pass Audit: Across this 16-day multi-company corridor (Fujikyu, Izukyu, Nohi Bus, Alpico Bus, Thunderbird/Shinkansen), total JR fares (~¥45k–¥49k) sit far below the 14-day Nationwide JR Pass (¥80,000), so paying point-to-point + the ¥6,500 Hokuriku One-Way Ticket saves >¥30,000!",
+          "timeSlots": [
+            {
+              "id": "f16_1",
+              "timeFrom": "09:30",
+              "timeTo": "11:45",
+              "locFrom": "APA Nishishinjuku",
+              "locTo": "Tokyo Station",
+              "category": "shopping",
+              "desc": "Check out & pick up final packaged omiyage sweets inside JR Tokyo Station"
+            },
+            {
+              "id": "f16_2",
+              "timeFrom": "12:15",
+              "timeTo": "14:00",
+              "locFrom": "JR Tokyo",
+              "locTo": "HND / NRT Airport",
+              "category": "travel",
+              "desc": "Airport express train transfer & international flight home"
+            }
+          ],
+          "_unrecognizedPlace": false
+        }
+      ],
+      "hotels": [
+        {
+          "order": 1,
+          "nights": 3,
+          "perNightJpy": 15500,
+          "totalJpy": 46500,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 0,
+          "name": "APA Hotel & Resort Shinjuku Kabukicho Tower",
+          "region": "Tokyo",
+          "checkIn": "2027-02-21",
+          "checkOut": "2027-02-24",
+          "access": "6-min walk from JR Shinjuku Station East/West Exits & Seibu Shinjuku Stn",
+          "highlights": "Ideal West-Tokyo APA base with top-floor public bath & easy walking access to Shinjuku Fuji Excursion / Busta Shinjuku.",
+          "bookingNote": ""
+        },
+        {
+          "order": 2,
+          "nights": 2,
+          "perNightJpy": 9200,
+          "totalJpy": 18400,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 3,
+          "name": "APA Hotel Shizuoka-eki Kita",
+          "region": "Shizuoka",
+          "checkIn": "2027-02-24",
+          "checkOut": "2027-02-26",
+          "access": "5-min walk from JR Shizuoka Station North Exit",
+          "highlights": "High-value Shizuoka hub just 28 min by JR Tokaido Line from Fujikawa Stn (EXPASA Starbucks) & direct Shinkansen to Kyoto.",
+          "bookingNote": ""
+        },
+        {
+          "order": 3,
+          "nights": 3,
+          "perNightJpy": 13500,
+          "totalJpy": 40500,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 5,
+          "name": "APA Hotel Kyoto Ekimae",
+          "region": "Kyoto",
+          "checkIn": "2027-02-26",
+          "checkOut": "2027-03-01",
+          "access": "3-min walk from JR Kyoto Station Central Exit",
+          "highlights": "Weekend Kyoto base steps from Shinkansen, JR Inari/Arashiyama lines & City Bus hub.",
+          "bookingNote": ""
+        },
+        {
+          "order": 4,
+          "nights": 1,
+          "perNightJpy": 9500,
+          "totalJpy": 9500,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 8,
+          "name": "APA Hotel Kanazawa Ekimae",
+          "region": "Kanazawa",
+          "checkIn": "2027-03-01",
+          "checkOut": "2027-03-02",
+          "access": "1-min walk from JR Kanazawa Station West Exit",
+          "highlights": "Flagship hotel in APA's founding city featuring natural spa baths & instant access to Shirakawa-go bus terminal.",
+          "bookingNote": ""
+        },
+        {
+          "order": 5,
+          "nights": 2,
+          "perNightJpy": 11500,
+          "totalJpy": 23000,
+          "url": "https://www.wathotel.com/",
+          "luxury": false,
+          "startDayOffset": 9,
+          "name": "Wat Hotel & Spa Hida Takayama (Closest APA-Tier Onsen Hotel)",
+          "region": "Takayama",
+          "checkIn": "2027-03-02",
+          "checkOut": "2027-03-04",
+          "access": "7-min walk from JR Takayama & Nohi Bus Center",
+          "highlights": "APA operates no branch in Takayama proper; Wat Hotel & Spa mirrors APA's compact station-front convenience with rooftop hot springs for Shinhotaka & Shirakawa-go.",
+          "bookingNote": ""
+        },
+        {
+          "order": 6,
+          "nights": 2,
+          "perNightJpy": 9000,
+          "totalJpy": 18000,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 11,
+          "name": "APA Hotel Takasaki Ekimae",
+          "region": "Gunma",
+          "checkIn": "2027-03-04",
+          "checkOut": "2027-03-06",
+          "access": "Directly connected to JR Takasaki Station West Exit (pedestrian deck)",
+          "highlights": "Zero-hassle Gunma rail hub with natural hot spring bath & morning JR Agatsuma Line access to snowy Kusatsu Onsen.",
+          "bookingNote": ""
+        },
+        {
+          "order": 7,
+          "nights": 2,
+          "perNightJpy": 15500,
+          "totalJpy": 31000,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 13,
+          "name": "APA Hotel & Resort Nishishinjuku Gochome Eki Tower",
+          "region": "Tokyo",
+          "checkIn": "2027-03-06",
+          "checkOut": "2027-03-08",
+          "access": "1-min walk from Toei Oedo Nishishinjuku-gochome Stn (4 min to Shinjuku)",
+          "highlights": "Spacious large-bath APA Tower for your final two nights in West Tokyo before airport departure.",
+          "bookingNote": ""
+        }
+      ],
+      "food": [
+        {
+          "id": 1,
+          "region": "Tokyo",
+          "dish": "Edomae Omakase & Toyosu Market Sushi",
+          "place": "Sushi Dai / Daiwa Sushi (Toyosu Market)",
+          "url": "https://www.toyosu-market.or.jp/en/",
+          "tabelogScore": "★ 3.78",
+          "tabelogUrl": "https://www.toyosu-market.or.jp/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 2-min walk from Yurikamome Shijomae Station",
+          "sourceTag": "Must-Try (Tokyo)",
+          "note": "Fresh morning sushi flight featuring seasonal tuna, sea urchin, and conger eel right at Toyosu Market.",
+          "tried": false
+        },
+        {
+          "id": 2,
+          "region": "Tokyo",
+          "dish": "Asakusa Unagi Hitsumabushi & Kabayaki",
+          "place": "Unagi Irokawa / Hatsuogawa (Asakusa)",
+          "url": "https://www.gotokyo.org/en/spot/41/index.html",
+          "tabelogScore": "★ 3.72",
+          "tabelogUrl": "https://www.gotokyo.org/en/spot/41/index.html",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 4-min walk from Tokyo Metro Asakusa Station",
+          "sourceTag": "Must-Try (Tokyo)",
+          "note": "Charcoal-broiled eel glazed in decades-old tare sauce near Senso-ji Kaminarimon.",
+          "tried": false
+        },
+        {
+          "id": 3,
+          "region": "Tokyo",
+          "dish": "Artisanal Truffle Shoyu Ramen",
+          "place": "Ginza Hachigou / Shinjuku Fuunji",
+          "url": "https://www.gotokyo.org/en/story/guide/ramen-guide/index.html",
+          "tabelogScore": "★ 3.86",
+          "tabelogUrl": "https://www.gotokyo.org/en/story/guide/ramen-guide/index.html",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 3-min walk from Higashi-Ginza / Shinjuku Station",
+          "sourceTag": "Top Pick (Tokyo)",
+          "note": "Golden duck-and-prosciutto dashi broth or ultra-rich tsukemen dipping noodles.",
+          "tried": false
+        },
+        {
+          "id": 4,
+          "region": "Tokyo",
+          "dish": "Aged Pork Tonkatsu (Hire & Rosu Cutlet)",
+          "place": "Tonkatsu Maisen Aoyama / Narikura",
+          "url": "https://mai-sen.com/",
+          "tabelogScore": "★ 3.68",
+          "tabelogUrl": "https://mai-sen.com/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 3-min walk from Tokyo Metro Omotesando Station",
+          "sourceTag": "Top Pick (Tokyo)",
+          "note": "Melt-in-your-mouth breaded pork cutlet served with freshly shredded cabbage and sweet tonkatsu sauce.",
+          "tried": false
+        },
+        {
+          "id": 5,
+          "region": "Hakone & Mt. Fuji",
+          "dish": "Kawaguchiko Hoto (Flat Wheat Noodles in Pumpkin Miso Iron Pot)",
+          "place": "Hoto Fudo Kawaguchiko Ekimae / Higashikoiji",
+          "url": "https://www.houtou-fudou.jp/english.html",
+          "tabelogScore": "★ 3.57",
+          "tabelogUrl": "https://www.houtou-fudou.jp/english.html",
+          "transitLevel": "easy",
+          "transitText": "🟢 Right Outside Station: 1-min walk across from Fujikyuko Kawaguchiko Station",
+          "sourceTag": "Must-Try (Mt. Fuji)",
+          "note": "Chewy handmade flat noodles simmered in an iron cauldron with sweet kabocha pumpkin and mountain vegetables.",
+          "tried": false
+        },
+        {
+          "id": 6,
+          "region": "Hakone & Mt. Fuji",
+          "dish": "Hakone Yuba-don (Simmered Tofu Skin in Spring Water Dashi)",
+          "place": "Yubadon Naokichi (Hakone-Yumoto)",
+          "url": "https://www.hakoneyumoto.com/",
+          "tabelogScore": "★ 3.59",
+          "tabelogUrl": "https://www.hakoneyumoto.com/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 3-min walk from Odakyu Hakone-Yumoto Station",
+          "sourceTag": "Must-Try (Hakone)",
+          "note": "Silky soy-milk yuba simmered with egg in a personal earthenware pot beside the Hayakawa River.",
+          "tried": false
+        },
+        {
+          "id": 7,
+          "region": "Hakone & Mt. Fuji",
+          "dish": "Owakudani Black Eggs (Kuro-Tamago Boiled in Volcanic Sulfuric Springs)",
+          "place": "Owakudani Kurotamago-kan (Hakone Ropeway)",
+          "url": "https://owakudani.com/",
+          "tabelogScore": "★ 3.50",
+          "tabelogUrl": "https://owakudani.com/",
+          "transitLevel": "bus",
+          "transitText": "🟡 Ropeway Station Connected: Directly at Hakone Ropeway Owakudani Station",
+          "sourceTag": "Onsen Icon (Hakone)",
+          "note": "Boiled in 80°C volcanic hot spring pools—legend says eating one adds 7 years to your life!",
+          "tried": false
+        },
+        {
+          "id": 8,
+          "region": "Hakone & Mt. Fuji",
+          "dish": "Gotemba & Fuji Highland Craft Soba / Matcha",
+          "place": "Oshino Hakkai & Kawaguchiko Lakeside Tea Houses",
+          "url": "https://fujisan.ne.jp/en/",
+          "tabelogScore": "★ 3.56",
+          "tabelogUrl": "https://fujisan.ne.jp/en/",
+          "transitLevel": "bus",
+          "transitText": "🟡 Sightseeing Bus: Fujikyuko Red/Blue Line Bus around Kawaguchiko",
+          "sourceTag": "Local Specialty",
+          "note": "Cold buckwheat soba made with crystal-clear Mt. Fuji snowmelt spring water.",
+          "tried": false
+        },
+        {
+          "id": 9,
+          "region": "Atami, Kawazu & Shizuoka",
+          "dish": "Sagami Bay Seafood Bowl & Kinmedai Golden-Eye Snapper",
+          "place": "Atami Ginza Osakana Shokudo",
+          "url": "https://www.osakana-atami.com/",
+          "tabelogScore": "★ 3.50",
+          "tabelogUrl": "https://www.osakana-atami.com/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 12-min downhill stroll from JR Atami Station (5-min bus to Ginza stop)",
+          "sourceTag": "Must-Try (Atami)",
+          "note": "Famous Sagami Bay seafood donburi loaded with Suruga whitebait (shirasu), sea bream, and red-braised Izu kinmedai.",
+          "tried": false
+        },
+        {
+          "id": 10,
+          "region": "Atami, Kawazu & Shizuoka",
+          "dish": "Kawazu Fresh Mountain Wasabi-don & Izu Kinmedai",
+          "place": "Wasabi-en Kadoya (Kawazu Nanadaru)",
+          "url": "https://www.kawazu-onsen.com/eng/",
+          "tabelogScore": "★ 3.55",
+          "tabelogUrl": "https://www.kawazu-onsen.com/eng/",
+          "transitLevel": "bus",
+          "transitText": "🟡 Local Bus: 20 min via Tokai Bus from Izukyu Kawazu Station to Nanadaru (or central Kawazu stalls)",
+          "sourceTag": "Local Classic (Kawazu)",
+          "note": "Grate fresh Amagi spring-water wasabi root yourself over steaming rice topped with bonito flakes and aged soy sauce.",
+          "tried": false
+        },
+        {
+          "id": 11,
+          "region": "Atami, Kawazu & Shizuoka",
+          "dish": "Starbucks Coffee with Direct Mt. Fuji Overlook (Fujikawa SA)",
+          "place": "Starbucks EXPASA Fujikawa / Fujikawa Rakuza",
+          "url": "https://www.fujikawarakuza.co.jp/",
+          "tabelogScore": "★ 3.40",
+          "tabelogUrl": "https://www.fujikawarakuza.co.jp/",
+          "transitLevel": "bus",
+          "transitText": "🟡 Train + 5-min Taxi / Bus: JR Fujikawa Stn West Exit -> Fujikawa Rakuza Mae Bus (or 5-min taxi)",
+          "sourceTag": "Mt. Fuji Zekkei",
+          "note": "Best at 07:00–09:30 AM on winter mornings: floor-to-ceiling glass & terrace overlooking the Fuji River valley and snow-capped Mt. Fuji.",
+          "tried": false
+        },
+        {
+          "id": 12,
+          "region": "Atami, Kawazu & Shizuoka",
+          "dish": "Shizuoka Dark-Broth Oden Skewers & Sakura Shrimp",
+          "place": "Aoba Oden Alley / Miho-ya (Shizuoka City)",
+          "url": "https://www.visit-shizuoka.com/en/",
+          "tabelogScore": "★ 3.56",
+          "tabelogUrl": "https://www.visit-shizuoka.com/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 10-min walk from JR Shizuoka Station North Exit",
+          "sourceTag": "Must-Try (Shizuoka)",
+          "note": "Simmered in rich dark beef-tendon & soy dashi on wooden skewers, dusted with sardine dashi powder and green nori flakes.",
+          "tried": false
+        },
+        {
+          "id": 13,
+          "region": "Kyoto",
+          "dish": "Arashiyama Yudofu (Silky Bamboo-Basket Simmered Tofu Kaiseki)",
+          "place": "Yudofu Sagano / Nanzenji Junsei",
+          "url": "https://www.tofu-junsei.co.jp/",
+          "tabelogScore": "★ 3.68",
+          "tabelogUrl": "https://www.tofu-junsei.co.jp/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 6-min walk from Randen/JR Arashiyama or Subway Keage Station",
+          "sourceTag": "Must-Try (Kyoto)",
+          "note": "Silken Kyoto spring-water tofu simmered gently in kelp broth inside a historic stroll garden.",
+          "tried": false
+        },
+        {
+          "id": 14,
+          "region": "Kyoto",
+          "dish": "Kyoto Obanzai Seasonal Home-Style Platter & Matcha Parfait",
+          "place": "Nishiki Market & Nakamura Tokichi Kyoto Station",
+          "url": "https://tokichi.jp/",
+          "tabelogScore": "★ 3.75",
+          "tabelogUrl": "https://tokichi.jp/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Inside Station: Nakamura Tokichi is inside JR Kyoto Station Isetan 3F",
+          "sourceTag": "Must-Try (Kyoto)",
+          "note": "Sample Kyoto vegetables and yuba at 400-year-old Nishiki Market, and savor Uji matcha jelly parfaits.",
+          "tried": false
+        },
+        {
+          "id": 15,
+          "region": "Kyoto",
+          "dish": "Katsukura Kyoto Sanjo Tonkatsu & Sesame-Ground Sauce",
+          "place": "Katsukura Sanjo Main Shop / Kyoto Station Cube",
+          "url": "https://www.katsukura.jp/",
+          "tabelogScore": "★ 3.64",
+          "tabelogUrl": "https://www.katsukura.jp/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Connected: Directly inside JR Kyoto Station Building 11F",
+          "sourceTag": "Top Pick (Kyoto)",
+          "note": "Crispy Kyoto-style tonkatsu paired with freshly toasted sesame you grind yourself, yuzu dressing, and white miso soup.",
+          "tried": false
+        },
+        {
+          "id": 16,
+          "region": "Kyoto",
+          "dish": "Fushimi Inari Kitsune Udon & Inari Sushi",
+          "place": "Kendonya / Nezameya (Fushimi Inari Gate)",
+          "url": "https://inari.jp/en/",
+          "tabelogScore": "★ 3.66",
+          "tabelogUrl": "https://inari.jp/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Right Outside Station: 2-min walk from JR Inari Station / Keihan Fushimi-Inari",
+          "sourceTag": "Must-Try (Kyoto)",
+          "note": "Founded in 1540 right at the gate of Fushimi Inari Taisha—sweet simmered fried tofu 'kitsune' udon and inazushi.",
+          "tried": false
+        },
+        {
+          "id": 17,
+          "region": "Kyoto",
+          "dish": "Gion Duck Noodles (French-Inspired Duck Ramen)",
+          "place": "Gion Duck Noodles (Near Yasaka Shrine)",
+          "url": "https://kyoto.travel/en/",
+          "tabelogScore": "★ 3.70",
+          "tabelogUrl": "https://kyoto.travel/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 4-min walk from Keihan Gion-Shijo Station",
+          "sourceTag": "Top Pick (Kyoto)",
+          "note": "Tucked in a secret Gion alleyway—velvety slow-simmered Wakayama duck broth served with rose-pink roasted duck slices.",
+          "tried": false
+        },
+        {
+          "id": 18,
+          "region": "Kanazawa & Kaga",
+          "dish": "Kaisen-don (Winter Snow Crab & Nodoguro Bowl)",
+          "place": "Omicho Market (Yamasho / Ikiiki-tei)",
+          "url": "https://ohmicho-ichiba.com/",
+          "tabelogScore": "★ 3.64",
+          "tabelogUrl": "https://ohmicho-ichiba.com/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Walk / Loop Bus: 12-min walk or 5-min bus from JR Kanazawa Station",
+          "sourceTag": "Must-Try (Kanazawa)",
+          "note": "Kanazawa's kitchen for 300 years—famous for Kano snow crab, fatty blackthroat seaperch (nodoguro), and sweet shrimp.",
+          "tried": false
+        },
+        {
+          "id": 19,
+          "region": "Kanazawa & Kaga",
+          "dish": "Charcoal-Grilled Nodoguro & Kanazawa Oden",
+          "place": "Itaru Honten / Kuroyuri (Kanazawa Station)",
+          "url": "https://visitkanazawa.jp/en/",
+          "tabelogScore": "★ 3.71",
+          "tabelogUrl": "https://visitkanazawa.jp/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Inside Station: Kuroyuri is inside JR Kanazawa Station Anto",
+          "sourceTag": "Must-Try (Kanazawa)",
+          "note": "Dashi-soaked kurumafu (wheel gluten), baikai sea snails, and winter crab-shell Kanimen oden.",
+          "tried": false
+        },
+        {
+          "id": 20,
+          "region": "Kanazawa & Kaga",
+          "dish": "Hanton Rice & Champion Kanazawa Curry",
+          "place": "Grill Otsuka (Katamachi) / Turban Curry",
+          "url": "https://visitkanazawa.jp/en/",
+          "tabelogScore": "★ 3.59",
+          "tabelogUrl": "https://visitkanazawa.jp/en/",
+          "transitLevel": "bus",
+          "transitText": "🟡 Loop Bus: 10 min on Kanazawa Loop Bus to Korinbo, then 5-min walk",
+          "sourceTag": "Local Classic (Kanazawa)",
+          "note": "Ketchup-buttered rice topped with creamy soft-boiled egg, fried whitefish, shrimp, and house tartar sauce.",
+          "tried": false
+        },
+        {
+          "id": 21,
+          "region": "Kanazawa & Kaga",
+          "dish": "Gold-Leaf Soft Serve & Matcha Parfait",
+          "place": "Hakuichi Higashi Chaya District",
+          "url": "https://kanazawa.hakuichi.co.jp/",
+          "tabelogScore": "★ 3.55",
+          "tabelogUrl": "https://kanazawa.hakuichi.co.jp/",
+          "transitLevel": "bus",
+          "transitText": "🟡 Loop Bus: 10 min on Kanazawa Loop Bus to Hashibacho (Higashi Chaya)",
+          "sourceTag": "Must-Try (Kanazawa)",
+          "note": "Rich milk soft-serve wrapped in a whole sheet of artisan Kanazawa edible gold leaf.",
+          "tried": false
+        },
+        {
+          "id": 22,
+          "region": "Takayama & Shirakawa-go",
+          "dish": "A5 Hida Beef Hoba Miso & Nigiri Sushi",
+          "place": "Hidagyu Maruaki / Kotteushi (Sanmachi Suji)",
+          "url": "https://www.hidagyu-maruaki.co.jp/",
+          "tabelogScore": "★ 3.69",
+          "tabelogUrl": "https://www.hidagyu-maruaki.co.jp/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 5-min walk from JR Takayama Station East Exit",
+          "sourceTag": "Must-Try (Takayama)",
+          "note": "Marbled Hida wagyu grilled over a dried magnolia leaf (hoba) with sweet mountain miso, plus seared wagyu sushi on crisp senbei.",
+          "tried": false
+        },
+        {
+          "id": 23,
+          "region": "Takayama & Shirakawa-go",
+          "dish": "Takayama Chuka Soba (Soy-Bonito Ramen)",
+          "place": "Menya Shirakawa / Masago Soba",
+          "url": "https://www.hida.jp/english/",
+          "tabelogScore": "★ 3.74",
+          "tabelogUrl": "https://www.hida.jp/english/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 8-min walk from JR Takayama Station",
+          "sourceTag": "Must-Try (Takayama)",
+          "note": "Fine curly noodles simmered in a clear, aromatic soy-and-bonito broth.",
+          "tried": false
+        },
+        {
+          "id": 24,
+          "region": "Takayama & Shirakawa-go",
+          "dish": "Shirakawa-go Irori Hearth Tofu & Gohei Mochi",
+          "place": "Irori / Shirakawago Gassho-zukuri Teahouses",
+          "url": "https://shirakawa-go.gr.jp/en/",
+          "tabelogScore": "★ 3.52",
+          "tabelogUrl": "https://shirakawa-go.gr.jp/en/",
+          "transitLevel": "bus",
+          "transitText": "🟡 Bus Stop Walkable: 3-min walk from Shirakawa-go Bus Terminal",
+          "sourceTag": "Local Classic (Shirakawa-go)",
+          "note": "Firm mountain 'rope tofu' and walnut-miso Gohei rice skewers grilled beside a traditional thatched-roof hearth.",
+          "tried": false
+        },
+        {
+          "id": 25,
+          "region": "Takayama & Shirakawa-go",
+          "dish": "Mitarashi Dango (Savory Soy-Grilled Rice Skewers)",
+          "place": "Jinya-dori & Miyagawa Morning Market Stalls",
+          "url": "https://www.asaichi.net/",
+          "tabelogScore": "★ 3.50",
+          "tabelogUrl": "https://www.asaichi.net/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Station Walkable: 10-min walk from JR Takayama Station",
+          "sourceTag": "Street Snack (Takayama)",
+          "note": "Unlike sweet mitarashi elsewhere, Takayama's skewers are brushed with pure aged tamari soy sauce and toasted over charcoal.",
+          "tried": false
+        },
+        {
+          "id": 26,
+          "region": "Matsumoto & Northern Alps",
+          "dish": "Kyuwari Stone-Milled Matsumoto Shinshu Soba",
+          "place": "Osobauchidokoro Nomugi (Matsumoto)",
+          "url": "https://matsumoto-experience.com/",
+          "tabelogScore": "★ 3.72",
+          "tabelogUrl": "https://matsumoto-experience.com/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Castle Walkable: 6-min walk southeast of Matsumoto Castle, ~15 min from JR Matsumoto Stn",
+          "sourceTag": "Top Tabelog (Matsumoto)",
+          "note": "Renowned 90%-buckwheat handmade soba prized for clean aroma and al-dente chewiness; open lunchtime until sold out.",
+          "tried": false
+        },
+        {
+          "id": 27,
+          "region": "Kusatsu Onsen & Takasaki",
+          "dish": "Kusatsu Ishiusubiki Soba (Duck & Maitake Mushroom Broth)",
+          "place": "Ishiusubiki Soba Mikuniya (2 min from Yubatake)",
+          "url": "https://www.kusatsu-onsen.ne.jp/guide/en/",
+          "tabelogScore": "★ 3.49",
+          "tabelogUrl": "https://www.kusatsu-onsen.ne.jp/guide/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Yubatake Walkable: 2-min walk from Kusatsu Yubatake (5 min from Bus Terminal)",
+          "sourceTag": "Must-Try (Kusatsu)",
+          "note": "In-house stone-ground soba served over bamboo sieves with rich hot duck, pork, or Gunma maitake-mushroom dipping soup.",
+          "tried": false
+        },
+        {
+          "id": 28,
+          "region": "Kusatsu Onsen & Takasaki",
+          "dish": "Kusatsu Onsen Tamago & Hot Steamed Onsen Manju",
+          "place": "Matsumura Manju / Raiun-tei by Yubatake",
+          "url": "https://www.kusatsu-onsen.ne.jp/guide/en/",
+          "tabelogScore": "★ 3.58",
+          "tabelogUrl": "https://www.kusatsu-onsen.ne.jp/guide/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Yubatake Walkable: Directly along the Yubatake wooden boardwalk",
+          "sourceTag": "Onsen Snack (Kusatsu)",
+          "note": "Silky mineral-spring poached egg and pillow-soft brown-sugar azuki manju served piping hot in snowy winter air.",
+          "tried": false
+        },
+        {
+          "id": 29,
+          "region": "Kusatsu Onsen & Takasaki",
+          "dish": "Takasaki Daruma Bento, Torimeshi & Joshu Wagyu",
+          "place": "Torihei Takasaki Montres / Takasaki Ekiben",
+          "url": "https://www.torihei.co.jp/",
+          "tabelogScore": "★ 3.54",
+          "tabelogUrl": "https://www.torihei.co.jp/",
+          "transitLevel": "easy",
+          "transitText": "🟢 Inside Station: Inside JR Takasaki Station Building / Montres 5F",
+          "sourceTag": "Gunma Classic",
+          "note": "Gunma's beloved sweet soy-glazed chicken rice box (Torimeshi) or iconic red lucky Daruma bento inside JR Takasaki Station.",
+          "tried": false
+        }
+      ],
+      "access": [
+        {
+          "id": "acc_p_1",
+          "area": "Tokyo Metropolitan Area",
+          "day": "All Tokyo Days",
+          "place": "Tokyo Subway Official Route Map PDF (Tokyo Metro & Toei Subway All 13 Lines)",
+          "url": "https://www.tokyometro.jp/station/pdf/202305/202305_number_en.pdf",
+          "note": "Official downloadable PDF metro map covering all Tokyo Metro and Toei Subway lines with station numbers.",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_2",
+          "area": "Tokyo Metropolitan Area",
+          "day": "Airport & JR Lines",
+          "place": "JR East Major Railway & Subway Route Map PDF (Yamanote, N'EX & Shinkansen)",
+          "url": "https://www.jreast.co.jp/en/multi/downloads/",
+          "note": "Official JR East metropolitan route map PDF covering Haneda/Narita airport access, Yamanote Line, and Shinkansen hubs.",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_3",
+          "area": "Hakone & Mt. Fuji",
+          "day": "Fuji & Hakone Days",
+          "place": "JR Central & Odakyu Hakone / Mt. Fuji Railway Official Route Map PDF",
+          "url": "https://global.jr-central.co.jp/en/info/railwaymap/_pdf/railwaymap.pdf",
+          "note": "Official downloadable PDF railway & ropeway network map for Hakone, Odawara, and Mt. Fuji.",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_4",
+          "area": "Atami, Kawazu & Shizuoka",
+          "day": "Kawazu & Atami Day",
+          "place": "Izukyu Line & JR Odoriko Route Guide (Atami ↔ Ito ↔ Kawazu)",
+          "url": "https://www.izukyu.co.jp/global_data/english/index.html",
+          "note": "Reserve JR Limited Express Odoriko seats 1 month ahead at 10:00 AM JST for late-Feb Kawazu-zakura, or transfer at Ito onto frequent Izukyu trains.",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_5",
+          "area": "Atami, Kawazu & Shizuoka",
+          "day": "Fujikawa SA & Shizuoka",
+          "place": "Fujikawa Rakuza / EXPASA Fujikawa Public Transport Access Guide (from JR Fujikawa Stn)",
+          "url": "https://www.fujikawarakuza.co.jp/access/",
+          "note": "From JR Fujikawa Station West Exit: take Yamanashi Kotsu Bus to 'Fujikawa Rakuza Mae', walk 25–30 min uphill (~2.1 km), or take a 5-min station taxi (~¥1,200) for clear 07:30 AM Mt. Fuji views.",
+          "isExisting": false
+        },
+        {
+          "id": "acc_p_6",
+          "area": "Kyoto, Osaka, Kobe & Hiroshima",
+          "day": "Kyoto Days",
+          "place": "Kyoto City Bus & Subway Official Navi Route Map PDF",
+          "url": "https://www.city.kyoto.lg.jp/kotsu/cmsfiles/contents/0000019/19770/ENG202503(map)WEB.pdf",
+          "note": "Official Kyoto Municipal Transportation Bureau PDF map covering subways and city buses.",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_7",
+          "area": "Kyoto, Osaka, Kobe & Hiroshima",
+          "day": "Osaka Days",
+          "place": "Osaka Metro Official Route Map PDF",
+          "url": "https://subway.osakametro.co.jp/img/osakametro_rosenzu_20191001.pdf",
+          "note": "Official Osaka Metro PDF route map covering Midosuji, Chuo, and Osaka Loop transfers.",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_8",
+          "area": "Kyoto, Osaka, Kobe & Hiroshima",
+          "day": "Kobe Days",
+          "place": "Kobe City Loop & Port Loop Sightseeing Bus Official Route Map PDF",
+          "url": "https://kobeloop.bus-japan.net/zh-Hant/images/home/map.pdf",
+          "note": "Official PDF map linking Shin-Kobe, Kitano, Sannomiya, Chinatown, and Meriken Park.",
+          "isExisting": false
+        },
+        {
+          "id": "acc_p_9",
+          "area": "Kyoto, Osaka, Kobe & Hiroshima",
+          "day": "Hiroshima & Miyajima",
+          "place": "Hiroshima Sightseeing Loop Bus 'Meipuru-pu' & Ferry Route Map PDF",
+          "url": "http://www.chugoku-jrbus.co.jp/sightseeing/files/20251024meipurupu_map_foreigner.pdf",
+          "note": "Official JR Bus Chugoku PDF map from Hiroshima Station to Peace Park & Miyajima Ferry.",
+          "isExisting": false
+        },
+        {
+          "id": "acc_p_10",
+          "area": "Kanazawa & Hokuriku",
+          "day": "Kanazawa Stay",
+          "place": "Kanazawa Loop Bus & Flat Bus Official 1-Day Pass Route Map PDF",
+          "url": "https://www.hokutetsu.co.jp/_wp/wp-content/uploads/2026/01/ONE-DAY-PASS-Kanazawa-Bus-Route-Map-February-2026.pdf",
+          "note": "Official Hokutetsu PDF map for navigating Kenrokuen Garden, Omicho Market, Higashi Chaya, and 21st Century Museum.",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_11",
+          "area": "Kanazawa & Hokuriku",
+          "day": "Shirakawa-go & Ainokura",
+          "place": "Kanazawa ↔ Shirakawa-go / Gokayama Ainokura ↔ Takayama (Nohi Bus & Hokutetsu)",
+          "url": "https://visitkanazawa.jp/lsc/upfile/pamphlet/0000/0014/14_201_file.pdf",
+          "note": "Official Visit Kanazawa PDF bus & rail access guide for Shirakawa-go, Gokayama Ainokura, and Takayama.",
+          "isExisting": false
+        },
+        {
+          "id": "acc_p_12",
+          "area": "Northern Alps & Gunma",
+          "day": "Shinhotaka & Matsumoto",
+          "place": "Nohi Bus & Alpico Highway Bus Official Route Guide (Takayama ↔ Shinhotaka / Hirayu / Matsumoto)",
+          "url": "https://www.nouhibus.co.jp/english/",
+          "note": "Nohi Bus runs every 1–2 hrs from Takayama Nohi Bus Center to Shinhotaka Ropeway (¥4,400 2-Day Open Pass) and direct via Abo Tunnel to Matsumoto (¥4,400, 2h25m).",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_13",
+          "area": "Northern Alps & Gunma",
+          "day": "Takasaki ↔ Kusatsu Onsen",
+          "place": "JR Agatsuma Line + JR Bus Kanto Official Route (Takasaki ↔ Naganoharakusatsuguchi ↔ Kusatsu)",
+          "url": "https://www.kusatsu-onsen.ne.jp/guide/en/access/",
+          "note": "Seamless rail-to-bus transfer at Naganoharakusatsuguchi Station straight into Kusatsu Onsen Town (~¥2,010 one-way, 2h05m total).",
+          "isExisting": true
+        }
+      ],
+      "guides": [
+        {
+          "id": "gd_p_1",
+          "area": "Tokyo",
+          "day": "Tokyo East",
+          "location": "Asakusa Senso-ji, Sumida River & Ueno Park Official Guide",
+          "url": "https://www.japan-guide.com/e/e3004.html",
+          "note": "Complete walking guide to Kaminarimon Gate, Nakamise Street, and Ueno Park.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_2",
+          "area": "Tokyo",
+          "day": "Tokyo West",
+          "location": "Shinjuku, Meiji Jingu Shrine & Shibuya Guide",
+          "url": "https://www.japan-guide.com/e/e3007.html",
+          "note": "Explore Tokyo's forested Meiji Shrine, Shinjuku Gyoen gardens, and Shibuya Crossing.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_3",
+          "area": "Tokyo",
+          "day": "Central & Bay",
+          "location": "Tokyo Station, Imperial Palace, Ginza & Odaiba Bay Guide",
+          "url": "https://www.japan-guide.com/e/e2164.html",
+          "note": "Top highlights across Marunouchi, Ginza shopping, Toyosu Market, and Tokyo Bay.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_4",
+          "area": "Hakone & Mt. Fuji",
+          "day": "Mt. Fuji & Kawaguchiko",
+          "location": "Lake Kawaguchiko, Ropeway & Chureito Pagoda Scenic Guide",
+          "url": "https://www.japan-guide.com/e/e6900.html",
+          "note": "Best morning Mt. Fuji reflections along northern Lake Kawaguchiko shores and Oishi Park.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_5",
+          "area": "Hakone & Mt. Fuji",
+          "day": "Hakone Loop",
+          "location": "Hakone Round Course (Ropeway over Owakudani, Lake Ashi & Hakone Shrine)",
+          "url": "https://www.japan-guide.com/e/e5200.html",
+          "note": "Classic ropeway and lake cruise loop with Mt. Fuji views and lakeside red torii gate.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_6",
+          "area": "Atami & Kawazu Sakura",
+          "day": "Atami & Kawazu",
+          "location": "Atami Plum Garden (Late-Feb Peak Ume) & Kawazu Early Cherry Blossoms",
+          "url": "https://www.japan-guide.com/e/e6314.html",
+          "note": "Catch late-February peak deep-pink Kawazu-zakura lining Kawazu River plus 460 early-to-late plum trees in Atami Baien.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_7",
+          "area": "Shizuoka & Fujikawa",
+          "day": "Fujikawa & Nihondaira",
+          "location": "Starbucks EXPASA Fujikawa Mt. Fuji Viewpoint, Nihondaira Yume Terrace & Miho-no-Matsubara",
+          "url": "https://www.japan-guide.com/e/e6350.html",
+          "note": "Visit EXPASA Fujikawa around 07:30–09:00 AM for crystal-clear morning Mt. Fuji reflections, then panoramic Suruga Bay terraces.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_8",
+          "area": "Kyoto",
+          "day": "East Kyoto",
+          "location": "Fushimi Inari Taisha, Kiyomizu-dera & Tofuku-ji Autumn Maples",
+          "url": "https://www.japan-guide.com/e/e2158.html",
+          "note": "Walk from Tofuku-ji & Kiyomizu-dera's wooden stages down Sannenzaka lanes into Gion.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_9",
+          "area": "Kyoto",
+          "day": "West & North Kyoto",
+          "location": "Arashiyama Bamboo Grove, Tenryu-ji & Kinkaku-ji Golden Pavilion",
+          "url": "https://www.japan-guide.com/e/e3912.html",
+          "note": "Togetsukyo Bridge, UNESCO Tenryu-ji Sogenchi Pond, and gold-leaf Kinkaku-ji.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_10",
+          "area": "Kanazawa & Kaga Onsen",
+          "day": "Kanazawa Day 1",
+          "location": "Kenrokuen Garden & Kanazawa Castle Guide",
+          "url": "https://www.japan-guide.com/e/e2167.html",
+          "note": "Iconic winter Yukitsuri rope-umbrella pine trees, Kotojitoro lantern, and Kanazawa Castle.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_11",
+          "area": "Kanazawa & Kaga Onsen",
+          "day": "Kanazawa Day 2",
+          "location": "Higashi Chaya Geisha District & Nagamachi Samurai Quarter",
+          "url": "https://visitkanazawa.jp/en/trip-ideas/detail_251.html",
+          "note": "Preserved wooden latticework teahouses, Nomura Samurai Residence, and gold-leaf workshops.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_12",
+          "area": "Kanazawa & Kaga Onsen",
+          "day": "Kaga Onsen",
+          "location": "Kaga Onsenkyo (Yamanaka & Yamashiro Hot Springs) Guide",
+          "url": "https://www.japan-guide.com/e/e4275.html",
+          "note": "1,300-year-old hot spring towns near Kanazawa featuring Kakusenkei Gorge.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_13",
+          "area": "Shirakawa-go, Gokayama & Takayama",
+          "day": "Gokayama & Shirakawa-go",
+          "location": "UNESCO Shirakawa-go & Gokayama Ainokura Gassho-zukuri Villages",
+          "url": "https://www.japan-guide.com/e/e5950.html",
+          "note": "Guide to Ogimachi Observation Deck and tranquil Ainokura thatched farmhouses.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_14",
+          "area": "Shirakawa-go, Gokayama & Takayama",
+          "day": "Takayama Old Town",
+          "location": "Takayama Sanmachi Suji Historic District & Takayama Jinya",
+          "url": "https://www.japan-guide.com/e/e5900.html",
+          "note": "Edo-period merchant streets, preserved Takayama Jinya outpost, and sake breweries.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_15",
+          "area": "Shirakawa-go, Gokayama & Takayama",
+          "day": "Takayama Markets",
+          "location": "Miyagawa Morning Market & Hida Folk Village (Hida no Sato)",
+          "url": "https://www.japan-guide.com/e/e5901.html",
+          "note": "Riverside morning stalls and open-air Hida farmhouses overlooking a scenic pond.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_16",
+          "area": "Northern Alps & Matsumoto",
+          "day": "Shinhotaka & Matsumoto",
+          "location": "Shinhotaka Double-Decker Ropeway (2,156m Winter Alps) & Matsumoto Castle Snow Peaks",
+          "url": "https://www.japan-guide.com/e/e5942.html",
+          "note": "Ascend to 2,156m Nishihotakaguchi Observatory in winter snow wall corridors, and photograph snow-capped Alps behind black Matsumoto Castle.",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_17",
+          "area": "Gunma • Kusatsu Onsen",
+          "day": "Kusatsu Onsen",
+          "location": "Kusatsu Onsen Yubatake Steam Field, Yumomi Dance & Sainokawara Snow Rotenburo",
+          "url": "https://www.japan-guide.com/e/e7400.html",
+          "note": "Japan's #1 mineral spring town in dramatic winter steam around the illuminated Yubatake sulfur wooden conduits.",
+          "isExisting": true
+        }
+      ],
+      "prep": [
+        {
+          "id": "feb1",
+          "title": "Book 1 Month Early (Jan 21–24, 2027 at 10:00 JST): JR Fuji Excursion & JR Odoriko",
+          "sub": "Feb 23 is Emperor's Birthday holiday in Japan & late-Feb Kawazu-zakura sells out fast"
+        },
+        {
+          "id": "feb2",
+          "title": "Reserve Highway Buses: Kanazawa → Shirakawa-go → Takayama & Takayama → Matsumoto",
+          "sub": "Mandatory seat reservations open 1 month before travel via Nohi/Alpico Bus portals"
+        },
+        {
+          "id": "feb3",
+          "title": "Reserve Shibuya Sky Sunset Slot (4 Weeks Prior) & Plan Yamato Luggage Forwarding",
+          "sub": "Forward big suitcases from Shinjuku APA to Kyoto APA on Day 4 morning (~¥2,200) for stress-free Atami/Kawazu sightseeing"
+        },
+        {
+          "id": "p1",
+          "title": "Complete Visit Japan Web (Immigration & Customs QR)",
+          "sub": "Register flights and hotel details before departure"
+        },
+        {
+          "id": "p2",
+          "title": "Prepare IC Card (Suica / PASMO / ICOCA) or Apple Wallet Suica",
+          "sub": "Load ¥3,000–¥5,000 for effortless metro, bus, and convenience store payments"
+        },
+        {
+          "id": "p3",
+          "title": "Confirm Hotel Check-in Times & Luggage Forwarding",
+          "sub": "Contact ryokans at least 3 days ahead if using station pickup shuttles"
+        },
+        {
+          "id": "p4",
+          "title": "Save Official City Metro & Bus PDF Maps (Tab 7)",
+          "sub": "Keep offline PDF route maps ready on your phone"
+        }
+      ],
+      "weather": {}
+    },
+    "dataJa": {
+      "days": [
+        {
+          "day": 1,
+          "date": "2027-02-21",
+          "stay": 15500,
+          "travelBase": 46500,
+          "travelActualAdd": 0,
+          "fun": 8500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 1500,
+          "totalAllLegs": 1500,
+          "dow": "日",
+          "region": "東京",
+          "routeJp": "東京到着（羽田/成田）→ アパホテル新宿歌舞伎町タワー＆思い出横丁",
+          "routeEn": "空港アクセスで新宿へ移動。交通系ICカード準備後、都庁無料夜景展望＆新宿ディナー",
+          "hotel": "アパホテル＆リゾート〈西新宿・新宿歌舞伎町タワー〉",
+          "legs": [
+            "東京行き航空券（目安 ¥45,000）",
+            "羽田空港 / 成田空港 → JR新宿駅（¥1,500）"
+          ],
+          "tip": "到着前にモバイルSuica準備が便利。大浴場完備の新宿アパホテルで初日の移動疲れを癒せます。",
+          "timeSlots": [
+            {
+              "id": "f1_1",
+              "timeFrom": "13:30",
+              "timeTo": "15:15",
+              "locFrom": "羽田 / 成田空港",
+              "locTo": "新宿駅",
+              "category": "travel",
+              "desc": "モノレール・京急・JR乗り継ぎで新宿駅へ移動"
+            },
+            {
+              "id": "f1_2",
+              "timeFrom": "15:30",
+              "timeTo": "16:30",
+              "locFrom": "JR新宿駅",
+              "locTo": "新宿アパホテル",
+              "category": "stay",
+              "desc": "アパホテル〈新宿 歌舞伎町タワー〉チェックイン"
+            },
+            {
+              "id": "f1_3",
+              "timeFrom": "17:30",
+              "timeTo": "20:00",
+              "locFrom": "西新宿",
+              "locTo": "思い出横丁",
+              "category": "meal",
+              "desc": "東京都庁展望室から無料夜景鑑賞＆新宿思い出横丁で初日ディナー"
+            }
+          ]
+        },
+        {
+          "day": 2,
+          "date": "2027-02-22",
+          "stay": 15500,
+          "travelBase": 8260,
+          "travelActualAdd": 1500,
+          "fun": 10000,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 4400,
+          "totalAllLegs": 9760,
+          "dow": "月",
+          "region": "富士山・河口湖",
+          "routeJp": "東京 ↔ 河口湖日帰り（大石公園・パノラマロープウェイ・ほうとう不動）",
+          "routeEn": "翌2/23(祝・天皇誕生日)の混雑を避けた月曜日に訪問！雪化粧の富士山＆ほうとうランチ",
+          "hotel": "アパホテル＆リゾート〈西新宿・新宿歌舞伎町タワー〉",
+          "legs": [
+            "新宿 ↔ 大月（JR特急富士回遊 往復 ¥4,400）",
+            "大月 ↔ 河口湖（富士急行線 往復 ¥3,860 • JR以外）",
+            "河口湖周遊バス レッドライン1日券（¥1,500 • JR以外）"
+          ],
+          "tip": "特急「富士回遊」は1ヶ月前10時に要予約（満席時はバスタ新宿発高速バス往復¥4,400も快適）。河口湖駅前の「ほうとう不動（食べログ★3.57）」が定番。",
+          "timeSlots": [
+            {
+              "id": "f2_1",
+              "timeFrom": "07:30",
+              "timeTo": "09:25",
+              "locFrom": "JR新宿駅",
+              "locTo": "河口湖駅",
+              "category": "travel",
+              "desc": "JR直通特急「富士回遊」で河口湖駅へ"
+            },
+            {
+              "id": "f2_2",
+              "timeFrom": "09:45",
+              "timeTo": "12:15",
+              "locFrom": "河口湖駅",
+              "locTo": "大石公園",
+              "category": "sightseeing",
+              "desc": "周遊バスで大石公園の富士山撮影＆富士山パノラマロープウェイ"
+            },
+            {
+              "id": "f2_3",
+              "timeFrom": "12:30",
+              "timeTo": "13:45",
+              "locFrom": "河口湖駅前",
+              "locTo": "ほうとう不動",
+              "category": "meal",
+              "desc": "名物かぼちゃ味噌ほうとう（ほうとう不動 • 食べログ★3.57）ランチ"
+            },
+            {
+              "id": "f2_4",
+              "timeFrom": "16:45",
+              "timeTo": "18:45",
+              "locFrom": "河口湖駅",
+              "locTo": "JR新宿駅",
+              "category": "travel",
+              "desc": "夕方の富士回遊で新宿アパホテルへ帰着"
+            }
+          ]
+        },
+        {
+          "day": 3,
+          "date": "2027-02-23",
+          "stay": 15500,
+          "travelBase": 900,
+          "travelActualAdd": 0,
+          "fun": 12000,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 400,
+          "totalAllLegs": 900,
+          "dow": "火",
+          "region": "東京",
+          "routeJp": "東京満喫（祝）：浅草寺・上野公園の梅と寒桜・銀座＆渋谷スカイ夕景",
+          "routeEn": "天皇誕生日の祝日は都内周遊！上野の梅と早咲き寒桜を愛でた後、渋谷スカイへ",
+          "hotel": "アパホテル＆リゾート〈西新宿・新宿歌舞伎町タワー〉",
+          "legs": [
+            "東京メトロ24時間券・都内JR移動（¥900）"
+          ],
+          "tip": "渋谷スカイの16:40夕暮れ枠は4週間前に要予約。浅草で老舗うなぎ（色川・初小川 ★3.72）もおすすめ。",
+          "timeSlots": [
+            {
+              "id": "f3_1",
+              "timeFrom": "09:00",
+              "timeTo": "11:30",
+              "locFrom": "新宿",
+              "locTo": "浅草寺",
+              "category": "sightseeing",
+              "desc": "朝の浅草寺・仲見世通り＆隅田公園散策"
+            },
+            {
+              "id": "f3_2",
+              "timeFrom": "12:00",
+              "timeTo": "14:00",
+              "locFrom": "浅草",
+              "locTo": "上野公園",
+              "category": "meal",
+              "desc": "浅草老舗うなぎランチ（★3.72）後、上野公園の梅・寒桜鑑賞"
+            },
+            {
+              "id": "f3_3",
+              "timeFrom": "16:15",
+              "timeTo": "18:30",
+              "locFrom": "上野",
+              "locTo": "渋谷スカイ",
+              "category": "sightseeing",
+              "desc": "渋谷スカイ展望台から富士山のシルエットと東京夕景・夜景鑑賞"
+            }
+          ]
+        },
+        {
+          "day": 4,
+          "date": "2027-02-24",
+          "stay": 9200,
+          "travelBase": 9900,
+          "travelActualAdd": 920,
+          "fun": 11500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 7400,
+          "totalAllLegs": 10820,
+          "dow": "水",
+          "region": "熱海・河津（伊豆）",
+          "routeJp": "東京 → 熱海梅園＆河津桜まつり（満開の早咲き桜）→ 静岡アパホテル泊",
+          "routeEn": "大きな荷物は京都へ宅配便！熱海梅園と河津川沿い約850本の濃いピンクの河津桜を1日で満喫",
+          "hotel": "アパホテル〈静岡駅北〉",
+          "legs": [
+            "東京 → 熱海 → 河津 → 熱海 → 静岡（JR特急踊り子・伊東線 ¥7,400 ＋ 伊豆急行線 ¥3,420 • JR以外）"
+          ],
+          "tip": "大荷物は新宿アパから京都アパへ宅急便（約¥2,200）し、熱海駅コインロッカー利用で身軽に！昼食は熱海銀座おさかな食堂（★3.50）が人気。",
+          "timeSlots": [
+            {
+              "id": "f4_1",
+              "timeFrom": "08:00",
+              "timeTo": "09:15",
+              "locFrom": "東京駅",
+              "locTo": "熱海駅",
+              "category": "travel",
+              "desc": "熱海到着後コインロッカーに荷物を預け、バスで熱海梅園へ"
+            },
+            {
+              "id": "f4_2",
+              "timeFrom": "09:30",
+              "timeTo": "12:15",
+              "locFrom": "熱海梅園",
+              "locTo": "熱海銀座",
+              "category": "meal",
+              "desc": "熱海梅園梅まつり散策＆熱海銀座おさかな食堂（食べログ★3.50）で海鮮ランチ"
+            },
+            {
+              "id": "f4_3",
+              "timeFrom": "12:40",
+              "timeTo": "17:15",
+              "locFrom": "熱海",
+              "locTo": "河津桜並木",
+              "category": "sightseeing",
+              "desc": "伊豆急行・踊り子で河津へ！満開の河津桜川沿い遊歩道＆わさび丼散策"
+            },
+            {
+              "id": "f4_4",
+              "timeFrom": "17:45",
+              "timeTo": "20:00",
+              "locFrom": "河津駅",
+              "locTo": "アパホテル静岡駅北",
+              "category": "stay",
+              "desc": "熱海乗換・JR東海道線で静岡駅へ移動しアパホテル静岡駅北チェックイン"
+            }
+          ]
+        },
+        {
+          "day": 5,
+          "date": "2027-02-25",
+          "stay": 9200,
+          "travelBase": 2840,
+          "travelActualAdd": 1200,
+          "fun": 9500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 1440,
+          "totalAllLegs": 4040,
+          "dow": "木",
+          "region": "静岡・富士川",
+          "routeJp": "静岡 ↔ 富士川SAスタバ（朝の富士山絶景カフェ）・日本平＆三保松原・静岡おでん",
+          "routeEn": "雲の出にくい朝7時台にJR富士川駅＋タクシーでEXPASA富士川スタバへ！午後は日本平・三保松原、夜は静岡おでん",
+          "hotel": "アパホテル〈静岡駅北〉",
+          "legs": [
+            "静岡 ↔ 富士川 ↔ 清水（JR東海道線 ¥1,440）",
+            "富士川駅 → 富士川楽座/SA 往路早朝タクシー（¥1,200 絶景優先）＋復路バス（¥200）",
+            "日本平・三保松原バス移動（¥1,200 • JR以外）"
+          ],
+          "tip": "静岡泊だからこそ朝7時前に出発して富士川駅＋タクシー約5分で晴天率最高の富士川SAスタバ（絶景テラス）へ直行可能！帰りは富士川楽座前の路線バス利用可。夜は青葉横丁の静岡おでん（食べログ★3.56）。",
+          "timeSlots": [
+            {
+              "id": "f5_1",
+              "timeFrom": "06:45",
+              "timeTo": "09:15",
+              "locFrom": "JR静岡駅",
+              "locTo": "富士川SAスタバ",
+              "category": "sightseeing",
+              "desc": "JR富士川駅着後タクシー5分でEXPASA富士川へ。朝の晴天時に富士山一望のスタバ絶景タイム（帰りはバス利用）"
+            },
+            {
+              "id": "f5_2",
+              "timeFrom": "10:45",
+              "timeTo": "16:30",
+              "locFrom": "日本平夢テラス",
+              "locTo": "三保松原",
+              "category": "sightseeing",
+              "desc": "日本平夢テラス・久能山ロープウェイ＆世界遺産・三保の松原から富士山遠望"
+            },
+            {
+              "id": "f5_3",
+              "timeFrom": "18:00",
+              "timeTo": "20:00",
+              "locFrom": "静岡駅周辺",
+              "locTo": "青葉おでん街",
+              "category": "meal",
+              "desc": "青葉横丁・青葉おでん街で静岡おでん＆黒はんぺん夕食（食べログ★3.56）"
+            }
+          ]
+        },
+        {
+          "day": 6,
+          "date": "2027-02-26",
+          "stay": 13500,
+          "travelBase": 10450,
+          "travelActualAdd": 300,
+          "fun": 10500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 10750,
+          "totalAllLegs": 10750,
+          "dow": "金",
+          "region": "京都",
+          "routeJp": "静岡 → 東海道新幹線「ひかり」で京都へ＆夕暮れの伏見稲荷大社・千本鳥居",
+          "routeEn": "新幹線で京都駅へ直通！APA京都駅前チェックイン後、混雑の落ち着いた夕方の伏見稲荷へ",
+          "hotel": "アパホテル〈京都駅前〉",
+          "legs": [
+            "静岡 → 京都（東海道新幹線ひかり ¥10,450）",
+            "京都 ↔ 稲荷（JR奈良線 往復 ¥300）"
+          ],
+          "tip": "新宿から送った大型荷物をアパホテル京都駅前で受取。夕方はJR奈良線5分の伏見稲荷へ。夕食は京都駅ビル「名代とんかつ かつくら（★3.64）」。",
+          "timeSlots": [
+            {
+              "id": "f6_1",
+              "timeFrom": "09:10",
+              "timeTo": "11:00",
+              "locFrom": "静岡駅",
+              "locTo": "京都駅",
+              "category": "travel",
+              "desc": "東海道新幹線ひかりで京都駅へ直通移動"
+            },
+            {
+              "id": "f6_2",
+              "timeFrom": "11:15",
+              "timeTo": "15:00",
+              "locFrom": "アパ京都駅前",
+              "locTo": "京都駅周辺",
+              "category": "stay",
+              "desc": "宅急便荷物の受取＆アパホテル京都駅前周辺ランチ散策"
+            },
+            {
+              "id": "f6_3",
+              "timeFrom": "16:15",
+              "timeTo": "19:30",
+              "locFrom": "稲荷駅",
+              "locTo": "かつくら京都駅店",
+              "category": "meal",
+              "desc": "夕方の伏見稲荷大社・千本鳥居参拝後、名代とんかつ「かつくら（★3.64）」夕食"
+            }
+          ]
+        },
+        {
+          "day": 7,
+          "date": "2027-02-27",
+          "stay": 13500,
+          "travelBase": 0,
+          "travelActualAdd": 1100,
+          "fun": 13500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 0,
+          "totalAllLegs": 1100,
+          "dow": "土",
+          "region": "京都",
+          "routeJp": "京都週末1日目(土)：清水寺・二年坂・北野天満宮「梅苑」＆祇園・先斗町",
+          "routeEn": "早朝の清水寺・産寧坂から錦市場食べ歩き、さらに2月下旬満開の北野天満宮梅苑＆夜の祇園花見小路",
+          "hotel": "アパホテル〈京都駅前〉",
+          "legs": [
+            "京都市地下鉄・バス1日券（¥1,100 • JR以外）"
+          ],
+          "tip": "2月最終週末の北野天満宮「梅苑」は1,500本が満開の見頃！昼は錦市場、夕暮れは石塀小路・祇園散策。",
+          "timeSlots": [
+            {
+              "id": "f7_1",
+              "timeFrom": "07:30",
+              "timeTo": "10:30",
+              "locFrom": "京都駅前",
+              "locTo": "清水寺・産寧坂",
+              "category": "sightseeing",
+              "desc": "開門直後の清水寺〜産寧坂・二年坂〜八坂神社を静かな時間帯に散策"
+            },
+            {
+              "id": "f7_2",
+              "timeFrom": "11:30",
+              "timeTo": "13:15",
+              "locFrom": "祇園四条",
+              "locTo": "錦市場",
+              "category": "meal",
+              "desc": "京の台所・錦市場でおばんざいや生湯葉グルメ食べ歩き"
+            },
+            {
+              "id": "f7_3",
+              "timeFrom": "14:00",
+              "timeTo": "17:00",
+              "locFrom": "烏丸",
+              "locTo": "北野天満宮梅苑",
+              "category": "sightseeing",
+              "desc": "市バスで北野天満宮へ。見頃の紅白1,500本の梅苑鑑賞＆梅茶屋一服"
+            },
+            {
+              "id": "f7_4",
+              "timeFrom": "18:00",
+              "timeTo": "20:30",
+              "locFrom": "先斗町",
+              "locTo": "祇園花見小路",
+              "category": "meal",
+              "desc": "先斗町・花見小路の京情緒ある夜散歩＆祇園ダックヌードル等（★3.70）"
+            }
+          ]
+        },
+        {
+          "day": 8,
+          "date": "2027-02-28",
+          "stay": 13500,
+          "travelBase": 480,
+          "travelActualAdd": 700,
+          "fun": 12500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 480,
+          "totalAllLegs": 1180,
+          "dow": "日",
+          "region": "京都",
+          "routeJp": "京都週末2日目(日)：早朝の嵐山竹林・渡月橋・湯豆腐＆金閣寺・宇治抹茶パフェ",
+          "routeEn": "日曜朝の混雑前にJR嵯峨野線で嵐山竹林＆天龍寺へ！嵐山湯豆腐ランチと午後の金閣寺・京都駅抹茶スイーツ",
+          "hotel": "アパホテル〈京都駅前〉",
+          "legs": [
+            "京都 ↔ 嵯峨嵐山（JR嵯峨野線 ¥480）",
+            "嵐山 → 金閣寺 → 京都駅（嵐電＆京都市バス ¥700 • JR以外）"
+          ],
+          "tip": "ランチは名水仕込みの湯豆腐（嵐山嵯峨野 ★3.68）、夕方京都駅で中村藤吉本店（★3.75）の抹茶パフェ。",
+          "timeSlots": [
+            {
+              "id": "f8_1",
+              "timeFrom": "07:30",
+              "timeTo": "11:00",
+              "locFrom": "JR京都駅",
+              "locTo": "嵐山・竹林",
+              "category": "sightseeing",
+              "desc": "JR嵯峨野線16分で朝イチの嵐山竹林の小径・天龍寺・渡月橋をゆったり鑑賞"
+            },
+            {
+              "id": "f8_2",
+              "timeFrom": "11:30",
+              "timeTo": "13:00",
+              "locFrom": "嵐山",
+              "locTo": "湯豆腐 嵯峨野",
+              "category": "meal",
+              "desc": "京都名物 伝統湯豆腐コースランチ（食べログ★3.68）"
+            },
+            {
+              "id": "f8_3",
+              "timeFrom": "13:30",
+              "timeTo": "17:00",
+              "locFrom": "嵐電嵐山駅",
+              "locTo": "金閣寺・京都駅",
+              "category": "sightseeing",
+              "desc": "嵐電＆バスで金閣寺（鹿苑寺）拝観後、京都駅伊勢丹3F・中村藤吉本店（★3.75）で抹茶パフェ"
+            }
+          ]
+        },
+        {
+          "day": 9,
+          "date": "2027-03-01",
+          "stay": 9500,
+          "travelBase": 6500,
+          "travelActualAdd": 800,
+          "fun": 13500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 6500,
+          "totalAllLegs": 7300,
+          "dow": "月",
+          "region": "金沢・石川",
+          "routeJp": "京都 → 金沢（サンダーバード＋北陸新幹線）・兼六園の雪吊り＆近江町市場海鮮",
+          "routeEn": "APA発祥の金沢へ！敦賀経由で北陸新幹線乗継。冬の加能ガニ・のどぐろ丼、兼六園の雪吊り、ひがし茶屋街",
+          "hotel": "アパホテル〈金沢駅前〉",
+          "legs": [
+            "京都 → 敦賀（サンダーバード）→ 金沢（北陸新幹線 • 訪日割引片道きっぷ¥6,500／通常¥9,460）",
+            "金沢周遊バス1日券（¥800 • JR以外）"
+          ],
+          "tip": "JR西日本の訪日向け割引「Hokuriku One-Way Ticket（¥6,500）」がお得。金沢駅前アパ（大浴場付）に荷物預け後、近江町市場海鮮丼（★3.64）＆兼六園雪吊り。",
+          "timeSlots": [
+            {
+              "id": "f9_1",
+              "timeFrom": "08:40",
+              "timeTo": "11:00",
+              "locFrom": "JR京都駅",
+              "locTo": "JR金沢駅",
+              "category": "travel",
+              "desc": "サンダーバードで敦賀駅へ、北陸新幹線に乗換えて金沢駅到着"
+            },
+            {
+              "id": "f9_2",
+              "timeFrom": "11:30",
+              "timeTo": "13:30",
+              "locFrom": "アパ金沢駅前",
+              "locTo": "近江町市場",
+              "category": "meal",
+              "desc": "アパホテル金沢駅前に荷物預け後、近江町市場で冬の香箱・加能ガニ＆のどぐろ海鮮丼（★3.64）"
+            },
+            {
+              "id": "f9_3",
+              "timeFrom": "14:00",
+              "timeTo": "18:00",
+              "locFrom": "兼六園",
+              "locTo": "ひがし茶屋街",
+              "category": "sightseeing",
+              "desc": "冬名物「雪吊り」の兼六園・金沢城公園＆ひがし茶屋街で金箔ソフト＆金沢おでん夕食（★3.71）"
+            }
+          ]
+        },
+        {
+          "day": 10,
+          "date": "2027-03-02",
+          "stay": 11500,
+          "travelBase": 5400,
+          "travelActualAdd": 0,
+          "fun": 12000,
+          "hotelUrl": "https://www.wathotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 0,
+          "totalAllLegs": 5400,
+          "dow": "火",
+          "region": "白川郷・高山",
+          "routeJp": "金沢 → 雪の世界遺産「白川郷」合掌造り → 飛騨高山・A5飛騨牛焼肉",
+          "routeEn": "予約制高速バスで雪景色の白川郷展望台＆集落を巡り夕方に飛騨高山へ。夜は丸明でA5飛騨牛！",
+          "hotel": "ワットホテル＆スパ飛騨高山（高山にAPA未展開のため駅近大浴場付）",
+          "legs": [
+            "金沢駅 → 白川郷（濃飛/北鉄高速バス ¥2,600 • JR以外）",
+            "白川郷 → 高山濃飛バスセンター（¥2,800 • JR以外）"
+          ],
+          "tip": "金沢〜白川郷〜高山バスは全席予約制（1ヶ月前予約・白川郷BTに荷物預け可）。※高山市内にはAPAホテルがないため、駅近・天然温泉付のワットホテルを拠点に設定。夕食は飛騨牛丸明（★3.69）。",
+          "timeSlots": [
+            {
+              "id": "f10_1",
+              "timeFrom": "08:40",
+              "timeTo": "10:05",
+              "locFrom": "金沢駅前",
+              "locTo": "白川郷",
+              "category": "travel",
+              "desc": "予約制高速バスで世界遺産・白川郷へ（バスターミナルに荷物ロッカー有）"
+            },
+            {
+              "id": "f10_2",
+              "timeFrom": "10:15",
+              "timeTo": "13:50",
+              "locFrom": "荻町合掌集落",
+              "locTo": "城山展望台",
+              "category": "sightseeing",
+              "desc": "雪化粧の合掌造り集落＆城山展望台絶景と囲炉裏グルメランチ（★3.52）"
+            },
+            {
+              "id": "f10_3",
+              "timeFrom": "14:00",
+              "timeTo": "15:00",
+              "locFrom": "白川郷",
+              "locTo": "高山駅前",
+              "category": "travel",
+              "desc": "濃飛バスで飛騨高山へ移動し、ワットホテル＆スパ飛騨高山チェックイン"
+            },
+            {
+              "id": "f10_4",
+              "timeFrom": "17:30",
+              "timeTo": "19:45",
+              "locFrom": "高山駅東口",
+              "locTo": "飛騨牛 丸明",
+              "category": "meal",
+              "desc": "飛騨牛専門店「丸明 飛騨高山店」（★3.69）でA5飛騨牛焼肉＆朴葉味噌ディナー"
+            }
+          ]
+        },
+        {
+          "day": 11,
+          "date": "2027-03-03",
+          "stay": 11500,
+          "travelBase": 4400,
+          "travelActualAdd": 0,
+          "fun": 11800,
+          "hotelUrl": "https://www.wathotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 0,
+          "totalAllLegs": 4400,
+          "dow": "水",
+          "region": "飛騨高山・新穂高",
+          "routeJp": "飛騨高山 ↔ 新穂高ロープウェイ（標高2,156m冬の北アルプス雪景色）＆古い町並",
+          "routeEn": "濃飛バスで日本唯一の2階建て新穂高ロープウェイへ！山頂の雪の回廊と夕方のさんまち通り・高山ラーメン",
+          "hotel": "ワットホテル＆スパ飛騨高山",
+          "legs": [
+            "高山 ↔ 平湯温泉 ↔ 新穂高ロープウェイ（濃飛バス2日フリー乗車券 ¥4,400 • JR以外）"
+          ],
+          "tip": "新穂高ロープウェイ往復（¥3,800は食遊予算に含む）は標高2,156mの西穂高口雪の回廊が圧巻。15:30頃に高山へ戻り古い町並＆麺屋しらかわ（★3.74）。",
+          "timeSlots": [
+            {
+              "id": "f11_1",
+              "timeFrom": "08:40",
+              "timeTo": "10:25",
+              "locFrom": "高山濃飛バス",
+              "locTo": "新穂高温泉駅",
+              "category": "travel",
+              "desc": "濃飛バスで平湯温泉経由・新穂高ロープウェイへ（2日フリー券利用）"
+            },
+            {
+              "id": "f11_2",
+              "timeFrom": "10:30",
+              "timeTo": "13:30",
+              "locFrom": "しらかば平",
+              "locTo": "西穂高口展望台",
+              "category": "sightseeing",
+              "desc": "2階建てゴンドラで標高2,156mへ！白銀の笠ヶ岳・穂高連峰と雪の回廊散策"
+            },
+            {
+              "id": "f11_3",
+              "timeFrom": "15:15",
+              "timeTo": "19:30",
+              "locFrom": "さんまち通り",
+              "locTo": "麺屋しらかわ",
+              "category": "meal",
+              "desc": "高山に戻り古い町並散策・地酒試飲と「麺屋しらかわ」（★3.74）高山ラーメン"
+            }
+          ]
+        },
+        {
+          "day": 12,
+          "date": "2027-03-04",
+          "stay": 9000,
+          "travelBase": 11720,
+          "travelActualAdd": 0,
+          "fun": 9500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 7320,
+          "totalAllLegs": 11720,
+          "dow": "木",
+          "region": "松本・高崎（群馬）",
+          "routeJp": "高山朝市 → 高速バスで国宝松本城＆手打ち蕎麦「野麦」→ 高崎アパホテル",
+          "routeEn": "安房トンネル直通の横断山岳バスで松本へ！雪アルプス背景の松本城・そば名店「野麦」後、高崎APAへ",
+          "hotel": "アパホテル〈高崎駅前〉",
+          "legs": [
+            "高山 → 松本バスターミナル（アルピコ/濃飛バス ¥4,400 • JR以外）",
+            "松本 → 長野（JR特急しなの ¥2,370）",
+            "長野 → 高崎（北陸新幹線 ¥4,950）"
+          ],
+          "tip": "松本ランチは百名店級の手打ちそば「野麦」（★3.72 • 売切れ注意で早め推奨）。アパホテル高崎駅前は駅直結＆天然温泉大浴場付で翌日草津への完璧な拠点。",
+          "timeSlots": [
+            {
+              "id": "f12_1",
+              "timeFrom": "07:40",
+              "timeTo": "10:15",
+              "locFrom": "宮川朝市",
+              "locTo": "松本駅",
+              "category": "travel",
+              "desc": "高山・宮川朝市散策後、安房トンネル直通の特急バスで松本バスターミナルへ"
+            },
+            {
+              "id": "f12_2",
+              "timeFrom": "10:30",
+              "timeTo": "14:45",
+              "locFrom": "国宝松本城",
+              "locTo": "野麦（手打ち蕎麦）",
+              "category": "meal",
+              "desc": "松本駅コインロッカー利用後、雪アルプス背景の松本城＆名店「御そば打処 野麦（★3.72）」ランチ"
+            },
+            {
+              "id": "f12_3",
+              "timeFrom": "15:10",
+              "timeTo": "18:05",
+              "locFrom": "JR松本駅",
+              "locTo": "アパ高崎駅前",
+              "category": "travel",
+              "desc": "JR特急しなの＋北陸新幹線で高崎へ移動しアパホテル高崎駅前泊（登利平 鳥めし等 ★3.54）"
+            }
+          ]
+        },
+        {
+          "day": 13,
+          "date": "2027-03-05",
+          "stay": 9000,
+          "travelBase": 4020,
+          "travelActualAdd": 0,
+          "fun": 10500,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 2460,
+          "totalAllLegs": 4020,
+          "dow": "金",
+          "region": "群馬・草津温泉",
+          "routeJp": "高崎 ↔ 雪の草津温泉日帰り（湯畑の湯けむり・湯もみ・西の河原露天＆三国家そば）",
+          "routeEn": "JR吾妻線＋JRバス関東で日本三名泉・草津へ！雪の中の湯畑、湯もみショー、石臼挽蕎麦「三国家」を満喫",
+          "hotel": "アパホテル〈高崎駅前〉",
+          "legs": [
+            "高崎 ↔ 長野原草津口（JR吾妻線 往復 ¥2,460）",
+            "長野原草津口 ↔ 草津温泉バスターミナル（JRバス関東 往復 ¥1,560 • JR以外）"
+          ],
+          "tip": "ランチは湯畑すぐ「石臼挽蕎麦 三国家」（★3.49）、おやつに松むら饅頭＆温泉卵（★3.58）。雪見の西の河原露天風呂入浴後に高崎アパへ帰着。",
+          "timeSlots": [
+            {
+              "id": "f13_1",
+              "timeFrom": "08:20",
+              "timeTo": "10:25",
+              "locFrom": "JR高崎駅",
+              "locTo": "草津温泉",
+              "category": "travel",
+              "desc": "JR吾妻線〜長野原草津口駅乗換・JRバスで雪の草津温泉へ"
+            },
+            {
+              "id": "f13_2",
+              "timeFrom": "10:35",
+              "timeTo": "13:30",
+              "locFrom": "草津 湯畑",
+              "locTo": "三国家そば",
+              "category": "meal",
+              "desc": "湯畑散策＆熱乃湯湯もみ見学、「石臼挽蕎麦 三国家」（★3.49）ランチと湯畑温泉卵"
+            },
+            {
+              "id": "f13_3",
+              "timeFrom": "13:45",
+              "timeTo": "16:30",
+              "locFrom": "西の河原露天",
+              "locTo": "高崎駅",
+              "category": "sightseeing",
+              "desc": "開放感抜群の西の河原雪見露天風呂を堪能し夕方の列車・バスで高崎へ"
+            }
+          ]
+        },
+        {
+          "day": 14,
+          "date": "2027-03-06",
+          "stay": 15500,
+          "travelBase": 5500,
+          "travelActualAdd": 0,
+          "fun": 12000,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 4990,
+          "totalAllLegs": 5500,
+          "dow": "土",
+          "region": "東京",
+          "routeJp": "高崎 → 上越/北陸新幹線で東京帰着：明治神宮・原宿・表参道＆中目黒",
+          "routeEn": "新幹線50分で東京へ帰着！明治神宮の参道散歩から原宿・表参道・中目黒で都市型東京ステイ",
+          "hotel": "アパホテル＆リゾート〈西新宿五丁目駅タワー〉",
+          "legs": [
+            "高崎 → 東京（上越/北陸新幹線 ¥4,990）",
+            "山手線・都営大江戸線等（¥510）"
+          ],
+          "tip": "西新宿五丁目駅タワーのAPAは大江戸線徒歩1分・露天風呂付大浴場完備。夕食は原宿とんかつまい泉（★3.68）または新宿風雲児（★3.86）。",
+          "timeSlots": [
+            {
+              "id": "f14_1",
+              "timeFrom": "09:15",
+              "timeTo": "10:10",
+              "locFrom": "JR高崎駅",
+              "locTo": "西新宿五丁目APA",
+              "category": "travel",
+              "desc": "新幹線で東京着、大江戸線でアパホテル西新宿五丁目駅タワーへ荷物預け"
+            },
+            {
+              "id": "f14_2",
+              "timeFrom": "11:30",
+              "timeTo": "16:30",
+              "locFrom": "明治神宮",
+              "locTo": "表参道",
+              "category": "sightseeing",
+              "desc": "明治神宮参拝・代々木公園・表参道ショッピング＆とんかつまい泉青山（★3.68）"
+            },
+            {
+              "id": "f14_3",
+              "timeFrom": "17:00",
+              "timeTo": "20:00",
+              "locFrom": "中目黒・渋谷",
+              "locTo": "新宿駅",
+              "category": "meal",
+              "desc": "中目黒〜渋谷の夜散歩＆新宿の名店「風雲児」（★3.86）濃厚つけ麺"
+            }
+          ]
+        },
+        {
+          "day": 15,
+          "date": "2027-03-07",
+          "stay": 15500,
+          "travelBase": 900,
+          "travelActualAdd": 0,
+          "fun": 15000,
+          "hotelUrl": "https://www3.apahotel.com/",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 300,
+          "totalAllLegs": 900,
+          "dow": "日",
+          "region": "東京",
+          "routeJp": "東京5日目(日)：豊洲市場寿司・築地場外・銀座＆秋葉原ショッピング",
+          "routeEn": "朝の豊洲市場でおまかせ寿司（★3.78）、銀座歩行者天国＆秋葉原、皇居東御苑の冬花散歩",
+          "hotel": "アパホテル＆リゾート〈西新宿五丁目駅タワー〉",
+          "legs": [
+            "都営・東京メトロ・ゆりかもめ移動（¥900）"
+          ],
+          "tip": "日曜午後の銀座中央通りは歩行者天国！豊洲市場（大和寿司・寿司大 ★3.78）で早朝グルメ、午後は銀座〜秋葉原を回遊。",
+          "timeSlots": [
+            {
+              "id": "f15_1",
+              "timeFrom": "07:30",
+              "timeTo": "10:15",
+              "locFrom": "新宿",
+              "locTo": "豊洲・築地",
+              "category": "meal",
+              "desc": "豊洲市場・築地場外で贅沢モーニング江戸前寿司（★3.78）"
+            },
+            {
+              "id": "f15_2",
+              "timeFrom": "11:00",
+              "timeTo": "14:30",
+              "locFrom": "皇居東御苑",
+              "locTo": "銀座歩行者天国",
+              "category": "sightseeing",
+              "desc": "皇居東御苑の冬花散策後、日曜の銀座中央通り歩行者天国を散歩"
+            },
+            {
+              "id": "f15_3",
+              "timeFrom": "15:00",
+              "timeTo": "19:30",
+              "locFrom": "秋葉原",
+              "locTo": "東京駅・銀座",
+              "category": "shopping",
+              "desc": "秋葉原＆東京駅周辺でショッピング、最終夜ラーメン・銀座八五（★3.86）等"
+            }
+          ]
+        },
+        {
+          "day": 16,
+          "date": "2027-03-08",
+          "stay": 0,
+          "travelBase": 48070,
+          "travelActualAdd": 0,
+          "fun": 8000,
+          "hotelUrl": "",
+          "passCovered": false,
+          "needsAttention": false,
+          "jrOnly": 3070,
+          "totalAllLegs": 3070,
+          "dow": "月",
+          "region": "東京",
+          "routeJp": "東京最終日：新宿・東京駅お土産購入 → 羽田 / 成田空港 出発帰国",
+          "routeEn": "10時チェックアウト後、東京駅構内で最後の土産購入をして空港特急で帰国便へ",
+          "hotel": "帰国・出発日（東京空港）",
+          "legs": [
+            "東京・新宿 → 成田エクスプレス / 羽田空港（¥3,070 ＋ 帰国便 ¥45,000目安）"
+          ],
+          "tip": "タブ5検証：JR以外（富士急・伊豆急・濃飛/アルピコバス）を多く活用する周遊のため、全国JRパス(¥80,000)より「区間都度払い＋北陸片道きっぷ」が3万円以上お得！",
+          "timeSlots": [
+            {
+              "id": "f16_1",
+              "timeFrom": "09:30",
+              "timeTo": "11:45",
+              "locFrom": "西新宿APA",
+              "locTo": "東京駅",
+              "category": "shopping",
+              "desc": "チェックアウト後、東京駅ギフトキヨスク等でお土産最終購入"
+            },
+            {
+              "id": "f16_2",
+              "timeFrom": "12:15",
+              "timeTo": "14:00",
+              "locFrom": "東京駅",
+              "locTo": "羽田/成田空港",
+              "category": "travel",
+              "desc": "空港アクセス特急で空港へ移動・チェックイン後帰国"
+            }
+          ]
+        }
+      ],
+      "hotels": [
+        {
+          "order": 1,
+          "nights": 3,
+          "perNightJpy": 15500,
+          "totalJpy": 46500,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 0,
+          "name": "アパホテル＆リゾート〈新宿歌舞伎町タワー〉",
+          "region": "東京",
+          "checkIn": "2027-02-21",
+          "checkOut": "2027-02-24",
+          "access": "JR新宿駅・西武新宿駅至近・大浴場完備",
+          "highlights": "バスタ新宿・特急富士回遊乗り場へ徒歩圏内！最上階大浴場付で東京観光・河口湖日帰りに最適。",
+          "bookingNote": ""
+        },
+        {
+          "order": 2,
+          "nights": 2,
+          "perNightJpy": 9200,
+          "totalJpy": 18400,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 3,
+          "name": "アパホテル〈静岡駅北〉",
+          "region": "静岡",
+          "checkIn": "2027-02-24",
+          "checkOut": "2027-02-26",
+          "access": "JR静岡駅 北口徒歩5分",
+          "highlights": "富士川SAスタバ（JR富士川駅28分）＆静岡おでん青葉横丁、翌日の京都新幹線移動に抜群。",
+          "bookingNote": ""
+        },
+        {
+          "order": 3,
+          "nights": 3,
+          "perNightJpy": 13500,
+          "totalJpy": 40500,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 5,
+          "name": "アパホテル〈京都駅前〉",
+          "region": "京都",
+          "checkIn": "2027-02-26",
+          "checkOut": "2027-03-01",
+          "access": "JR京都駅 中央口より徒歩3分",
+          "highlights": "週末の清水・北野天満宮梅苑・嵐山＆月曜朝サンダーバード金沢行きに最適な駅正面アパ。",
+          "bookingNote": ""
+        },
+        {
+          "order": 4,
+          "nights": 1,
+          "perNightJpy": 9500,
+          "totalJpy": 9500,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 8,
+          "name": "アパホテル〈金沢駅前〉",
+          "region": "金沢",
+          "checkIn": "2027-03-01",
+          "checkOut": "2027-03-02",
+          "access": "JR金沢駅 金沢港口徒歩1分・天然温泉大浴場",
+          "highlights": "APA創業の地・金沢の駅直近ホテル！天然温泉大浴場＆白川郷バス停目の前。",
+          "bookingNote": ""
+        },
+        {
+          "order": 5,
+          "nights": 2,
+          "perNightJpy": 11500,
+          "totalJpy": 23000,
+          "url": "https://www.wathotel.com/",
+          "luxury": false,
+          "startDayOffset": 9,
+          "name": "ワットホテル＆スパ飛騨高山（高山にAPA未展開のため駅近同格宿）",
+          "region": "飛騨高山",
+          "checkIn": "2027-03-02",
+          "checkOut": "2027-03-04",
+          "access": "JR高山駅・濃飛バスセンター徒歩7分・屋上貸切/大浴場天然温泉",
+          "highlights": "高山市内にAPA店舗がないため選定した駅近・天然温泉完備の同価格帯モダンホテル。",
+          "bookingNote": ""
+        },
+        {
+          "order": 6,
+          "nights": 2,
+          "perNightJpy": 9000,
+          "totalJpy": 18000,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 11,
+          "name": "アパホテル〈高崎駅前〉",
+          "region": "群馬・高崎",
+          "checkIn": "2027-03-04",
+          "checkOut": "2027-03-06",
+          "access": "JR高崎駅 西口直結・天然温泉大浴場完備",
+          "highlights": "高崎駅ペデストリアンデッキ直結＆大浴場付。翌朝の草津温泉日帰りに最高。",
+          "bookingNote": ""
+        },
+        {
+          "order": 7,
+          "nights": 2,
+          "perNightJpy": 15500,
+          "totalJpy": 31000,
+          "url": "https://www3.apahotel.com/",
+          "luxury": false,
+          "startDayOffset": 13,
+          "name": "アパホテル＆リゾート〈西新宿五丁目駅タワー〉",
+          "region": "東京",
+          "checkIn": "2027-03-06",
+          "checkOut": "2027-03-08",
+          "access": "都営大江戸線 西新宿五丁目駅 徒歩1分・大浴場/露天完備",
+          "highlights": "最終2泊は露天風呂・大浴場完備の大型アパタワーで東京ショッピングを締めくくり。",
+          "bookingNote": ""
+        }
+      ],
+      "food": [
+        {
+          "id": 1,
+          "region": "東京",
+          "dish": "江戸前寿司・豊洲市場おまかせ寿司",
+          "place": "寿司大・大和寿司（豊洲市場）",
+          "url": "https://www.toyosu-market.or.jp/en/",
+          "tabelogScore": "★ 3.78",
+          "tabelogUrl": "https://www.toyosu-market.or.jp/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅チカ：ゆりかもめ「市場前駅」徒歩2分",
+          "sourceTag": "厳選必食 (東京)",
+          "note": "豊洲市場の新鮮な本マグロ・ウニ・穴子を味わう江戸前寿司の王道。",
+          "tried": false
+        },
+        {
+          "id": 2,
+          "region": "東京",
+          "dish": "浅草 老舗うなぎ蒲焼・ひつまぶし",
+          "place": "うなぎ色川・初小川（浅草）",
+          "url": "https://www.gotokyo.org/en/spot/41/index.html",
+          "tabelogScore": "★ 3.72",
+          "tabelogUrl": "https://www.gotokyo.org/en/spot/41/index.html",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅チカ：東京メトロ「浅草駅」徒歩4分",
+          "sourceTag": "厳選必食 (東京)",
+          "note": "浅草雷門近くで味わう秘伝ダレの炭火焼うなぎ。",
+          "tried": false
+        },
+        {
+          "id": 3,
+          "region": "東京",
+          "dish": "特製トリュフ醤油ラーメン",
+          "place": "銀座 八五／新宿 風雲児",
+          "url": "https://www.gotokyo.org/en/story/guide/ramen-guide/index.html",
+          "tabelogScore": "★ 3.86",
+          "tabelogUrl": "https://www.gotokyo.org/en/story/guide/ramen-guide/index.html",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅チカ：東銀座駅・新宿駅 徒歩3分",
+          "sourceTag": "名店おすすめ (東京)",
+          "note": "ミシュラン掲載の黄金スープ中華そばや濃厚魚介豚骨つけ麺。",
+          "tried": false
+        },
+        {
+          "id": 4,
+          "region": "東京",
+          "dish": "低温熟成 とんかつ（特上ヒレ・ロース）",
+          "place": "とんかつ まい泉 青山本店／成蔵",
+          "url": "https://mai-sen.com/",
+          "tabelogScore": "★ 3.68",
+          "tabelogUrl": "https://mai-sen.com/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅チカ：表参道駅 徒歩3分",
+          "sourceTag": "名店おすすめ (東京)",
+          "note": "お箸で切れるほど柔らかい熟成豚のとんかつ。",
+          "tried": false
+        },
+        {
+          "id": 5,
+          "region": "箱根・富士山",
+          "dish": "山梨・河口湖名物 ほうとう不動（かぼちゃ味噌鉄鍋）",
+          "place": "ほうとう不動 河口湖駅前店／東恋路店",
+          "url": "https://www.houtou-fudou.jp/english.html",
+          "tabelogScore": "★ 3.57",
+          "tabelogUrl": "https://www.houtou-fudou.jp/english.html",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅前すぐ：富士急行「河口湖駅」目の前徒歩1分",
+          "sourceTag": "厳選必食 (河口湖)",
+          "note": "河口湖駅目の前！カボチャや山菜たっぷりの味噌仕立て鉄鍋ほうとう。",
+          "tried": false
+        },
+        {
+          "id": 6,
+          "region": "箱根・富士山",
+          "dish": "箱根湯本 直吉の湯葉丼（箱根銘水仕立て）",
+          "place": "湯葉丼 直吉（箱根湯本駅前通り）",
+          "url": "https://www.hakoneyumoto.com/",
+          "tabelogScore": "★ 3.59",
+          "tabelogUrl": "https://www.hakoneyumoto.com/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅チカ：箱根登山鉄道「箱根湯本駅」より徒歩3分",
+          "sourceTag": "厳選必食 (箱根)",
+          "note": "箱根の湧水で汲み上げた生湯葉をカツオ出汁と卵でとじた熱々土鍋。",
+          "tried": false
+        },
+        {
+          "id": 7,
+          "region": "箱根・富士山",
+          "dish": "箱根・大涌谷名物 黒たまご（温泉池茹で）",
+          "place": "大涌谷くろたまご館（箱根ロープウェイ大涌谷駅）",
+          "url": "https://owakudani.com/",
+          "tabelogScore": "★ 3.50",
+          "tabelogUrl": "https://owakudani.com/",
+          "transitLevel": "bus",
+          "transitText": "🟡 駅直結：箱根ロープウェイ「大涌谷駅」すぐ",
+          "sourceTag": "名物食べ歩き (箱根)",
+          "note": "1個食べると7年寿命が延びると伝わる、大涌谷の温泉池で茹でた黒たまご。",
+          "tried": false
+        },
+        {
+          "id": 8,
+          "region": "箱根・富士山",
+          "dish": "忍野八海 手打ち富士湧水そば＆抹茶甘味",
+          "place": "忍野八海 湧水手打ちそば処／河口湖畔カフェ",
+          "url": "https://fujisan.ne.jp/en/",
+          "tabelogScore": "★ 3.56",
+          "tabelogUrl": "https://fujisan.ne.jp/en/",
+          "transitLevel": "bus",
+          "transitText": "🟡 周遊バス：河口湖周遊バス・忍野八海バス停",
+          "sourceTag": "ご当地名物",
+          "note": "富士山の雪解け湧水で打ち上げる香り高い手打ちそば。",
+          "tried": false
+        },
+        {
+          "id": 9,
+          "region": "熱海・河津・静岡",
+          "dish": "熱海銀座おさかな食堂（海の幸海鮮丼・金目鯛）",
+          "place": "熱海銀座おさかな食堂",
+          "url": "https://www.osakana-atami.com/",
+          "tabelogScore": "★ 3.50",
+          "tabelogUrl": "https://www.osakana-atami.com/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅徒歩・バス：JR熱海駅から徒歩約12分または銀座バス停すぐ",
+          "sourceTag": "厳選必食 (熱海)",
+          "note": "相模湾の地魚・駿河湾しらす・伊豆名物の金目鯛がたっぷり盛られた大人気海鮮丼。",
+          "tried": false
+        },
+        {
+          "id": 10,
+          "region": "熱海・河津・静岡",
+          "dish": "河津名物 生わさび丼（かどや）",
+          "place": "わさび園 かどや（河津七滝）",
+          "url": "https://www.kawazu-onsen.com/eng/",
+          "tabelogScore": "★ 3.55",
+          "tabelogUrl": "https://www.kawazu-onsen.com/eng/",
+          "transitLevel": "bus",
+          "transitText": "🟡 バス・駅周辺：伊豆急「河津駅」から東海バス約20分（桜まつり会場屋台も充実）",
+          "sourceTag": "ご当地名物 (河津)",
+          "note": "天城の清流で育った本わさびを自分ですりおろし、鰹節ごはんにのせて味わう絶品丼。",
+          "tried": false
+        },
+        {
+          "id": 11,
+          "region": "熱海・河津・静岡",
+          "dish": "スターバックス EXPASA富士川上り/下り（富士山絶景テラス）",
+          "place": "スターバックスコーヒー EXPASA富士川（富士川楽座隣接）",
+          "url": "https://www.fujikawarakuza.co.jp/",
+          "tabelogScore": "★ 3.40",
+          "tabelogUrl": "https://www.fujikawarakuza.co.jp/",
+          "transitLevel": "bus",
+          "transitText": "🟡 駅＋バス/タクシー：JR富士川駅西口からバス「富士川楽座前」またはタクシー約5分",
+          "sourceTag": "富士山絶景カフェ",
+          "note": "冬の澄んだ朝7時〜9時台が最高！富士川と雪化粧の富士山を一望する特等席テラス。",
+          "tried": false
+        },
+        {
+          "id": 12,
+          "region": "熱海・河津・静岡",
+          "dish": "静岡おでん（青葉横丁・青葉おでん街 黒はんぺん）",
+          "place": "青葉おでん街・青葉横丁「三保屋」ほか（静岡駅徒歩圏）",
+          "url": "https://www.visit-shizuoka.com/en/",
+          "tabelogScore": "★ 3.56",
+          "tabelogUrl": "https://www.visit-shizuoka.com/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅チカ：JR静岡駅 北口より徒歩約10分",
+          "sourceTag": "厳選必食 (静岡)",
+          "note": "濃い口醤油と牛すじの真っ黒出汁が染みた黒はんぺん・牛すじに、だし粉と青海苔をかけて味わう静岡夜グルメ。",
+          "tried": false
+        },
+        {
+          "id": 13,
+          "region": "京都",
+          "dish": "嵐山・南禅寺 伝統湯豆腐会席",
+          "place": "湯豆腐 嵯峨野（嵐山）／南禅寺 順正",
+          "url": "https://www.tofu-junsei.co.jp/",
+          "tabelogScore": "★ 3.68",
+          "tabelogUrl": "https://www.tofu-junsei.co.jp/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅チカ：嵐電「嵐山駅」または地下鉄東西線「蹴上駅」徒歩6分",
+          "sourceTag": "厳選必食 (京都)",
+          "note": "名水で仕込んだなめらかな京豆腐を日本庭園を眺めながら味わう伝統料理。",
+          "tried": false
+        },
+        {
+          "id": 14,
+          "region": "京都",
+          "dish": "京のおばんざい御膳＆宇治抹茶パフェ",
+          "place": "錦市場（京のおばんざい）＆中村藤吉本店 京都駅店",
+          "url": "https://tokichi.jp/",
+          "tabelogScore": "★ 3.75",
+          "tabelogUrl": "https://tokichi.jp/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅直結：中村藤吉はJR京都駅伊勢丹3F直結・錦市場は四条駅徒歩3分",
+          "sourceTag": "厳選必食 (京都)",
+          "note": "400年の歴史ある錦市場の食べ歩きと、竹筒に入った濃厚宇治抹茶パフェ。",
+          "tried": false
+        },
+        {
+          "id": 15,
+          "region": "京都",
+          "dish": "名代とんかつ かつくら 三条本店（京野菜・すり胡麻ソース）",
+          "place": "名代とんかつ かつくら 三条本店／京都駅ザ・キューブ店",
+          "url": "https://www.katsukura.jp/",
+          "tabelogScore": "★ 3.64",
+          "tabelogUrl": "https://www.katsukura.jp/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅直結：JR京都駅ビル11Fまたは三条河原町",
+          "sourceTag": "名店おすすめ (京都)",
+          "note": "すりたての香ばしい胡麻と赤ワイン仕立ての濃厚ソース、白味噌汁が絶品。",
+          "tried": false
+        },
+        {
+          "id": 16,
+          "region": "京都",
+          "dish": "伏見稲荷 名物きつねうどん＆いなり寿司",
+          "place": "手打ちうどん けんどん屋／祢ざめ家（伏見稲荷大社門前）",
+          "url": "https://inari.jp/en/",
+          "tabelogScore": "★ 3.66",
+          "tabelogUrl": "https://inari.jp/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅前すぐ：JR稲荷駅・京阪伏見稲荷駅より徒歩2分",
+          "sourceTag": "厳選必食 (京都)",
+          "note": "千本鳥居の参拝前後に味わう、門前老舗のお稲荷さんと手打ちきつねうどん。",
+          "tried": false
+        },
+        {
+          "id": 17,
+          "region": "京都",
+          "dish": "祇園 ダックヌードル（合鴨フレンチラーメン）",
+          "place": "Gion Duck Noodles（祇園北側）",
+          "url": "https://kyoto.travel/en/",
+          "tabelogScore": "★ 3.70",
+          "tabelogUrl": "https://kyoto.travel/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅チカ：京阪「祇園四条駅」より徒歩4分",
+          "sourceTag": "名店おすすめ (京都)",
+          "note": "祇園の路地裏に佇む、紀州鴨の旨みを凝縮したフレンチ仕立ての鴨ラーメン。",
+          "tried": false
+        },
+        {
+          "id": 18,
+          "region": "金沢・加賀",
+          "dish": "近江町市場 海鮮丼（加能ガニ・のどぐろ・甘えび）",
+          "place": "近江町市場（山さん寿司・いきいき亭）",
+          "url": "https://ohmicho-ichiba.com/",
+          "tabelogScore": "★ 3.64",
+          "tabelogUrl": "https://ohmicho-ichiba.com/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅徒歩・バス：JR金沢駅から徒歩12分またはバス5分",
+          "sourceTag": "厳選必食 (金沢)",
+          "note": "金沢の台所・近江町市場で味わう冬のズワイガニとのどぐろ海鮮丼。",
+          "tried": false
+        },
+        {
+          "id": 19,
+          "region": "金沢・加賀",
+          "dish": "のどぐろ原始焼き・金沢おでん（車麩・カニ面）",
+          "place": "いたる本店／黒百合（金沢駅百番街）",
+          "url": "https://visitkanazawa.jp/en/",
+          "tabelogScore": "★ 3.71",
+          "tabelogUrl": "https://visitkanazawa.jp/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅直結：黒百合はJR金沢駅構内「あんと」直結",
+          "sourceTag": "厳選必食 (金沢)",
+          "note": "車麩やバイ貝、冬のカニ面など上品な出汁が染みた金沢おでん。",
+          "tried": false
+        },
+        {
+          "id": 20,
+          "region": "金沢・加賀",
+          "dish": "金沢名物 ハントンライス＆金沢カレー",
+          "place": "グリルオーツカ（片町）／ターバンカレー",
+          "url": "https://visitkanazawa.jp/en/",
+          "tabelogScore": "★ 3.59",
+          "tabelogUrl": "https://visitkanazawa.jp/en/",
+          "transitLevel": "bus",
+          "transitText": "🟡 周遊バス：香林坊バス停より徒歩5分",
+          "sourceTag": "ご当地名物 (金沢)",
+          "note": "ふわとろ卵に白身魚フライとタルタルソースを添えた洋食名物。",
+          "tried": false
+        },
+        {
+          "id": 21,
+          "region": "金沢・加賀",
+          "dish": "金箔ソフトクリーム・加賀棒茶パフェ",
+          "place": "箔一 東山店（ひがし茶屋街）",
+          "url": "https://kanazawa.hakuichi.co.jp/",
+          "tabelogScore": "★ 3.55",
+          "tabelogUrl": "https://kanazawa.hakuichi.co.jp/",
+          "transitLevel": "bus",
+          "transitText": "🟡 周遊バス：橋場町バス停（ひがし茶屋街）徒歩3分",
+          "sourceTag": "厳選必食 (金沢)",
+          "note": "金沢伝統の食用金箔をまるごと1枚まとった華やかなソフトクリーム。",
+          "tried": false
+        },
+        {
+          "id": 22,
+          "region": "高山・白川郷",
+          "dish": "飛騨牛 朴葉味噌焼き＆飛騨牛にぎり寿司",
+          "place": "飛騨牛 丸明 飛騨高山店／こって牛",
+          "url": "https://www.hidagyu-maruaki.co.jp/",
+          "tabelogScore": "★ 3.69",
+          "tabelogUrl": "https://www.hidagyu-maruaki.co.jp/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅チカ：JR高山駅 東口より徒歩5分",
+          "sourceTag": "厳選必食 (高山)",
+          "note": "香ばしい朴葉味噌と絡めるA5飛騨牛と、古い町並みの飛騨牛握り。",
+          "tried": false
+        },
+        {
+          "id": 23,
+          "region": "高山・白川郷",
+          "dish": "高山ラーメン（飛騨中華そば）",
+          "place": "麺屋しらかわ／まさごそば",
+          "url": "https://www.hida.jp/english/",
+          "tabelogScore": "★ 3.74",
+          "tabelogUrl": "https://www.hida.jp/english/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅チカ：JR高山駅より徒歩8分",
+          "sourceTag": "厳選必食 (高山)",
+          "note": "鰹と醤油の深い旨みが広がる飛騨高山伝統の中華そば。",
+          "tried": false
+        },
+        {
+          "id": 24,
+          "region": "高山・白川郷",
+          "dish": "白川郷 石豆腐・五平餅・飛騨牛朴葉定食",
+          "place": "いろり（白川郷合掌造り集落）",
+          "url": "https://shirakawa-go.gr.jp/en/",
+          "tabelogScore": "★ 3.52",
+          "tabelogUrl": "https://shirakawa-go.gr.jp/en/",
+          "transitLevel": "bus",
+          "transitText": "🟡 バス停すぐ：白川郷バスターミナル徒歩3分",
+          "sourceTag": "厳選必食 (白川郷)",
+          "note": "合掌造りの囲炉裏端で味わう堅豆腐と香ばしい五平餅。",
+          "tried": false
+        },
+        {
+          "id": 25,
+          "region": "高山・白川郷",
+          "dish": "飛騨高山 みたらし団子（香ばしい醤油焼き）",
+          "place": "陣屋前・宮川朝市のだんご屋台",
+          "url": "https://www.asaichi.net/",
+          "tabelogScore": "★ 3.50",
+          "tabelogUrl": "https://www.asaichi.net/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅徒歩圏：JR高山駅より徒歩10分",
+          "sourceTag": "食べ歩き (高山)",
+          "note": "砂糖を使わず香ばしい醤油ダレで焼き上げる飛騨高山の名物団子。",
+          "tried": false
+        },
+        {
+          "id": 26,
+          "region": "松本・信州",
+          "dish": "信州松本 名店手打ち蕎麦「御そば打処 野麦」",
+          "place": "御そば打処 野麦（松本）",
+          "url": "https://matsumoto-experience.com/",
+          "tabelogScore": "★ 3.72",
+          "tabelogUrl": "https://matsumoto-experience.com/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅・城徒歩圏：松本城から徒歩約6分・JR松本駅から徒歩約15分",
+          "sourceTag": "百名店級 (松本)",
+          "note": "香り高い九割手打ちそばの名店。売切れ次第終了のため昼前〜ランチ早めの訪問が安心。",
+          "tried": false
+        },
+        {
+          "id": 27,
+          "region": "草津温泉・高崎",
+          "dish": "草津温泉 石臼挽蕎麦「三国家」（都汁・三國そば）",
+          "place": "石臼挽蕎麦 三国家（湯畑から徒歩2分）",
+          "url": "https://www.kusatsu-onsen.ne.jp/guide/en/",
+          "tabelogScore": "★ 3.49",
+          "tabelogUrl": "https://www.kusatsu-onsen.ne.jp/guide/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 湯畑すぐ：草津湯畑から徒歩2分・草津温泉バスターミナルから徒歩5分",
+          "sourceTag": "厳選必食 (草津)",
+          "note": "店内の石臼で挽く自家製蕎麦を、特製の濃厚な鴨汁・豚肉都汁などでいただく草津の行列店。",
+          "tried": false
+        },
+        {
+          "id": 28,
+          "region": "草津温泉・高崎",
+          "dish": "草津湯畑 温泉たまご＆松むら饅頭（出来立て黒糖まんじゅう）",
+          "place": "松むら饅頭＆湯畑前「頼朝」（温泉たまご）",
+          "url": "https://www.kusatsu-onsen.ne.jp/guide/en/",
+          "tabelogScore": "★ 3.58",
+          "tabelogUrl": "https://www.kusatsu-onsen.ne.jp/guide/en/",
+          "transitLevel": "easy",
+          "transitText": "🟢 湯畑直結：湯畑の足湯すぐ横・西の河原通り入口",
+          "sourceTag": "食べ歩き必食 (草津)",
+          "note": "雪見散策のお供に欠かせない、湯畑名物のトロトロ温泉玉子と蒸したて黒糖薄皮まんじゅう。",
+          "tried": false
+        },
+        {
+          "id": 29,
+          "region": "草津温泉・高崎",
+          "dish": "高崎駅「だるま弁当」・登利平「上州御用鳥めし」＆上州牛",
+          "place": "登利平 高崎モントレー店＆高崎弁当だるま弁当（駅直結）",
+          "url": "https://www.torihei.co.jp/",
+          "tabelogScore": "★ 3.54",
+          "tabelogUrl": "https://www.torihei.co.jp/",
+          "transitLevel": "easy",
+          "transitText": "🟢 駅直結：JR高崎駅ビル「高崎モントレー」＆駅構内売店",
+          "sourceTag": "群馬ソウルフード",
+          "note": "群馬県民のソウルフード「登利平の鳥めし」や、記念に持ち帰れる赤い縁起物「だるま弁当」。",
+          "tried": false
+        }
+      ],
+      "access": [
+        {
+          "id": "acc_p_1",
+          "area": "東京・首都圏",
+          "day": "東京滞在日",
+          "place": "東京メトロ・都営地下鉄 公式路線図PDF（全13路線・駅番号付）",
+          "url": "https://www.tokyometro.jp/station/pdf/202305/202305_number_en.pdf",
+          "note": "東京都内の移動は地下鉄が最も便利！駅ナンバリング付きの公式地下鉄路線図PDFです。",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_2",
+          "area": "東京・首都圏",
+          "day": "空港・JR首都圏",
+          "place": "JR東日本 首都圏主要鉄道路線図PDF（山手線・成田エクスプレス・新幹線）",
+          "url": "https://www.jreast.co.jp/en/multi/downloads/",
+          "note": "山手線・中央線・空港アクセス特急と新幹線の乗換が一目でわかるJR東日本公式路線図。",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_3",
+          "area": "箱根・富士山エリア",
+          "day": "箱根・河口湖",
+          "place": "箱根登山鉄道・ロープウェイ＆JR東海エリア公式鉄道路線図PDF",
+          "url": "https://global.jr-central.co.jp/en/info/railwaymap/_pdf/railwaymap.pdf",
+          "note": "小田原・箱根登山電車・富士山周辺エリアの公式鉄道路線図PDF。",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_4",
+          "area": "熱海・河津・静岡エリア",
+          "day": "熱海・河津桜移動",
+          "place": "伊豆急行線・JR特急「踊り子」公式案内（熱海〜伊東〜河津）",
+          "url": "https://www.izukyu.co.jp/global_data/english/index.html",
+          "note": "2月下旬の河津桜ピーク時は特急踊り子指定席を1ヶ月前に確保推奨（または熱海〜伊東経由で伊豆急行普通列車）。",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_5",
+          "area": "熱海・河津・静岡エリア",
+          "day": "富士川SA・静岡移動",
+          "place": "富士川楽座・EXPASA富士川 公共交通アクセス案内（JR富士川駅からバス・徒歩・タクシー）",
+          "url": "https://www.fujikawarakuza.co.jp/access/",
+          "note": "JR富士川駅西口からバス「富士川楽座前」またはタクシー約5分（¥1,200前後）・徒歩約25分。朝の晴天時が富士山絶景。",
+          "isExisting": false
+        },
+        {
+          "id": "acc_p_6",
+          "area": "京都・大阪・神戸・広島",
+          "day": "京都滞在日",
+          "place": "京都市バス・地下鉄 公式路線図「バス・鉄道なび」PDF",
+          "url": "https://www.city.kyoto.lg.jp/kotsu/cmsfiles/contents/0000019/19770/ENG202503(map)WEB.pdf",
+          "note": "清水寺・金閣寺・嵐山・祇園への地下鉄＆市バス乗換が一目でわかる京都市交通局公式PDF。",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_7",
+          "area": "京都・大阪・神戸・広島",
+          "day": "大阪滞在日",
+          "place": "Osaka Metro（大阪メトロ）公式路線図PDF",
+          "url": "https://subway.osakametro.co.jp/img/osakametro_rosenzu_20191001.pdf",
+          "note": "新大阪・梅田・なんば・天王寺・大阪城を結ぶOsaka Metro全線の公式路線図PDF。",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_8",
+          "area": "京都・大阪・神戸・広島",
+          "day": "神戸滞在日",
+          "place": "神戸シティループ＆ポートループバス 公式路線図マップPDF",
+          "url": "https://kobeloop.bus-japan.net/zh-Hant/images/home/map.pdf",
+          "note": "新神戸駅・北野異人館・三宮・南京町・メリケンパークを巡る公式マップPDF。",
+          "isExisting": false
+        },
+        {
+          "id": "acc_p_9",
+          "area": "京都・大阪・神戸・広島",
+          "day": "広島・宮島滞在日",
+          "place": "広島観光ループバス「めいぷる〜ぷ」公式路線図PDF",
+          "url": "http://www.chugoku-jrbus.co.jp/sightseeing/files/20251024meipurupu_map_foreigner.pdf",
+          "note": "広島駅から原爆ドーム・平和記念公園を巡るJRバス公式PDF（JRパス提示で無料）。",
+          "isExisting": false
+        },
+        {
+          "id": "acc_p_10",
+          "area": "金沢・北陸",
+          "day": "金沢滞在日",
+          "place": "金沢周遊バス・ふらっとバス 公式1日フリー乗車券 路線図PDF",
+          "url": "https://www.hokutetsu.co.jp/_wp/wp-content/uploads/2026/01/ONE-DAY-PASS-Kanazawa-Bus-Route-Map-February-2026.pdf",
+          "note": "兼六園・近江町市場・ひがし茶屋街・21世紀美術館を巡る金沢周遊バス公式路線図PDF。",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_11",
+          "area": "金沢・北陸",
+          "day": "白川郷・五箇山・高山",
+          "place": "金沢駅 ↔ 五箇山（相倉合掌造り）・白川郷 ↔ 高山濃飛バスセンター 公式案内PDF",
+          "url": "https://visitkanazawa.jp/lsc/upfile/pamphlet/0000/0014/14_201_file.pdf",
+          "note": "金沢から五箇山・白川郷・飛騨高山への高速バス・加賀温泉郷アクセス案内PDF。",
+          "isExisting": false
+        },
+        {
+          "id": "acc_p_12",
+          "area": "飛騨・信州・群馬",
+          "day": "新穂高・松本連絡バス",
+          "place": "濃飛バス＆アルピコ交通 公式路線・時刻表（高山〜新穂高ロープウェイ〜松本）",
+          "url": "https://www.nouhibus.co.jp/english/",
+          "note": "高山濃飛バスセンターから新穂高ロープウェイ（2日フリー¥4,400）や、安房トンネル経由・松本直通バス（¥4,400）が便利。",
+          "isExisting": true
+        },
+        {
+          "id": "acc_p_13",
+          "area": "飛騨・信州・群馬",
+          "day": "高崎〜草津温泉連絡",
+          "place": "JR吾妻線＋JRバス関東 公式案内（高崎〜長野原草津口〜草津温泉バスターミナル）",
+          "url": "https://www.kusatsu-onsen.ne.jp/guide/en/access/",
+          "note": "高崎からJR吾妻線で長野原草津口駅へ（¥1,230）、駅前のJRバス接続で草津温泉中心部へ約25分（¥780）。",
+          "isExisting": true
+        }
+      ],
+      "guides": [
+        {
+          "id": "gd_p_1",
+          "area": "東京",
+          "day": "東京東エリア",
+          "location": "浅草寺・隅田公園・上野恩賜公園 散策ガイド",
+          "url": "https://www.japan-guide.com/e/e3004.html",
+          "note": "雷門・仲見世通りから隅田川テラス、上野公園を巡る王道ガイド。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_2",
+          "area": "東京",
+          "day": "東京西エリア",
+          "location": "明治神宮・新宿御苑・渋谷 散策ガイド",
+          "url": "https://www.japan-guide.com/e/e3007.html",
+          "note": "都心の杜・明治神宮と新宿御苑の庭園、渋谷パノラマ夜景ガイド。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_3",
+          "area": "東京",
+          "day": "東京駅・湾岸",
+          "location": "皇居東御苑・銀座・お台場ベイエリアガイド",
+          "url": "https://www.japan-guide.com/e/e2164.html",
+          "note": "丸の内・皇居東御苑の歴史散策から銀座ショッピング、豊洲・お台場まで。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_4",
+          "area": "箱根・富士山",
+          "day": "富士山・河口湖",
+          "location": "河口湖・富士山パノラマロープウェイ＆富士五湖絶景ガイド",
+          "url": "https://www.japan-guide.com/e/e6900.html",
+          "note": "逆さ富士が美しい河口湖北岸・大石公園と周辺観光スポット。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_5",
+          "area": "箱根・富士山",
+          "day": "箱根ゴールデンコース",
+          "location": "箱根ゴールデンコース（大涌谷ロープウェイ・芦ノ湖海賊船・箱根神社）",
+          "url": "https://www.japan-guide.com/e/e5200.html",
+          "note": "登山電車・ロープウェイ・芦ノ湖海賊船を乗り継ぐ箱根の王道周遊コース。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_6",
+          "area": "熱海・河津桜",
+          "day": "熱海梅園・河津桜",
+          "location": "熱海梅園（梅まつり）＆河津桜まつり（2月下旬満開の早咲き桜並木）",
+          "url": "https://www.japan-guide.com/e/e6314.html",
+          "note": "河津川沿い約850本の濃いピンクの河津桜と、熱海梅園の早咲き〜遅咲き梅リレーを同日に満喫。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_7",
+          "area": "静岡・富士川",
+          "day": "富士川SA・日本平・三保松原",
+          "location": "富士川SAスタバ富士山絶景・日本平夢テラス＆三保松原 ガイド",
+          "url": "https://www.japan-guide.com/e/e6350.html",
+          "note": "朝7時台〜9時台が富士川の雲のない逆光少なめの富士山絶景ベストタイム。午後は三保松原と静岡おでん。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_8",
+          "area": "京都",
+          "day": "京都東山・伏見",
+          "location": "伏見稲荷大社・清水寺・東福寺（通天橋紅葉）＆祇園ガイド",
+          "url": "https://www.japan-guide.com/e/e2158.html",
+          "note": "東福寺の紅葉や清水の舞台から二年坂・産寧坂、祇園花見小路へ歩く王道コース。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_9",
+          "area": "京都",
+          "day": "京都嵐山・金閣寺",
+          "location": "嵐山・竹林の小径・天龍寺＆金閣寺（鹿苑寺）観光ガイド",
+          "url": "https://www.japan-guide.com/e/e3912.html",
+          "note": "渡月橋・天龍寺から竹林の小径、黄金に輝く金閣寺を巡るガイド。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_10",
+          "area": "金沢・加賀温泉",
+          "day": "金沢1日目",
+          "location": "日本三名園・兼六園（雪吊り）＆金沢城公園ガイド",
+          "url": "https://www.japan-guide.com/e/e2167.html",
+          "note": "冬の風物詩「雪吊り」と徽軫灯籠で名高い兼六園・金沢城の見どころ。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_11",
+          "area": "金沢・加賀温泉",
+          "day": "金沢2日目",
+          "location": "ひがし茶屋街・長町武家屋敷跡・近江町市場 町歩きガイド",
+          "url": "https://visitkanazawa.jp/en/trip-ideas/detail_251.html",
+          "note": "紅殻格子の美しい茶屋街と土塀が続く武家屋敷跡の散策コース。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_12",
+          "area": "金沢・加賀温泉",
+          "day": "加賀温泉郷",
+          "location": "加賀温泉郷（山中温泉・鶴仙渓＆山代温泉・古総湯）湯めぐりガイド",
+          "url": "https://www.japan-guide.com/e/e4275.html",
+          "note": "開湯1300年の歴史を誇る山中温泉・鶴仙渓の渓谷美と山代温泉。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_13",
+          "area": "白川郷・五箇山・高山",
+          "day": "五箇山・白川郷",
+          "location": "世界遺産・白川郷＆五箇山（相倉合掌造り集落）雪景色ガイド",
+          "url": "https://www.japan-guide.com/e/e5950.html",
+          "note": "合掌造り家屋が雪に包まれる五箇山・相倉集落と白川郷展望台の絶景。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_14",
+          "area": "白川郷・五箇山・高山",
+          "day": "飛騨高山",
+          "location": "飛騨高山 古い町並（さんまち通り）・高山陣屋ガイド",
+          "url": "https://www.japan-guide.com/e/e5900.html",
+          "note": "江戸時代の面影を残す城下町と、現存する代官所・高山陣屋の散策案内。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_15",
+          "area": "白川郷・五箇山・高山",
+          "day": "高山朝市・里山",
+          "location": "宮川朝市＆飛騨の里（合掌造り民家園）観光ガイド",
+          "url": "https://www.japan-guide.com/e/e5901.html",
+          "note": "宮川沿いの朝市食べ歩きと、雪化粧した飛騨の古民家が集まる飛騨の里。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_16",
+          "area": "新穂高・松本",
+          "day": "新穂高ロープウェイ・松本城",
+          "location": "新穂高ロープウェイ（標高2,156m西穂高口・雪の回廊）＆国宝松本城",
+          "url": "https://www.japan-guide.com/e/e5942.html",
+          "note": "日本唯一の2階建てゴンドラで標高2,156mへ！白銀の北アルプス大パノラマと黒漆塗りの国宝松本城。",
+          "isExisting": true
+        },
+        {
+          "id": "gd_p_17",
+          "area": "群馬・草津温泉",
+          "day": "草津温泉（湯畑・西の河原）",
+          "location": "草津温泉「湯畑」湯けむり散策・湯もみショー＆西の河原雪見露天風呂",
+          "url": "https://www.japan-guide.com/e/e7400.html",
+          "note": "冬の雪化粧と湯畑のモクモクと立ち上る湯けむりが幻想的な日本三名泉・草津温泉。",
+          "isExisting": true
+        }
+      ],
+      "prep": [
+        {
+          "id": "feb1",
+          "title": "1ヶ月前10時予約（1/21〜24）：特急富士回遊・特急踊り子指定席",
+          "sub": "2/23(祝)前後＆河津桜ピークのため早め手配必須"
+        },
+        {
+          "id": "feb2",
+          "title": "高速バス座席予約（金沢〜白川郷〜高山・高山〜松本）",
+          "sub": "濃飛バス・アルピコ交通は全席予約制（乗車1ヶ月前発売）"
+        },
+        {
+          "id": "feb3",
+          "title": "渋谷スカイ4週間前予約＆宅急便手配（新宿APA→京都APA）",
+          "sub": "Day 4朝に大荷物を京都へ送ると熱海梅園・河津・富士川移動が極めて快適"
+        },
+        {
+          "id": "p1",
+          "title": "Visit Japan Web 登録（入国審査・税関QR）",
+          "sub": "出発前にフライト・宿泊先情報を登録"
+        },
+        {
+          "id": "p2",
+          "title": "交通系ICカード（Suica / PASMO / ICOCA）準備",
+          "sub": "地下鉄・路線バス用に事前チャージ（モバイルSuicaも便利）"
+        },
+        {
+          "id": "p3",
+          "title": "宿泊ホテル・旅館のチェックイン時刻＆送迎予約確認",
+          "sub": "送迎バス利用時は宿泊3日前までに要連絡"
+        },
+        {
+          "id": "p4",
+          "title": "主要都市の公式地下鉄・バス路線図PDF（タブ7）を保存",
+          "sub": "スマホに公式路線図PDFを保存しておくと現地移動が快適"
+        }
+      ],
+      "weather": {}
+    },
+    "shoppingList": [],
+    "updatedAt": "2026-11-22T10:28:00.574Z",
+    "_activeLangHint": "en"
+  }
+}

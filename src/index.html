@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';">
+<title>Japan Master Trip & Budget Planner (EN ⇄ JP)</title>
+<link rel="stylesheet" href="styles/themes.css">
+<link rel="stylesheet" href="styles/base.css">
+</head>
+<body data-season="autumn">
+
+<div id="toastBox" class="toast-box" role="status" aria-live="polite"></div>
+
+<div id="confirmModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle" onclick="if(event.target===this)closeConfirmModal()">
+  <div class="modal-card">
+    <h3 id="confirmModalTitle">Confirm Action</h3>
+    <p id="confirmModalBody">Are you sure?</p>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="confirmModalCancel" onclick="closeConfirmModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" id="confirmModalOk">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save Preset Modal (Overwrite vs Save As New) -->
+<div id="savePresetModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="savePresetModalTitle" onclick="if(event.target===this)closeAllModals()">
+  <div class="modal-card">
+    <h3 id="savePresetModalTitle">💾 Save Trip Preset</h3>
+    <p id="savePresetModalDesc">Choose whether to update your existing saved preset or create a separate new preset.</p>
+    <div style="margin-bottom:12px;">
+      <label for="savePresetNameInput" id="lblSavePresetName" style="display:block;font-size:12px;font-weight:800;margin-bottom:5px;">Preset Description</label>
+      <input type="text" id="savePresetNameInput" class="search-input" style="width:100%;" oninput="updateSavePresetModalPreview()" placeholder="Enter trip description...">
+    </div>
+    <div style="margin-bottom:12px;background:var(--surface-alt);border:1px solid var(--border);border-radius:9px;padding:8px 11px;">
+      <div id="savePresetPreviewLabel" style="font-size:11px;font-weight:800;color:var(--ink-muted);margin-bottom:2px;">Formatted Preset Name (auto-tagged):</div>
+      <div id="savePresetPreviewVal" style="font-size:13px;font-weight:800;color:var(--indigo);word-break:break-word;"></div>
+    </div>
+    <div id="savePresetStatusNotice" class="preset-notice-box" style="display:none;"></div>
+    <div class="modal-actions" style="flex-wrap:wrap;">
+      <button type="button" class="btn" id="btnCancelSavePreset" onclick="closeAllModals()">Cancel</button>
+      <button type="button" class="btn" id="btnModalSaveAsNewPreset" onclick="confirmSaveAsNewPreset()">Save as New Preset</button>
+      <button type="button" class="btn btn-primary" id="btnModalOverwritePreset" onclick="confirmOverwritePreset()" style="display:none;">Overwrite</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create New Blank Trip Modal -->
+<div id="newTripModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="newTripModalTitle" onclick="if(event.target===this)closeAllModals()">
+  <div class="modal-card">
+    <h3 id="newTripModalTitle">➕ Create New Blank Japan Trip</h3>
+    <p id="newTripModalDesc">Start a fresh blank itinerary with customizable dates, cities, hotels, and budget tracker.</p>
+    <div style="display:grid;gap:11px;margin-bottom:16px;">
+      <div>
+        <label for="newTripTitleInput" id="lblNewTripName" style="display:block;font-size:12px;font-weight:800;margin-bottom:4px;">Trip Description</label>
+        <input type="text" id="newTripTitleInput" class="search-input" style="width:100%;" placeholder="e.g., Spring Hokkaido Explorer">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label for="newTripStartInput" id="lblNewTripStart" style="display:block;font-size:12px;font-weight:800;margin-bottom:4px;">Start Date</label>
+          <input type="date" id="newTripStartInput" class="search-input" style="width:100%;min-width:0;">
+        </div>
+        <div>
+          <label for="newTripDaysInput" id="lblNewTripDays" style="display:block;font-size:12px;font-weight:800;margin-bottom:4px;">Days (1–60)</label>
+          <input type="number" id="newTripDaysInput" class="search-input" style="width:100%;min-width:0;" min="1" max="60" value="7">
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="btnCancelNewTrip" onclick="closeAllModals()">Cancel</button>
+      <button type="button" class="btn btn-primary" id="btnConfirmNewTrip" onclick="submitNewBlankTrip()">Create Blank Trip</button>
+    </div>
+  </div>
+</div>
+
+<!-- Share / Export Modal (App Preset + Multi-Sheet Excel .xlsx) -->
+<div id="shareExportModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="shareExportModalTitle" onclick="if(event.target===this)closeAllModals()">
+  <div class="modal-card wide">
+    <h3 id="shareExportModalTitle">📤 Share or Export Active Itinerary</h3>
+    <p id="shareExportModalDesc" style="margin-bottom:14px;">Choose how you want to share this itinerary with friends or archive it.</p>
+    <div class="share-mode-grid">
+      <div class="share-mode-card">
+        <h4 id="shareModeAppTitle">🗾 1. Share for App Users (.jptrip.json)</h4>
+        <p id="shareModeAppDesc">Exports a portable preset file preserving exact theme, currency, FX rate, rail pass, hotels, map stops &amp; schedule for anyone using JP Trip Planner.</p>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:auto;">
+          <button type="button" class="btn btn-primary" id="btnShareAppPreset" onclick="exportCurrentPresetFile()">📤 Export This Preset (.jptrip.json)</button>
+          <button type="button" class="btn" id="btnShareImportFromModal" onclick="closeAllModals();triggerImportPresetFile()">📥 Import Preset File</button>
+        </div>
+      </div>
+      <div class="share-mode-card">
+        <h4 id="shareModeExcelTitle">📊 2. Export as Excel Workbook (.xlsx)</h4>
+        <p id="shareModeExcelDesc">Generates a styled 8-sheet Excel / Google Sheets file (Overview, Daily Schedule, Hourly Slots, Hotels, Budget &amp; Rail Pass, Gourmet, Guides &amp; Shopping).</p>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:auto;">
+          <button type="button" class="btn btn-primary" id="btnShareExcel" onclick="exportTripExcel()">📊 Export Excel (.xlsx)</button>
+          <button type="button" class="btn" id="btnShareCsv" onclick="exportCsv()">📄 Export Simple CSV</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions" style="justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap;">
+      <button type="button" class="btn" id="btnShareFullBackup" onclick="exportTripJson()" style="font-size:11.5px;">💾 Full All-Presets Backup (.json)</button>
+      <button type="button" class="btn" id="btnCloseShareModal" onclick="closeAllModals()">Close</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="jsonImportFileInput" accept=".jptrip.json,.json,application/json" style="display:none;" onchange="handlePresetImportFile(event)">
+
+<canvas id="bodySeasonalCanvas" class="body-seasonal-canvas"></canvas>
+
+<header class="hero">
+  <div class="hero-seasonal-scene" id="heroSeasonalScene">
+    <img id="heroSceneImg" class="hero-scene-img" src="assets/hero-autumn.jpg" alt="Seasonal Japan Scenic Backdrop">
+    <canvas id="heroSeasonalCanvas" class="hero-seasonal-canvas"></canvas>
+  </div>
+
+  <div class="hero-top">
+    <div class="hero-left-glass">
+      <div class="hero-badge-row">
+        <span class="hero-badge" id="heroBadge1">🗾 Japan Master Trip &amp; Budget Planner</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button type="button" class="btn" id="btnToggleAnim" onclick="toggleSeasonalAnimation()" style="padding:3px 9px;font-size:11px;" title="Pause/Resume seasonal animation">⏸️ Effects</button>
+          <button type="button" class="btn" id="btnHeroPeek" onclick="toggleHeroPeek()" style="padding:3px 9px;font-size:11px;" title="Preview seasonal scenery clearly">👁️ Scenery</button>
+        </div>
+      </div>
+
+      <div class="hero-title-row">
+        <span class="hero-title-season-tag" id="heroTitleSeasonTag" title="Automatically determined by Start Date">[Autumn]</span>
+        <textarea id="heroTitleInput" class="hero-title-input" rows="1" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" oninput="autoResizeHeroTitle(this);debouncedUpdateCustomTitle(this.value)" onblur="normalizeHeroTitleOnBlur(this)" title="Click to edit trip description (season and duration tags update automatically)">Japan Autumn Foliage 2026: Tohoku, Nikko &amp; Tokyo</textarea>
+        <span class="hero-title-days-tag" id="heroTitleDaysTag" title="Automatically computed from Start and End dates">(22 days)</span>
+      </div>
+      <input type="text" id="heroSubtitleInput" class="hero-subtitle-input" value="Wed, Oct 21 – Wed, Nov 11, 2026 • 7 Base Hotels • Rail Pass Optimizer" oninput="debouncedUpdateCustomSubtitle(this.value)" title="Click to edit planner subtitle">
+
+      <div class="hero-date-theme-bar">
+        <label class="hero-date-field">
+          <span id="lblStartDate">📅 Start Date:</span>
+          <input type="date" id="tripStartDate" value="2026-10-21" onchange="updateTripDates(this.value, null)">
+        </label>
+        <label class="hero-date-field">
+          <span id="lblEndDate">→ End Date:</span>
+          <input type="date" id="tripEndDate" value="2026-11-11" onchange="updateTripDates(null, this.value)">
+        </label>
+        <label class="hero-date-field">
+          <span id="lblPaxSelect">👥 Travelers:</span>
+          <input type="text" inputmode="numeric" id="paxCountSelect" class="pax-num-input" value="1"
+            onkeydown="handlePaxKeydown(event)"
+            oninput="handlePaxInput(this, false)"
+            onchange="handlePaxInput(this, true)"
+            title="Enter number of travelers (1 to 99)">
+        </label>
+        <label class="hero-date-field">
+          <span id="lblHomeCurrency">💱 Currency:</span>
+          <select id="currencyCodeSelect" onchange="updateCurrencyCode(this.value)">
+            <option value="SGD">SGD (S$)</option>
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="AUD">AUD (A$)</option>
+            <option value="MYR">MYR (RM)</option>
+            <option value="HKD">HKD (HK$)</option>
+            <option value="TWD">TWD (NT$)</option>
+            <option value="KRW">KRW (₩)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="hero-date-theme-bar">
+        <label class="hero-date-field" style="flex:1 1 260px;">
+          <span id="lblPresetSelect">🗾 Preset:</span>
+          <select id="tripPresetSelect" onchange="loadTripPreset(this.value)"></select>
+          <button type="button" class="btn btn-danger" id="btnDeleteCustomPreset" onclick="confirmDeleteCustomPreset()" style="display:none;padding:4px 8px;font-size:11px;" title="Delete selected custom preset">🗑️</button>
+        </label>
+        <div class="hero-date-field" style="gap:5px;">
+          <button type="button" class="btn" id="btnNewBlankTrip" style="padding:5px 10px;font-size:11.5px;" onclick="openNewTripModal()">➕ New</button>
+          <button type="button" class="btn btn-primary" id="btnSaveCustomPreset" style="padding:5px 10px;font-size:11.5px;" onclick="openSavePresetModal()">💾 Save</button>
+          <button type="button" class="btn" id="btnHeroShareExport" style="padding:5px 10px;font-size:11.5px;" onclick="openShareExportModal()">📤 Share / Export</button>
+          <button type="button" class="btn" id="btnHeroImportPreset" style="padding:5px 10px;font-size:11.5px;" onclick="triggerImportPresetFile()">📥 Import</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-controls">
+      <div class="hero-controls-row">
+        <div class="lang-switch-group" role="group" aria-label="Language Switcher">
+          <button type="button" class="lang-btn active" id="heroLangEn" onclick="setLanguage('en')" title="Switch to English">EN</button>
+          <button type="button" class="lang-btn" id="heroLangJa" onclick="setLanguage('ja')" title="日本語に切り替え">JP</button>
+        </div>
+
+        <div class="fx-control-card">
+          <div class="fx-label" id="fxLabelBox">
+            FX (SGD ↔ JPY)
+            <span>0–9999 (2 d.p.)</span>
+          </div>
+          <div class="fx-input-group">
+            <span id="fxBaseUnitSpan">1 SGD =</span>
+            <input type="text" inputmode="decimal" id="fxRateInput" value="122"
+              onkeydown="handleFxKeydown(event)"
+              oninput="handleFxInput(this, false)"
+              onchange="handleFxInput(this, true)">
+            <span id="fxUnitLabel">JPY</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn" onclick="toggleDarkMode()" id="themeBtn">🌙 Dark Mode</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="kpi-strip">
+  <div class="kpi-card highlight" onclick="switchTabById('budget')" style="cursor:pointer;">
+    <div class="kpi-title">
+      <span id="kpiTitle1">Itinerary Baseline</span>
+      <span style="color:var(--accent);" id="kpiLink1">💴 View Budget →</span>
+    </div>
+    <div class="kpi-main" id="kpiBaselineJpy">¥0</div>
+    <div class="kpi-sub" id="kpiBaselineSgd"></div>
+  </div>
+
+  <div class="kpi-card warning" onclick="switchTabById('budget')" style="cursor:pointer;">
+    <div class="kpi-title">
+      <span id="kpiTitle2">All-In Final Budget</span>
+      <span style="color:var(--gold);" id="kpiLink2">📊 Breakdown →</span>
+    </div>
+    <div class="kpi-main" id="kpiReconciledJpy">¥0</div>
+    <div class="kpi-sub" id="kpiReconciledSgd"></div>
+  </div>
+
+  <div class="kpi-card savings" onclick="switchTabById('rail')" style="cursor:pointer;">
+    <div class="kpi-title">
+      <span id="kpiTitle3">Rail / Transit Pass Optimizer</span>
+      <span style="color:var(--forest);" id="kpiLink3">🚄 Simulator</span>
+    </div>
+    <div class="kpi-main" id="kpiPassSavingsJpy">¥0</div>
+    <div class="kpi-sub" id="kpiPassSavingsSgd"></div>
+  </div>
+
+  <div class="kpi-card indigo" onclick="switchTabById('hotels')" style="cursor:pointer;">
+    <div class="kpi-title">
+      <span id="kpiTitle4">Stays, Stops & Guides</span>
+      <span style="color:var(--indigo);" id="kpiLink4">🏨 View Hotels →</span>
+    </div>
+    <div class="kpi-main" id="kpiMain4">0 Bases</div>
+    <div class="kpi-sub" id="kpiSub4"></div>
+  </div>
+</section>
+
+<div class="nav-wrapper">
+  <nav class="nav-bar">
+    <div class="tab-list" role="tablist">
+      <button type="button" class="tab-btn active" data-tab="overview" onclick="switchTab('overview', this)" id="tabBtnOverview">🗾 1. Overview & Map</button>
+      <button type="button" class="tab-btn" data-tab="itinerary" onclick="switchTab('itinerary', this)" id="tabBtnItinerary">🗓️ 2. Schedule</button>
+      <button type="button" class="tab-btn" data-tab="hotels" onclick="switchTab('hotels', this)" id="tabBtnHotels">🏨 3. Hotels & Stays</button>
+      <button type="button" class="tab-btn" data-tab="budget" onclick="switchTab('budget', this)" id="tabBtnBudget">💴 4. Budget & Analytics</button>
+      <button type="button" class="tab-btn" data-tab="rail" onclick="switchTab('rail', this)" id="tabBtnRail">🚄 5. Rail Pass & Transit</button>
+      <button type="button" class="tab-btn" data-tab="gourmet" onclick="switchTab('gourmet', this)" id="tabBtnGourmet">🍜 6. Gourmet</button>
+      <button type="button" class="tab-btn" data-tab="access" onclick="switchTab('access', this)" id="tabBtnAccess">🚌 7. Metro PDFs & Bus</button>
+      <button type="button" class="tab-btn" data-tab="guides" onclick="switchTab('guides', this)" id="tabBtnGuides">📖 8. Sightseeing Guides</button>
+      <button type="button" class="tab-btn" data-tab="shopping" onclick="switchTab('shopping', this)" id="tabBtnShopping">🛍️ 9. Shopping List</button>
+    </div>
+    <div class="action-bar">
+      <button type="button" class="btn" id="btnMergeTransit" onclick="syncLocalTransitToBudget()">⚡ Merge Transit</button>
+      <button type="button" class="btn" id="btnUndo" onclick="undoLastChange()" style="display:none;">↩ Undo</button>
+      <button type="button" class="btn" id="btnExportJson" onclick="openShareExportModal()">📤 Export / Share</button>
+      <button type="button" class="btn" id="btnImportJson" onclick="triggerImportPresetFile()">📥 Import</button>
+      <button type="button" class="btn" id="btnPrint" onclick="printOrPdf()">🖨️ Print</button>
+      <button type="button" class="btn btn-danger" id="btnResetData" onclick="confirmResetDefaultData()">↺ Reset</button>
+    </div>
+  </nav>
+</div>
+
+<main class="container">
+  <!-- TAB 1: OVERVIEW & MAP -->
+  <section id="tab-overview" class="tab-pane active">
+    <div class="overview-grid">
+      <div id="overviewLeftCol"></div>
+      <div>
+        <div id="overviewMapCard" class="section-card"></div>
+        <div class="section-card" style="margin-top:20px;">
+          <h2>
+            <span id="prepCardTitle">🎒 Pre-Trip & Reservation Checklist</span>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="pass-badge" id="checklistProgressBadge" style="font-size:12px;">0 / 0 Done</span>
+              <button type="button" class="btn btn-primary" id="btnAddNewPrepItem" onclick="togglePrepAddForm()" style="font-size:12px;padding:6px 12px;">Add new item</button>
+            </div>
+          </h2>
+          <p class="lead" style="margin-bottom:12px;" id="prepCardLead"></p>
+
+          <div id="prepAddFormWrap" class="prep-add-form">
+            <div id="prepErrorBanner" class="prep-error-banner" role="alert"></div>
+            <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+              <div>
+                <label for="prepInputTitle" id="lblPrepInputTitle" style="display:block;font-size:12px;font-weight:800;margin-bottom:4px;">Title</label>
+                <input type="text" id="prepInputTitle" class="search-input" style="width:100%;" placeholder="Enter checklist header / title...">
+              </div>
+              <div>
+                <label for="prepInputDetails" id="lblPrepInputDetails" style="display:block;font-size:12px;font-weight:800;margin-bottom:4px;">Additional details</label>
+                <input type="text" id="prepInputDetails" class="search-input" style="width:100%;" placeholder="Enter additional details (optional)...">
+              </div>
+              <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button type="button" class="btn" id="btnCancelPrepItem" onclick="togglePrepAddForm(false)">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btnUpdatePrepItem" onclick="submitNewPrepItem()">Update</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bar-track" style="height:8px;margin-bottom:14px;">
+            <div class="bar-fill" id="checklistProgressBar" style="width:0%;background:linear-gradient(90deg, var(--forest), #34D399);transition:width 0.25s ease;"></div>
+          </div>
+          <div id="prepChecklistGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:8px;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: SCHEDULE -->
+  <section id="tab-itinerary" class="tab-pane">
+    <div class="filter-bar">
+      <div class="pill-group" id="regionFilters"></div>
+      <input type="text" class="search-input" id="itinerarySearch" placeholder="Search places, hotels, slots..." oninput="renderItineraryCards()">
+    </div>
+    <div class="day-jump-strip" id="dayJumpStrip"></div>
+    <div class="day-list" id="itineraryList"></div>
+  </section>
+
+  <!-- TAB 3: HOTELS -->
+  <section id="tab-hotels" class="tab-pane">
+    <div class="section-card">
+      <h2>
+        <span id="hotelsTabTitle">🏨 Hotel & Accommodation Ledger</span>
+        <span style="font-size:14px;font-weight:800;color:var(--indigo);" id="hotelSummaryHeader"></span>
+      </h2>
+      <p class="lead" id="hotelsTabLead"></p>
+      <div class="hotel-grid" id="hotelGrid"></div>
+    </div>
+  </section>
+
+  <!-- TAB 4: BUDGET -->
+  <section id="tab-budget" class="tab-pane">
+    <div class="section-card">
+      <h2>
+        <span id="budgetAnalyticsTitle">📊 Category & Regional Expense Analytics</span>
+        <span style="font-size:12.5px;font-weight:600;color:var(--ink-muted);" id="budgetAnalyticsSub"></span>
+      </h2>
+      <div id="budgetModeControlsBar" style="margin-bottom:12px;"></div>
+      <p class="lead" id="budgetAnalyticsLead"></p>
+      <div class="overview-grid">
+        <div>
+          <h3 style="font-size:14px;font-weight:800;margin-bottom:10px;" id="catBarsHeading"></h3>
+          <div id="categoryBars"></div>
+        </div>
+        <div>
+          <h3 style="font-size:14px;font-weight:800;margin-bottom:10px;" id="regBarsHeading"></h3>
+          <div id="regionalBars"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h2><span id="budgetLedgerTitle">💴 Expense Ledger</span></h2>
+      <div class="data-table-wrap">
+        <table class="data-table" id="budgetTable">
+          <thead id="budgetTableHead"></thead>
+          <tbody id="budgetTableBody"></tbody>
+          <tfoot id="budgetTableFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 5: RAIL PASS & TRANSIT -->
+  <section id="tab-rail" class="tab-pane">
+    <div class="section-card">
+      <h2 id="railTabTitle">🚄 Rail Pass & Ground Transport Optimizer</h2>
+      <p class="lead" id="railTabLead"></p>
+      <div class="strategy-grid" id="railStrategyCards"></div>
+
+      <div style="background:var(--surface-alt);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:18px;">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
+            <strong style="font-size:13.5px;" id="passSimLabel"></strong>
+            <span style="font-size:12.5px;color:var(--ink-muted);" id="passSimSub"></span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+            <select id="passStartSelect" class="search-input" style="min-width:250px;font-weight:700;" onchange="updatePassStartDay(this.value)"></select>
+            <button type="button" class="btn btn-primary" id="btnApplyPassWindow" onclick="applyPassWindowToSchedule()">✓ Apply to Schedule</button>
+          </div>
+        </div>
+        <div id="passSimSummary" style="margin-top:10px;font-size:13px;font-weight:600;color:var(--indigo);"></div>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead id="railTableHead"></thead>
+          <tbody id="railTableBody"></tbody>
+          <tfoot id="railTableFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 6: GOURMET -->
+  <section id="tab-gourmet" class="tab-pane">
+    <div class="section-card">
+      <h2>
+        <span id="gourmetTabTitle"></span>
+        <div class="pill-group" id="foodRegionPills"></div>
+      </h2>
+      <p class="lead" id="gourmetTabLead"></p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;background:var(--surface-alt);padding:12px;border-radius:10px;" id="foodFormBar"></div>
+      <div class="gourmet-grid" id="gourmetGrid"></div>
+    </div>
+  </section>
+
+  <!-- TAB 7: ACCESS -->
+  <section id="tab-access" class="tab-pane">
+    <div class="section-card">
+      <h2>
+        <span id="accessTabTitle"></span>
+        <div class="pill-group" id="accessAreaPills"></div>
+      </h2>
+      <p class="lead" id="accessTabLead"></p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;background:var(--surface-alt);padding:12px;border-radius:10px;" id="accessFormBar"></div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead id="accessTableHead"></thead>
+          <tbody id="accessTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 8: GUIDES -->
+  <section id="tab-guides" class="tab-pane">
+    <div class="section-card" id="nikkoMasterplanCard"></div>
+    <div class="section-card">
+      <h2>
+        <span id="guidesTabTitle"></span>
+        <div class="pill-group" id="guideAreaPills"></div>
+      </h2>
+      <p class="lead" id="guidesTabLead"></p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;background:var(--surface-alt);padding:12px;border-radius:10px;" id="guideFormBar"></div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead id="guidesTableHead"></thead>
+          <tbody id="guidesTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 9: SHOPPING LIST -->
+  <section id="tab-shopping" class="tab-pane">
+    <div class="section-card">
+      <h2>
+        <span id="shoppingTabTitle">🛍️ Shopping List</span>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <label style="font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:5px;cursor:pointer;background:var(--surface-alt);padding:4px 10px;border-radius:8px;border:1px solid var(--border);">
+            <input type="checkbox" id="chkTaxFreeToggle" onchange="toggleTaxFreeShopping(this.checked)">
+            <span id="lblTaxFreeToggle">🇯🇵 Est. 10% Tax-Free (≥¥5,000)</span>
+          </label>
+          <span style="font-size:14.5px;font-weight:800;color:var(--accent);" id="shoppingTotalHeaderBadge"></span>
+        </div>
+      </h2>
+      <p class="lead" id="shoppingTabLead"></p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;background:var(--surface-alt);padding:12px;border-radius:10px;align-items:center;" id="shoppingFormBar"></div>
+      <div class="data-table-wrap">
+        <table class="data-table" id="shoppingTable">
+          <thead id="shoppingTableHead"></thead>
+          <tbody id="shoppingTableBody"></tbody>
+          <tfoot id="shoppingTableFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="data/tohoku22.js"></script>
+<script src="data/gazetteer.js"></script>
+<script src="data/catalogs.js"></script>
+<script src="data/presets.js"></script>
+<script src="data/feb2027-preset.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/excel-export.js"></script>
+<script src="js/themes.js"></script>
+<script src="js/state.js"></script>
+<script src="js/map.js"></script>
+<script src="js/render-rail.js"></script>
+<script src="js/render-chrome.js"></script>
+<script src="js/render-overview.js"></script>
+<script src="js/render-schedule.js"></script>
+<script src="js/render-hotels.js"></script>
+<script src="js/render-budget.js"></script>
+<script src="js/render-extras.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
