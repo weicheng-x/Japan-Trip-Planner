@@ -50,7 +50,7 @@ window.addCustomHotel = function() {
   state.dataEn.hotels.push(Object.assign({}, hObj));
   state.dataJa.hotels.push(Object.assign({}, hObj));
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(en ? `🏨 Added "${name}" (${nights}N: ${checkIn} → ${checkOut})` : `🏨 「${name}」（${nights}泊：${checkIn} → ${checkOut}）を追加しました`);
 };
 
@@ -67,7 +67,7 @@ window.moveHotelOrder = function(idx, delta) {
     arr.forEach((h, i) => { h.order = i + 1; });
   });
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(window.isEn() ? "↕ Reordered hotel stay" : "↕ ホテルの順番を入れ替えました");
 };
 
@@ -78,7 +78,7 @@ window.deleteHotelStay = function(idx) {
   state.dataEn.hotels.forEach((h, i) => { h.order = i + 1; });
   state.dataJa.hotels.forEach((h, i) => { h.order = i + 1; });
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(window.isEn() ? "🗑️ Removed hotel stay" : "🗑️ ホテルを削除しました");
 };
 
@@ -139,7 +139,7 @@ window.updateHotelField = function(idx, field, val) {
     if (curHotels[idx]) curHotels[idx][field] = val;
   }
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
 };
 
 window.syncHotelsToDailyBudget = function() {
@@ -173,10 +173,26 @@ window.syncHotelsToDailyBudget = function() {
   applySync(enHotels, state.dataEn.days || []);
   applySync(jaHotels, state.dataJa.days || []);
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(window.isEn()
     ? "🔄 Synced Hotel Names, Official Links, Nights & Rates to Daily Schedule!"
     : "🔄 ホテル名・公式URL・宿泊数・単価を日別スケジュールへ反映しました！");
+};
+
+window.autoFillNewHotelFromCity = function(cityVal) {
+  if (!cityVal || typeof window.resolveDefaultHotelForLocation !== "function") return;
+  const nameInp = document.getElementById("newHotelName");
+  if (nameInp && nameInp.value.trim()) return;
+  const def = window.resolveDefaultHotelForLocation(cityVal);
+  if (!def || def.matchLevel === "fallback") return;
+  const en = window.isEn();
+  if (nameInp) nameInp.value = en ? def.nameEn : def.nameJa;
+  const rateInp = document.getElementById("newHotelRate");
+  if (rateInp && def.perNightJpy) rateInp.value = String(def.perNightJpy);
+  const accInp = document.getElementById("newHotelAccess");
+  if (accInp && !accInp.value.trim()) accInp.value = en ? def.accessEn : def.accessJa;
+  const urlInp = document.getElementById("newHotelUrl");
+  if (urlInp && !urlInp.value.trim()) urlInp.value = def.url || "";
 };
 
 window.renderHotelsTab = function() {
@@ -211,7 +227,7 @@ window.renderHotelsTab = function() {
   const addBarHtml = `
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;background:var(--surface-alt);padding:12px;border-radius:10px;align-items:center;">
       <input type="text" id="newHotelName" class="search-input" placeholder="${en ? "Hotel Name" : "ホテル名"}" style="min-width:170px;flex:1;">
-      <input type="text" id="newHotelRegion" class="search-input" placeholder="${en ? "City / Region" : "都市・エリア"}" style="min-width:130px;">
+      <input type="text" id="newHotelRegion" class="search-input" placeholder="${en ? "City / Region (auto-suggests hotel)" : "都市・エリア（ホテル自動提案）"}" onchange="autoFillNewHotelFromCity(this.value)" style="min-width:160px;">
       <input type="number" id="newHotelNights" class="editable-num" value="2" min="1" max="30" step="1" style="width:60px;" title="${en ? "Nights" : "泊数"}">
       <span style="font-size:12px;font-weight:700;">${en ? "N @" : "泊 ×"}</span>
       <input type="number" id="newHotelRate" class="editable-num" value="15000" step="500" style="width:88px;" title="${en ? "Rate/night" : "1泊単価"}">

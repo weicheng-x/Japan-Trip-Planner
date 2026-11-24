@@ -136,9 +136,17 @@
     return best;
   }
 
+  let _railMetricsCache = null;
+
   window.computeRailPassMetrics = function() {
     const daysList = (window.curData().days) || [];
     const catalog = window.JR_PASS_CATALOG || [];
+    const daysSig = daysList.map(d => `${d.day}|${d.region || ""}|${Number(d.jrOnly) || 0}|${Number(d.totalAllLegs) || 0}`).join(";");
+    const cacheKey = `${(state && state._rev) || 0}|${(state && state.lang) || "en"}|${(state && state.selectedPassId) || "none"}|${(state && state.passStartDay) || 1}|${state && state.customPassPrice !== null && state.customPassPrice !== undefined ? state.customPassPrice : ""}|${daysSig}`;
+    if (_railMetricsCache && _railMetricsCache.key === cacheKey) {
+      return _railMetricsCache.val;
+    }
+
     const passObj = catalog.find(p => p.id === (state.selectedPassId || "none")) || catalog[0];
     const passPrice = (state.customPassPrice !== null && state.customPassPrice !== undefined && state.customPassPrice !== "")
       ? Math.max(0, Number(state.customPassPrice) || 0)
@@ -160,8 +168,15 @@
       }
     });
 
-    return { passObj, passPrice, currentEval, noPassEval, bestAlt };
+    const val = { passObj, passPrice, currentEval, noPassEval, bestAlt };
+    _railMetricsCache = { key: cacheKey, val };
+    return val;
   };
+
+  function refreshView() {
+    if (typeof window.refreshActiveViews === "function") window.refreshActiveViews();
+    else if (typeof window.renderAll === "function") window.renderAll();
+  }
 
   window.selectJapanPass = function(passId) {
     state.selectedPassId = passId;
@@ -169,13 +184,13 @@
     const daysLen = ((window.curData().days) || []).length || 1;
     if ((parseInt(state.passStartDay, 10) || 1) > daysLen) state.passStartDay = 1;
     window.saveState();
-    window.renderAll();
+    refreshView();
   };
 
   window.updatePassStartDay = function(val) {
     state.passStartDay = Math.max(1, parseInt(val, 10) || 1);
     window.saveState();
-    window.renderAll();
+    refreshView();
   };
 
   window.updateCustomPassPrice = function(val) {
@@ -185,7 +200,7 @@
       state.customPassPrice = Math.max(0, Number(val) || 0);
     }
     window.saveState();
-    window.renderAll();
+    refreshView();
   };
 
   window.updateRailDayFare = function(idx, kind, val) {
@@ -204,7 +219,7 @@
       }
     });
     window.saveState();
-    window.renderAll();
+    refreshView();
   };
 
   window.applyPassWindowToSchedule = function() {
@@ -219,7 +234,7 @@
       });
     });
     window.saveState();
-    window.renderAll();
+    refreshView();
     window.showToast(hasPass
       ? (en ? `🚄 Synced ${m.passObj.nameEn.split("(")[0].trim()} (Days ${s}–${e}) to Daily Schedule` : `🚄 パス適用期間（Day ${s}〜${e}）を日別スケジュールへ反映しました`)
       : (en ? "🎫 Cleared active Rail Pass flags on Daily Schedule" : "🎫 パス適用フラグを解除しました"));
@@ -250,7 +265,7 @@
     });
 
     window.saveState();
-    window.renderAll();
+    refreshView();
     window.showToast(en
       ? "🔄 Synced Rail Pass out-of-pocket fares into Tab 4 Budget!"
       : "🔄 パス試算後の実質交通費をタブ4予算台帳へ反映しました！");

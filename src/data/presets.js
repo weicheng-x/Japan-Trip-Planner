@@ -165,19 +165,22 @@ window.PRESET_CATALOG_META = [
       selectedCities.forEach((city, idx) => {
         const n = baseN + (idx < remN ? 1 : 0);
         const prev = idx > 0 ? selectedCities[idx - 1] : null;
+        const defH = typeof window.resolveDefaultHotelForLocation === "function"
+          ? window.resolveDefaultHotelForLocation(city.regEn)
+          : null;
         hotelBlocks.push({
           startDay: cursorDay,
           nights: n,
-          rate: costMode === "estimate" ? 12000 : 0,
-          nameEn: city.hotelEn,
-          nameJa: city.hotelJa,
+          rate: costMode === "estimate" ? ((defH && defH.perNightJpy) || 12000) : 0,
+          nameEn: (defH && defH.nameEn) || city.hotelEn,
+          nameJa: (defH && defH.nameJa) || city.hotelJa,
           regEn: city.regEn,
           regJa: city.regJa,
-          url: "",
-          accEn: `Near main station (${city.regEn})`,
-          accJa: `主要駅周辺（${city.regJa}）`,
-          hiEn: "Edit hotel name, rate, booking ref & official URL anytime.",
-          hiJa: "ホテル名・料金・予約番号・公式URLを自由に編集できます。"
+          url: (defH && defH.url) || "",
+          accEn: (defH && defH.accessEn) || `Near main station (${city.regEn})`,
+          accJa: (defH && defH.accessJa) || `主要駅周辺（${city.regJa}）`,
+          hiEn: `${(defH && defH.stars) ? `${defH.stars}★ curated pick — e` : "E"}dit hotel name, rate, booking ref & official URL anytime.`,
+          hiJa: "厳選3〜4つ星ホテル・料金・予約番号・公式URLを自由に編集できます。"
         });
         for (let k = 0; k < n; k++) {
           dayCityList.push({ city, isBlockStart: k === 0 && idx > 0, prevCity: prev });
@@ -214,10 +217,13 @@ window.PRESET_CATALOG_META = [
         titleJa = `${city.regJa} 終日観光＆ご当地グルメ`;
       }
 
+      const cityDefH = typeof window.resolveDefaultHotelForLocation === "function"
+        ? window.resolveDefaultHotelForLocation(city.regEn)
+        : null;
       let stay = 0, travelBase = 0, fun = 0, jrOnly = 0, totalAllLegs = 0;
       let legsEn = [], legsJa = [];
       if (costMode === "estimate") {
-        stay = isLast ? 0 : 12000;
+        stay = isLast ? 0 : ((cityDefH && cityDefH.perNightJpy) || 12000);
         fun = 9000;
         if (isFirst || isLast) {
           travelBase = 45000;
@@ -247,9 +253,9 @@ window.PRESET_CATALOG_META = [
         travelBase,
         travelActualAdd: 0,
         fun,
-        hotelEn: isLast ? "Departure Day" : city.hotelEn,
-        hotelJa: isLast ? "帰国・出発日" : city.hotelJa,
-        hotelUrl: "",
+        hotelEn: isLast ? "Departure Day" : ((cityDefH && cityDefH.nameEn) || city.hotelEn),
+        hotelJa: isLast ? "帰国・出発日" : ((cityDefH && cityDefH.nameJa) || city.hotelJa),
+        hotelUrl: isLast ? "" : ((cityDefH && cityDefH.url) || ""),
         jrOnly,
         totalAllLegs,
         legsEn,

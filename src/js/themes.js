@@ -398,7 +398,7 @@
   };
 
   function stepSeasonAnimation(ts) {
-    if (state && state.animationsPaused) {
+    if ((state && state.animationsPaused) || (typeof document !== "undefined" && document.hidden)) {
       _seasonAnimFrame = null;
       return;
     }
@@ -413,107 +413,112 @@
     if (!heroCanvas || !bodyCanvas) return;
 
     const hRect = heroCanvas.parentElement.getBoundingClientRect();
-    const targetW = Math.max(320, Math.floor(hRect.width));
-    const targetH = Math.max(240, Math.floor(hRect.height));
-    if (heroCanvas.width !== targetW || heroCanvas.height !== targetH) {
-      heroCanvas.width = targetW;
-      heroCanvas.height = targetH;
+    const heroVisible = hRect.bottom > 0 && hRect.width > 0 && hRect.height > 0;
+    if (heroVisible) {
+      const targetW = Math.max(320, Math.floor(hRect.width));
+      const targetH = Math.max(240, Math.floor(hRect.height));
+      if (heroCanvas.width !== targetW || heroCanvas.height !== targetH) {
+        heroCanvas.width = targetW;
+        heroCanvas.height = targetH;
+      }
     }
     if (bodyCanvas.width !== window.innerWidth || bodyCanvas.height !== window.innerHeight) {
       bodyCanvas.width = window.innerWidth;
       bodyCanvas.height = window.innerHeight;
     }
 
-    const hCtx = heroCanvas.getContext("2d");
+    const hCtx = heroVisible ? heroCanvas.getContext("2d") : null;
     const bCtx = bodyCanvas.getContext("2d");
     const sKey = _activeAnimSeason || "sakura";
 
     if (sKey === "summer") {
-      // Trail fade using destination-out preserves vivid river backdrop beneath!
-      hCtx.save();
-      hCtx.globalCompositeOperation = "destination-out";
-      hCtx.fillStyle = "rgba(0, 0, 0, 0.18)";
-      hCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
-      hCtx.restore();
+      if (heroVisible && hCtx) {
+        // Trail fade using destination-out preserves vivid river backdrop beneath!
+        hCtx.save();
+        hCtx.globalCompositeOperation = "destination-out";
+        hCtx.fillStyle = "rgba(0, 0, 0, 0.18)";
+        hCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+        hCtx.restore();
 
-      // Periodic synchronized 3-shell Starmine Salvo across the river
-      _salvoCooldown--;
-      if (_salvoCooldown <= 0 && _fireworkRockets.length < 14) {
-        const baseX = heroCanvas.width * (0.22 + Math.random() * 0.56);
-        [-95, 0, 95].forEach((dx, idx) => {
-          _fireworkRockets.push(createFireworkRocket(heroCanvas.width, heroCanvas.height, idx * 4, Math.max(40, Math.min(heroCanvas.width - 40, baseX + dx))));
-        });
-        _salvoCooldown = 140 + Math.floor(Math.random() * 90);
-      }
+        // Periodic synchronized 3-shell Starmine Salvo across the river
+        _salvoCooldown--;
+        if (_salvoCooldown <= 0 && _fireworkRockets.length < 14) {
+          const baseX = heroCanvas.width * (0.22 + Math.random() * 0.56);
+          [-95, 0, 95].forEach((dx, idx) => {
+            _fireworkRockets.push(createFireworkRocket(heroCanvas.width, heroCanvas.height, idx * 4, Math.max(40, Math.min(heroCanvas.width - 40, baseX + dx))));
+          });
+          _salvoCooldown = 140 + Math.floor(Math.random() * 90);
+        }
 
-      for (let i = _fireworkRockets.length - 1; i >= 0; i--) {
-        const r = _fireworkRockets[i];
-        if (r.delay > 0) { r.delay--; continue; }
-        r.trail.push({ x: r.x, y: r.y });
-        if (r.trail.length > 10) r.trail.shift();
-        r.x += r.vx;
-        r.y += r.vy;
-        r.vy *= 0.988;
+        for (let i = _fireworkRockets.length - 1; i >= 0; i--) {
+          const r = _fireworkRockets[i];
+          if (r.delay > 0) { r.delay--; continue; }
+          r.trail.push({ x: r.x, y: r.y });
+          if (r.trail.length > 10) r.trail.shift();
+          r.x += r.vx;
+          r.y += r.vy;
+          r.vy *= 0.988;
 
-        for (let t = 0; t < r.trail.length; t++) {
-          const pt = r.trail[t];
+          for (let t = 0; t < r.trail.length; t++) {
+            const pt = r.trail[t];
+            hCtx.save();
+            hCtx.fillStyle = "#FEF08A";
+            hCtx.globalAlpha = ((t + 1) / r.trail.length) * 0.9;
+            hCtx.beginPath();
+            hCtx.arc(pt.x, pt.y, 1.8, 0, Math.PI * 2);
+            hCtx.fill();
+            hCtx.restore();
+          }
+
+          if (r.y <= r.targetY || Math.abs(r.vy) < 1.2) {
+            spawnFireworkBurst(r);
+            if (i < 9) {
+              _fireworkRockets[i] = createFireworkRocket(heroCanvas.width, heroCanvas.height, 8 + Math.floor(Math.random() * 24));
+            } else {
+              _fireworkRockets.splice(i, 1);
+            }
+          }
+        }
+
+        const waterTopY = heroCanvas.height * 0.74;
+        for (let j = _fireworkSparks.length - 1; j >= 0; j--) {
+          const sp = _fireworkSparks[j];
+          sp.prevX = sp.x;
+          sp.prevY = sp.y;
+          sp.x += sp.vx;
+          sp.y += sp.vy;
+          sp.vx *= 0.968;
+          sp.vy = sp.vy * 0.968 + (sp.gravity || 0.04);
+          sp.alpha -= sp.decay;
+          if (sp.alpha <= 0) {
+            _fireworkSparks.splice(j, 1);
+            continue;
+          }
+          const flicker = sp.twinkle && sp.alpha < 0.55 ? (Math.random() > 0.30 ? 1 : 0.25) : 1;
           hCtx.save();
-          hCtx.fillStyle = "#FEF08A";
-          hCtx.globalAlpha = ((t + 1) / r.trail.length) * 0.9;
+          hCtx.globalAlpha = sp.alpha * flicker;
+          hCtx.strokeStyle = sp.color;
+          hCtx.lineWidth = sp.size;
+          hCtx.lineCap = "round";
           hCtx.beginPath();
-          hCtx.arc(pt.x, pt.y, 1.8, 0, Math.PI * 2);
-          hCtx.fill();
+          hCtx.moveTo(sp.prevX, sp.prevY);
+          hCtx.lineTo(sp.x, sp.y);
+          hCtx.stroke();
+
+          // Shimmering river reflection in bottom water zone
+          if (sp.y < waterTopY && sp.alpha > 0.28 && (j % 4 === 0)) {
+            const reflY = waterTopY + (waterTopY - sp.y) * 0.22 + (Math.random() - 0.5) * 4;
+            if (reflY < heroCanvas.height - 2) {
+              hCtx.globalAlpha = sp.alpha * 0.26 * flicker;
+              hCtx.lineWidth = 1.4;
+              hCtx.beginPath();
+              hCtx.moveTo(sp.x - 4, reflY);
+              hCtx.lineTo(sp.x + 4, reflY);
+              hCtx.stroke();
+            }
+          }
           hCtx.restore();
         }
-
-        if (r.y <= r.targetY || Math.abs(r.vy) < 1.2) {
-          spawnFireworkBurst(r);
-          if (i < 9) {
-            _fireworkRockets[i] = createFireworkRocket(heroCanvas.width, heroCanvas.height, 8 + Math.floor(Math.random() * 24));
-          } else {
-            _fireworkRockets.splice(i, 1);
-          }
-        }
-      }
-
-      const waterTopY = heroCanvas.height * 0.74;
-      for (let j = _fireworkSparks.length - 1; j >= 0; j--) {
-        const sp = _fireworkSparks[j];
-        sp.prevX = sp.x;
-        sp.prevY = sp.y;
-        sp.x += sp.vx;
-        sp.y += sp.vy;
-        sp.vx *= 0.968;
-        sp.vy = sp.vy * 0.968 + (sp.gravity || 0.04);
-        sp.alpha -= sp.decay;
-        if (sp.alpha <= 0) {
-          _fireworkSparks.splice(j, 1);
-          continue;
-        }
-        const flicker = sp.twinkle && sp.alpha < 0.55 ? (Math.random() > 0.30 ? 1 : 0.25) : 1;
-        hCtx.save();
-        hCtx.globalAlpha = sp.alpha * flicker;
-        hCtx.strokeStyle = sp.color;
-        hCtx.lineWidth = sp.size;
-        hCtx.lineCap = "round";
-        hCtx.beginPath();
-        hCtx.moveTo(sp.prevX, sp.prevY);
-        hCtx.lineTo(sp.x, sp.y);
-        hCtx.stroke();
-
-        // Shimmering river reflection in bottom water zone
-        if (sp.y < waterTopY && sp.alpha > 0.28 && (j % 4 === 0)) {
-          const reflY = waterTopY + (waterTopY - sp.y) * 0.22 + (Math.random() - 0.5) * 4;
-          if (reflY < heroCanvas.height - 2) {
-            hCtx.globalAlpha = sp.alpha * 0.26 * flicker;
-            hCtx.lineWidth = 1.4;
-            hCtx.beginPath();
-            hCtx.moveTo(sp.x - 4, reflY);
-            hCtx.lineTo(sp.x + 4, reflY);
-            hCtx.stroke();
-          }
-        }
-        hCtx.restore();
       }
 
       // Gentle summer embers on body canvas
@@ -532,7 +537,7 @@
         bCtx.restore();
       });
     } else {
-      hCtx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
+      if (heroVisible && hCtx) hCtx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
       bCtx.clearRect(0, 0, bodyCanvas.width, bodyCanvas.height);
 
       const updateAndDrawList = (list, ctx, w, h) => {
@@ -552,11 +557,25 @@
         });
       };
 
-      updateAndDrawList(_heroParticles, hCtx, heroCanvas.width, heroCanvas.height);
+      if (heroVisible && hCtx) updateAndDrawList(_heroParticles, hCtx, heroCanvas.width, heroCanvas.height);
       updateAndDrawList(_bodyParticles, bCtx, bodyCanvas.width, bodyCanvas.height);
     }
 
     _seasonAnimFrame = requestAnimationFrame(stepSeasonAnimation);
+  }
+
+  if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden) {
+        if (_seasonAnimFrame) {
+          cancelAnimationFrame(_seasonAnimFrame);
+          _seasonAnimFrame = null;
+        }
+      } else if (state && !state.animationsPaused && !_seasonAnimFrame) {
+        _lastAnimTs = 0;
+        _seasonAnimFrame = requestAnimationFrame(stepSeasonAnimation);
+      }
+    });
   }
 
   window.toggleSeasonalAnimation = function() {

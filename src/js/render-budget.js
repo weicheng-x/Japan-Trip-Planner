@@ -3,19 +3,19 @@
 window.setBudgetMode = function(mode) {
   state.budgetMode = mode === "per_person" ? "per_person" : "group";
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
 };
 
 window.toggleShareHotelRoom = function(checked) {
   state.shareHotelRoom = !!checked;
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
 };
 
 window.updateBudgetTarget = function(val) {
   state.budgetTargetJpy = Math.max(0, Number(val) || 0);
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
 };
 
 window.renderBudgetTable = function() {

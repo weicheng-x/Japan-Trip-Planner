@@ -20,7 +20,7 @@ window.deleteFood = function(id) {
   state.dataEn.food = (state.dataEn.food || []).filter(f => f.id !== id);
   state.dataJa.food = (state.dataJa.food || []).filter(f => f.id !== id);
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(window.isEn() ? "🗑️ Removed gourmet spot" : "🗑️ グルメカードを削除しました");
 };
 
@@ -59,7 +59,7 @@ window.addCustomFood = function() {
   state.dataEn.food.unshift(entryEn);
   state.dataJa.food.unshift(entryJa);
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(en ? "🍜 Added new gourmet spot!" : "🍜 グルメ候補を追加しました！");
 };
 
@@ -163,7 +163,7 @@ window.deleteAccessRow = function(id) {
   state.dataEn.access = (state.dataEn.access || []).filter(a => a.id !== id);
   state.dataJa.access = (state.dataJa.access || []).filter(a => a.id !== id);
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(window.isEn() ? "🗑️ Removed transit link" : "🗑️ 時刻表リンクを削除しました");
 };
 
@@ -181,7 +181,7 @@ window.addAccessRow = function() {
   state.dataEn.access.unshift(Object.assign({}, obj));
   state.dataJa.access.unshift(Object.assign({}, obj));
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(en ? "🚌 Added transit / metro PDF link!" : "🚌 路線図・時刻表リンクを追加しました！");
 };
 
@@ -266,7 +266,7 @@ window.deleteGuideRow = function(id) {
   state.dataEn.guides = (state.dataEn.guides || []).filter(g => g.id !== id);
   state.dataJa.guides = (state.dataJa.guides || []).filter(g => g.id !== id);
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(window.isEn() ? "🗑️ Removed sightseeing guide" : "🗑️ 観光ガイドを削除しました");
 };
 
@@ -284,7 +284,7 @@ window.addGuideRow = function() {
   state.dataEn.guides.unshift(Object.assign({}, obj));
   state.dataJa.guides.unshift(Object.assign({}, obj));
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(en ? "📖 Added sightseeing guide!" : "📖 観光ガイドを追加しました！");
 };
 
@@ -372,7 +372,7 @@ window.renderGuidesTable = function() {
 window.toggleTaxFreeShopping = function(checked) {
   state.taxFreeEnabled = !!checked;
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
 };
 
 window.addShoppingItem = function() {
@@ -390,7 +390,7 @@ window.addShoppingItem = function() {
   }
   state.shoppingList.push({ id: "shop_" + Date.now(), name, url, store, price, qty, bought: false });
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(en ? `🛍️ Added "${name}" to Shopping List` : `🛍️ 「${name}」を買い物リストに追加しました`);
 };
 
@@ -402,14 +402,14 @@ window.updateShoppingItem = function(id, field, val) {
   else if (field === "bought") item.bought = !!val;
   else item[field] = val;
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
 };
 
 window.deleteShoppingItem = function(id) {
   window.pushUndoSnapshot("Delete shopping item");
   state.shoppingList = (state.shoppingList || []).filter(x => x.id !== id);
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(window.isEn() ? "🗑️ Deleted item from Shopping List" : "🗑️ 買い物リストから削除しました");
 };
 

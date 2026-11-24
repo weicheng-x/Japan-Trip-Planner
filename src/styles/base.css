@@ -843,41 +843,241 @@ body.dark-mode .btn-danger:hover { background: rgba(185, 28, 28, 0.38); }
   cursor: pointer;
   margin-left: 2px;
 }
-.route-svg-wrap {
-  background: linear-gradient(180deg, #E6F2FA 0%, #F7F3EA 100%);
+.route-svg-wrap,
+.route-svg-wrap.gmaps-stage {
+  background: #9CC0F9;
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 12px;
+  padding: 0;
   text-align: center;
   position: relative;
   overflow: hidden;
+  user-select: none;
 }
-body.dark-mode .route-svg-wrap {
-  background: linear-gradient(180deg, #132131 0%, #1B2430 100%);
+body.dark-mode .route-svg-wrap,
+body.dark-mode .route-svg-wrap.gmaps-stage {
+  background: #17263C;
 }
 
-/* Fixed Hover Scaling (no hardcoded r:9.5 pin explosion on zoomed views!) */
-.map-node { cursor: pointer; }
-.map-node circle {
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: transform 0.16s ease, filter 0.16s ease;
+.gmaps-svg {
+  display: block;
+  width: 100%;
+  height: 460px;
+  cursor: grab;
+  touch-action: none;
 }
-.map-node:hover circle {
-  transform: scale(1.3);
-  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.35));
+.gmaps-svg:active {
+  cursor: grabbing;
 }
-body.dark-mode #dynamicJapanMapSvg path[fill="url(#landGrad)"] {
-  fill: #273547 !important;
-  stroke: #4B5F78 !important;
+
+.gmaps-pref {
+  fill: #EBECE8;
+  stroke: #C5CCD6;
+  cursor: pointer;
+  transition: fill 0.14s ease;
 }
-body.dark-mode #dynamicJapanMapSvg path[data-water="true"] {
-  fill: #1A334D !important;
-  stroke: #34608C !important;
+.gmaps-pref:hover {
+  fill: #E2E7EC;
 }
-body.dark-mode #dynamicJapanMapSvg text {
-  fill: #F1F5F9 !important;
-  stroke: #0E141B !important;
+.gmaps-pref.has-stop {
+  fill: #F6F3E7;
+}
+.gmaps-pref.has-stop:hover {
+  fill: #EFEAD8;
+}
+.gmaps-pref.is-focused {
+  fill: #FFF8E1;
+}
+body.dark-mode .gmaps-pref {
+  fill: #242F3E;
+  stroke: #3B4D63;
+}
+body.dark-mode .gmaps-pref:hover {
+  fill: #2E3D52;
+}
+body.dark-mode .gmaps-pref.has-stop {
+  fill: #2B394B;
+}
+body.dark-mode .gmaps-pref.has-stop:hover {
+  fill: #34465C;
+}
+body.dark-mode .gmaps-pref.is-focused {
+  fill: #334155;
+}
+
+.gmaps-highlight-boundary {
+  pointer-events: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.gmaps-route-casing {
+  stroke: #FFFFFF;
+  pointer-events: none;
+}
+.gmaps-route-line {
+  stroke: #1A73E8;
+  pointer-events: none;
+}
+.gmaps-route-air {
+  stroke: #F29900;
+  pointer-events: none;
+}
+body.dark-mode .gmaps-route-casing {
+  stroke: #0F172A;
+}
+body.dark-mode .gmaps-route-line {
+  stroke: #60A5FA;
+}
+body.dark-mode .gmaps-route-air {
+  stroke: #FBBF24;
+}
+
+.gmaps-pref-label {
+  fill: #5F6368;
+  stroke: rgba(255, 255, 255, 0.92);
+  paint-order: stroke fill;
+  cursor: pointer;
+}
+body.dark-mode .gmaps-pref-label {
+  fill: #CBD5E1;
+  stroke: rgba(15, 23, 42, 0.92);
+}
+
+.map-node {
+  cursor: pointer;
+}
+.map-node:hover > g {
+  filter: brightness(1.08) drop-shadow(0 2px 5px rgba(0, 0, 0, 0.35));
+}
+
+.gmaps-pin-label {
+  fill: #202124;
+  stroke: rgba(255, 255, 255, 0.95);
+  paint-order: stroke fill;
+  pointer-events: none;
+}
+.gmaps-pin-label.is-selected {
+  fill: #C5221F;
+}
+body.dark-mode .gmaps-pin-label {
+  fill: #F8FAFC;
+  stroke: rgba(15, 23, 42, 0.95);
+}
+body.dark-mode .gmaps-pin-label.is-selected {
+  fill: #FCA5A5;
+}
+
+.gmaps-place-card {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 5;
+  max-width: 290px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 13px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.16);
+}
+body.dark-mode .gmaps-place-card {
+  background: rgba(30, 41, 59, 0.96);
+  border-color: #475569;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.48);
+}
+.gmaps-place-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.gmaps-place-scope {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #1A73E8;
+  margin-bottom: 2px;
+}
+body.dark-mode .gmaps-place-scope {
+  color: #60A5FA;
+}
+.gmaps-place-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 4px;
+}
+.gmaps-place-meta {
+  font-size: 11.5px;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+.gmaps-place-hotel {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--surface-alt);
+  padding: 4px 7px;
+  border-radius: 6px;
+  margin-bottom: 7px;
+}
+.gmaps-place-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.gmaps-card-close {
+  border: none;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 17px;
+  line-height: 1;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 6px;
+}
+.gmaps-card-close:hover {
+  background: var(--surface-alt);
+  color: var(--ink);
+}
+
+.gmaps-zoom-controls {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+  background: rgba(255, 255, 255, 0.96);
+}
+body.dark-mode .gmaps-zoom-controls {
+  background: rgba(30, 41, 59, 0.96);
+  border-color: #475569;
+}
+.gmaps-ctrl-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gmaps-ctrl-btn:last-child {
+  border-bottom: none;
+}
+.gmaps-ctrl-btn:hover {
+  background: var(--surface-alt);
 }
 
 /* Filter Bar & Pills */
@@ -955,6 +1155,14 @@ body.dark-mode #dynamicJapanMapSvg text {
   border-color: var(--accent);
 }
 .day-jump-btn.pass-day { border-bottom: 3px solid var(--forest); }
+.day-jump-btn[draggable="true"] { cursor: grab; }
+.day-jump-btn[draggable="true"]:active { cursor: grabbing; }
+.day-jump-btn.drag-over-pill {
+  outline: 2px solid #1A73E8;
+  background: var(--indigo-soft);
+  color: var(--indigo);
+  transform: translateY(-1px);
+}
 
 /* Day Cards & Detailed Time-Slot Drawer */
 .day-list { display: flex; flex-direction: column; gap: 14px; }
@@ -964,12 +1172,52 @@ body.dark-mode #dynamicJapanMapSvg text {
   border-radius: var(--radius);
   padding: 16px 20px;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease, opacity 0.14s ease, transform 0.14s ease;
   position: relative;
 }
 .day-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow); }
 .day-card.pass-active { border-left: 5px solid var(--forest); }
 .day-card.needs-attention { border-left: 5px solid var(--gold); }
+.day-card.dragging {
+  opacity: 0.48;
+  transform: scale(0.992);
+  border-style: dashed;
+}
+.day-card.drag-over-top {
+  box-shadow: 0 -4px 0 0 #1A73E8, var(--shadow);
+}
+.day-card.drag-over-bottom {
+  box-shadow: 0 4px 0 0 #1A73E8, var(--shadow);
+}
+
+.day-drag-handle {
+  cursor: grab;
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: var(--ink-muted);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  line-height: 1;
+  user-select: none;
+}
+.day-drag-handle:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+.day-drag-handle:active {
+  cursor: grabbing;
+}
+.day-move-select {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 7px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
 
 .day-header {
   display: flex;
@@ -1494,20 +1742,12 @@ body.dark-mode .pref-day-badge {
   padding: 3px 9px !important;
   font-weight: 800;
 }
-.map-pref-cluster {
-  cursor: pointer;
-  transition: opacity 0.16s ease;
-}
-.map-pref-cluster:hover ellipse {
-  fill: rgba(217, 119, 6, 0.18);
-  stroke-width: 2.2;
-}
-
 /* Clean Print Stylesheet */
 @media print {
   .nav-wrapper, .filter-bar, .hero-controls, .day-jump-strip, .body-seasonal-canvas,
-  .hero-seasonal-scene, .map-control-bar, .map-pref-zoom-bar, .info-tip-wrap, .action-bar, .btn, button,
-  .slot-add-bar, .leg-del-btn, .leg-add-inline, .day-actions-mini,
+  .hero-seasonal-scene, .map-control-bar, .map-pref-zoom-bar, .gmaps-zoom-controls, .gmaps-place-card,
+  .info-tip-wrap, .action-bar, .btn, button,
+  .slot-add-bar, .leg-del-btn, .leg-add-inline, .day-actions-mini, .day-drag-handle, .day-move-select,
   #foodFormBar, #accessFormBar, #guideFormBar, #shoppingFormBar {
     display: none !important;
   }

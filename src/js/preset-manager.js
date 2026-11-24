@@ -35,12 +35,16 @@ window.populatePresetSelectDropdown = function() {
       ).join("") +
       `</optgroup>`;
   }
-  sel.innerHTML = html;
-  sel.value = curVal;
-
   const delBtn = document.getElementById("btnDeleteCustomPreset");
-  if (delBtn) {
-    delBtn.style.display = String(curVal).startsWith("userpreset_") ? "inline-flex" : "none";
+  const delVis = String(curVal).startsWith("userpreset_") ? "inline-flex" : "none";
+  if (sel._lastHtml !== html) {
+    sel.innerHTML = html;
+    sel._lastHtml = html;
+  }
+  if (sel.value !== curVal) sel.value = curVal;
+
+  if (delBtn && delBtn.style.display !== delVis) {
+    delBtn.style.display = delVis;
   }
 };
 
@@ -81,8 +85,10 @@ function buildSnapshotFromActiveState(descEn, descJa, existingId) {
   };
 }
 
-function computePresetFingerprint(obj) {
-  if (!obj) return "";
+const _savedFingerprintCache = typeof WeakMap === "function" ? new WeakMap() : null;
+let _dirtyCheckCache = null;
+
+function buildRawPresetFingerprint(obj) {
   return JSON.stringify({
     startDate: obj.startDate || "",
     endDate: obj.endDate || "",
@@ -105,6 +111,19 @@ function computePresetFingerprint(obj) {
   });
 }
 
+function computePresetFingerprint(obj) {
+  if (!obj) return "";
+  const isSavedObj = _savedFingerprintCache && obj.id && String(obj.id).startsWith("userpreset_") && typeof obj.updatedAt === "string";
+  if (isSavedObj) {
+    const cached = _savedFingerprintCache.get(obj);
+    if (cached && cached.updatedAt === obj.updatedAt) return cached.fp;
+    const fp = buildRawPresetFingerprint(obj);
+    _savedFingerprintCache.set(obj, { updatedAt: obj.updatedAt, fp });
+    return fp;
+  }
+  return buildRawPresetFingerprint(obj);
+}
+
 window.isActiveTripDirty = function() {
   if (!state || !state.dataEn) return false;
   const activeId = String(state.activePreset || "");
@@ -112,13 +131,25 @@ window.isActiveTripDirty = function() {
   if (!activeId.startsWith("userpreset_")) return false;
   const saved = (state.savedCustomPresets || []).find(p => p.id === activeId);
   if (!saved) return true;
-  const activeSnap = buildSnapshotFromActiveState(state.customTitleEn, state.customTitleJa, saved.id);
-  if (computePresetFingerprint(saved) !== computePresetFingerprint(activeSnap)) return true;
-  const curEn = window.sanitizeTripDescriptor(state.customTitleEn || "");
-  const curJa = window.sanitizeTripDescriptor(state.customTitleJa || "");
-  const savEn = window.sanitizeTripDescriptor(saved.customTitleEn || saved.labelEn || "");
-  const savJa = window.sanitizeTripDescriptor(saved.customTitleJa || saved.labelJa || "");
-  return (curEn !== savEn) || (curJa !== savJa);
+
+  const daysLen = Array.isArray(state.dataEn.days) ? state.dataEn.days.length : 0;
+  const cacheKey = `${state._rev || 0}|${activeId}|${saved.updatedAt || ""}|${state.customTitleEn || ""}|${state.customTitleJa || ""}|${daysLen}`;
+  if (_dirtyCheckCache && _dirtyCheckCache.key === cacheKey) {
+    return _dirtyCheckCache.dirty;
+  }
+
+  let dirty = false;
+  if (computePresetFingerprint(saved) !== computePresetFingerprint(state)) {
+    dirty = true;
+  } else {
+    const curEn = window.sanitizeTripDescriptor(state.customTitleEn || "");
+    const curJa = window.sanitizeTripDescriptor(state.customTitleJa || "");
+    const savEn = window.sanitizeTripDescriptor(saved.customTitleEn || saved.labelEn || "");
+    const savJa = window.sanitizeTripDescriptor(saved.customTitleJa || saved.labelJa || "");
+    dirty = (curEn !== savEn) || (curJa !== savJa);
+  }
+  _dirtyCheckCache = { key: cacheKey, dirty };
+  return dirty;
 };
 
 window.resolveSavePresetContext = function(rawInput) {
@@ -143,8 +174,7 @@ window.resolveSavePresetContext = function(rawInput) {
   }) || null;
 
   const overwriteTarget = activeSaved || matchingByName;
-  const activeSnap = buildSnapshotFromActiveState(effectiveClean, effectiveClean);
-  const unchanged = !!(overwriteTarget && computePresetFingerprint(overwriteTarget) === computePresetFingerprint(activeSnap));
+  const unchanged = !!(overwriteTarget && computePresetFingerprint(overwriteTarget) === computePresetFingerprint(state));
 
   return { effectiveClean, formattedPreview, activeSaved, matchingByName, overwriteTarget, unchanged };
 };
@@ -349,6 +379,7 @@ window.submitNewBlankTrip = function() {
   state.customMapLocations = [];
   state.manualMapZoom = null;
   state.focusedPrefId = null;
+  state.selectedMapStopId = null;
   state.mapScopeMode = "schedule";
   state.syncedLocalTransit = false;
   state.customPassPrice = null;
@@ -435,6 +466,7 @@ window.loadTripPreset = function(presetKey, opts) {
   state.customMapLocations = [];
   state.manualMapZoom = null;
   state.focusedPrefId = null;
+  state.selectedMapStopId = null;
   state.mapScopeMode = "schedule";
   state.syncedLocalTransit = false;
   state.customPassPrice = null;
@@ -532,7 +564,7 @@ window.buildPresetExportPayload = function() {
   const envelope = {
     schema: "jp-trip-planner-preset-v2",
     exportedAt: new Date().toISOString(),
-    appVersion: "2.2.0",
+    appVersion: "2.3.0",
     preset: snap
   };
   const cleanName = window.sanitizeTripDescriptor(en ? snap.customTitleEn : snap.customTitleJa) || "Japan_Trip_Preset";

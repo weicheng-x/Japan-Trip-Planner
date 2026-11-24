@@ -1,4 +1,4 @@
-// Automated Regression & Self-Audit Test Suite for JP Trip Planner v2.1.0
+// Automated Regression & Self-Audit Test Suite for JP Trip Planner v2.3.0
 const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
@@ -52,7 +52,7 @@ function createDomSandbox() {
   body.removeChild = noop;
 
   const ctx = {
-    console, Math, Date, Number, String, Array, Object, JSON, RegExp, Set, Map, URL, Blob,
+    console, Math, Date, Number, String, Array, Object, JSON, RegExp, Set, Map, WeakMap, URL, Blob,
     Uint8Array, Uint32Array, DataView, Buffer,
     btoa: (s) => Buffer.from(s, "binary").toString("base64"),
     unescape, encodeURIComponent, parseInt, parseFloat, isNaN, isFinite, Infinity,
@@ -82,9 +82,11 @@ function createDomSandbox() {
   const loadOrder = [
     "data/tohoku22.js",
     "data/romanization.js",
+    "data/japan-geo.js",
     "data/gazetteer.js",
     "data/prefectures-catalog.js",
     "data/cities-catalog.js",
+    "data/hotels-catalog.js",
     "data/catalogs.js",
     "data/presets.js",
     "data/feb2027-preset.js",
@@ -94,9 +96,11 @@ function createDomSandbox() {
     "js/state.js",
     "js/preset-manager.js",
     "js/map.js",
+    "js/map-interact.js",
     "js/render-rail.js",
     "js/render-chrome.js",
     "js/render-overview.js",
+    "js/schedule-actions.js",
     "js/render-schedule.js",
     "js/render-hotels.js",
     "js/render-budget.js",
@@ -307,7 +311,7 @@ function run() {
   ctx.loadTripPreset("userpreset_feb2027_16d", { skipUndo: true, force: true });
   const presetExport = ctx.buildPresetExportPayload();
   assert.strictEqual(presetExport.envelope.schema, "jp-trip-planner-preset-v2");
-  assert.strictEqual(presetExport.envelope.appVersion, "2.2.0");
+  assert.strictEqual(presetExport.envelope.appVersion, "2.3.0");
   const xlsx = ctx.buildExcelWorkbookPayload();
   assert(xlsx.bytes.length > 20000);
   assert.strictEqual(xlsx.bytes[0], 0x50);
@@ -391,7 +395,8 @@ function run() {
   assert(aomoriZoomHtml.includes("Back to Full Route"), "Focusing prefecture must render Back to Full Route button");
   ctx.focusMapPrefecture(null);
   const fullMapHtml = ctx.buildInteractiveJapanMapHtml();
-  assert(fullMapHtml.includes('data-pref-id="aomori"') && fullMapHtml.includes("map-pref-cluster"), "Full route map must include clickable Aomori prefecture cluster halo");
+  assert(fullMapHtml.includes('data-pref-id="aomori"') && fullMapHtml.includes("gmaps-pref has-stop") && fullMapHtml.includes("gmaps-pref-label"), "Full route map must include clickable Aomori prefecture boundary and multi-stop label");
+  assert(!fullMapHtml.includes("<ellipse"), "Google Maps SVG must replace legacy ellipse circles with real boundaries");
 
   // 16. Critique 2: City Priority vs Prefecture Fallback Sync
   ctx.state.dataEn.days = [
@@ -438,6 +443,114 @@ function run() {
   const grBadges = [...grGrid.matchAll(/class="tabelog-badge"[\s\S]*?<a href="([^"]+)"/g)].map(m => m[1]);
   assert(grBadges.length >= 5 && grBadges.every(u => u.includes("tabelog.com")), "Golden Route rating badges must all point to Tabelog");
   assert(getEl("foodFormBar").innerHTML.includes("newFoodTabelogUrl"), "Gourmet add form must accept separate restaurant & Tabelog URLs");
+
+  // 18. v2.3.0 Google Maps MLIT Geography & City vs Prefecture Highlight
+  assert.strictEqual(Object.keys(ctx.JAPAN_PREF_PATHS || {}).length, 47, "MLIT geometry must include all 47 prefectures");
+  assert.strictEqual(Object.keys(ctx.JAPAN_CITY_PATHS || {}).length, 95, "MLIT geometry must include 95 city/region boundaries");
+  ctx.loadTripPreset("goldenRoute", { skipUndo: true, force: true });
+  ctx.selectMapLocationPin("kyoto", "PREF:kyoto");
+  const kyotoHighlightHtml = ctx.buildInteractiveJapanMapHtml();
+  assert(kyotoHighlightHtml.includes('data-highlight-scope="city"') && kyotoHighlightHtml.includes('data-city-id="kyoto"'), "Selecting common city (Kyoto) must highlight its exact city boundary");
+  assert(kyotoHighlightHtml.includes('id="gmapsPlaceCard"') && kyotoHighlightHtml.includes("City Boundary Highlight"), "City selection must open Google Maps Place Card with city scope");
+
+  // Uncommon city or prefectural stop falls back to whole prefecture boundary
+  ctx.state.dataEn.days = [
+    { day: 1, date: "2027-06-01", dow: "Tue", region: "Shimane", routeJp: "Tsuwano & Iwami Ginzan Coast", routeEn: "Shimane", hotel: "Tsuwano Heritage Inn", stay: 10000, travelBase: 2000, fun: 4000, legs: [], timeSlots: [] }
+  ];
+  ctx.state.dataJa.days = JSON.parse(JSON.stringify(ctx.state.dataEn.days));
+  ctx.selectMapLocationPin("pref_shimane", "PREF:shimane");
+  const shimaneHighlightHtml = ctx.buildInteractiveJapanMapHtml();
+  assert(shimaneHighlightHtml.includes('data-highlight-scope="prefecture"') && shimaneHighlightHtml.includes('data-pref-id="shimane"'), "Prefectural/uncommon stop must highlight the entire prefecture boundary");
+  assert(!shimaneHighlightHtml.includes('data-highlight-scope="city"'), "Prefectural fallback must not claim city scope");
+  ctx.clearMapBoundarySelection();
+
+  // 19. v2.3.0 Tab 1 "+ Add Stop & Day" -> Appends Latest Day in Tab 2 + 3-4 Star Hotel Catalog Defaults
+  assert.strictEqual(Object.keys(ctx.CITY_HOTELS || {}).length, 80, "Hotels catalog must include all 80 priority cities");
+  assert.strictEqual(Object.keys(ctx.PREFECTURE_HOTELS || {}).length, 47, "Hotels catalog must include all 47 prefectures");
+  assert(!/hotel nikko/i.test(ctx.CITY_HOTELS.nikko.nameEn), "Nikko default hotel must never be Hotel Nikko trap");
+
+  ctx.loadTripPreset("goldenRoute", { skipUndo: true, force: true });
+  const daysBeforeAdd = ctx.state.dataEn.days.length;
+  const endBeforeAdd = ctx.state.endDate;
+  getEl("mapLocationInput").value = "Takayama";
+  ctx.addCustomMapLocation();
+  assert.strictEqual(ctx.state.dataEn.days.length, daysBeforeAdd + 1, "Adding map stop must automatically append a new latest day to Tab 2");
+  assert.strictEqual(ctx.state.dataJa.days.length, daysBeforeAdd + 1, "JA schedule must stay synchronized on map-stop add");
+  assert(ctx.state.endDate > endBeforeAdd, "Appending map stop must advance trip endDate by 1 day");
+  const appendedDay = ctx.state.dataEn.days[ctx.state.dataEn.days.length - 1];
+  const expectedTakayamaHotel = ctx.resolveDefaultHotelForLocation("Takayama");
+  assert.strictEqual(appendedDay.hotel, expectedTakayamaHotel.nameEn, "Appended Takayama day must default to curated 3-4 star Takayama hotel");
+  assert(appendedDay.stay > 0, "Estimated preset should populate nightly hotel rate on appended day");
+
+  // Clean Blank ¥0 draft mode preserves stay === 0 while assigning real 3-4 star hotel
+  getEl("newTripTitleInput").value = "Clean Blank Map Add";
+  getEl("newTripStartInput").value = "2027-07-01";
+  getEl("newTripDaysInput").value = "3";
+  getEl("newTripCostMode").value = "blank";
+  getEl("newTripEmptySlots").checked = true;
+  getEl("newTripCityChips").querySelectorAll = () => [
+    { classList: { contains: () => true }, dataset: { city: "Tokyo" } }
+  ];
+  ctx.submitNewBlankTrip();
+  getEl("mapLocationInput").value = "Matsuyama";
+  ctx.addCustomMapLocation();
+  assert.strictEqual(ctx.state.dataEn.days.length, 4);
+  const blankAddedDay = ctx.state.dataEn.days[3];
+  assert.strictEqual(blankAddedDay.stay, 0, "Clean Blank ¥0 trip must preserve ¥0 stay rate when appending map stop");
+  assert.strictEqual(blankAddedDay.hotel, ctx.CITY_HOTELS.matsuyama.nameEn, "Clean Blank day still defaults hotel name cleanly");
+
+  // Direct region edit in Tab 2 resolves prefecture-level fallback hotel for non-common destinations
+  ctx.updateDayRegionAndMap(1, "Shimane");
+  assert.strictEqual(ctx.state.dataEn.days[1].hotel, ctx.PREFECTURE_HOTELS.shimane.nameEn, "Region edit to Shimane must resolve prefectural 3-4 star hotel");
+
+  // Adding a prefecture/uncommon location via "+ Add Stop & Day" immediately opens full-prefecture Place Card
+  getEl("mapLocationInput").value = "Shimane";
+  ctx.addCustomMapLocation();
+  const shimaneAddedMapHtml = ctx.buildInteractiveJapanMapHtml();
+  assert(shimaneAddedMapHtml.includes('id="gmapsPlaceCard"') && shimaneAddedMapHtml.includes('data-highlight-scope="prefecture"') && shimaneAddedMapHtml.includes('data-pref-id="shimane"'), "Adding Shimane via map must auto-open Shimane prefecture highlight Place Card");
+
+  // 20. v2.3.0 Drag-and-Drop Day Rearrangement & Sequential Re-dating + Undo
+  ctx.loadTripPreset("userpreset_feb2027_16d", { skipUndo: true, force: true });
+  const febDaysOrig = ctx.state.dataEn.days.map(d => d.routeJp);
+  const day15Route = febDaysOrig[14];
+  const day2Route = febDaysOrig[1];
+  ctx.state.expandedDays = { 15: true };
+  // Test direct drag-drop handler moving Day 15 (idx 14) -> Day 2 (idx 1)
+  ctx.handleDayDragStart(14, { dataTransfer: { effectAllowed: "", setData() {} }, currentTarget: null });
+  ctx.handleDayDrop(1, { preventDefault() {}, dataTransfer: { getData: () => "14" } });
+  assert.strictEqual(ctx.state.dataEn.days[1].routeJp, day15Route, "Day 15 moved to Day 2 must sit at index 1");
+  assert.strictEqual(ctx.state.dataEn.days[2].routeJp, day2Route, "Previous Day 2 must shift smoothly to Day 3");
+  assert.strictEqual(ctx.state.expandedDays[2], true, "Expanded drawer state must follow moved day to Day 2");
+  for (let i = 0; i < ctx.state.dataEn.days.length; i++) {
+    assert.strictEqual(ctx.state.dataEn.days[i].day, i + 1, "Day numbers must remain strictly 1..N after reorder");
+    const expectedDt = ctx.formatDateYMD(new Date(2027, 1, 21 + i));
+    assert.strictEqual(ctx.state.dataEn.days[i].date, expectedDt, "Calendar dates must stay sequential after reorder");
+  }
+  ctx.undoLastChange();
+  assert.strictEqual(ctx.state.dataEn.days[14].routeJp, day15Route, "Undo must revert drag-and-drop day reorder cleanly");
+
+  // 21. v2.3.0 Memoization & Active-Tab Dirty Flush Optimization Checks
+  const railCall1 = ctx.computeRailPassMetrics();
+  const railCall2 = ctx.computeRailPassMetrics();
+  assert.strictEqual(railCall1, railCall2, "Consecutive computeRailPassMetrics() calls without edits must hit memo cache");
+  ctx.updateRailDayFare(1, "jr", 9800);
+  const railCall3 = ctx.computeRailPassMetrics();
+  assert.notStrictEqual(railCall1, railCall3, "Editing JR fare must invalidate rail metrics memo cache");
+
+  ctx.loadTripPreset("userpreset_feb2027_16d", { skipUndo: true, force: true });
+  const revBefore = ctx.state._rev;
+  const dirty1 = ctx.isActiveTripDirty();
+  const dirty2 = ctx.isActiveTripDirty();
+  assert.strictEqual(dirty1, dirty2, "isActiveTripDirty() should agree across unchanged _rev");
+  ctx.updateDayField(0, "hotel", "APA Hotel Test Optimization");
+  assert(ctx.state._rev > revBefore, "saveState() must increment monotonic state._rev");
+  assert.strictEqual(ctx.isActiveTripDirty(), true, "Dirty cache must invalidate on state._rev bump");
+
+  ctx.switchTab("itinerary", null);
+  ctx.renderActiveViews();
+  assert(ctx._dirtyTabs && ctx._dirtyTabs.has("budget"), "renderActiveViews() on Schedule tab must defer hidden Budget tab in _dirtyTabs");
+  ctx.switchTab("budget", null);
+  assert(!ctx._dirtyTabs.has("budget"), "switchTab('budget') must flush deferred dirty Budget tab immediately");
 
   console.log("ALL_UNIT_AND_AUDIT_TESTS_PASSED");
 }

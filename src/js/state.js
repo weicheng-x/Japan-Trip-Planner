@@ -27,6 +27,8 @@ window.state = {
   customMapLocations: [],
   manualMapZoom: null,
   focusedPrefId: null,
+  selectedMapStopId: null,
+  _rev: 1,
   startDate: "2026-10-21",
   endDate: "2026-11-11",
   customTitleEn: null,
@@ -141,7 +143,13 @@ window.parseDateLocal = function(str) {
 };
 
 let _desktopSaveTimer = null;
+window.bumpStateRev = function() {
+  state._rev = (Number(state._rev) || 1) + 1;
+  return state._rev;
+};
+
 window.saveState = function() {
+  window.bumpStateRev();
   try {
     localStorage.setItem(window.STORAGE_KEY, JSON.stringify(state));
   } catch (e) {
@@ -194,6 +202,7 @@ window.ensureSeededUserPresets = function() {
 window.applyStateFromParsed = function(parsed) {
   if (!parsed || !parsed.dataEn || !parsed.dataJa) return false;
   Object.assign(state, parsed);
+  window.bumpStateRev();
   if (!Array.isArray(state.shoppingList)) state.shoppingList = [];
   if (!Array.isArray(state.savedCustomPresets)) state.savedCustomPresets = [];
   window.ensureSeededUserPresets();
@@ -249,6 +258,9 @@ window.toggleHeroPeek = function() {
 
 window.switchTab = function(tabId, btnEl) {
   state.activeTab = tabId;
+  if (typeof window.flushDirtyTab === "function") {
+    window.flushDirtyTab(tabId);
+  }
   document.querySelectorAll(".tab-pane").forEach(el => el.classList.remove("active"));
   document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
   const target = document.getElementById("tab-" + tabId);
@@ -295,6 +307,11 @@ window.handleFxKeydown = function(e) {
   if (e.key === "-" || e.key === "+" || e.key === "e" || e.key === "E") e.preventDefault();
 };
 
+window.refreshActiveViews = function() {
+  if (typeof window.renderActiveViews === "function") window.renderActiveViews();
+  else if (typeof window.renderAll === "function") window.renderAll();
+};
+
 window.handleFxInput = function(el, isBlurOrChange) {
   if (!el) return;
   let cleaned = String(el.value || "").replace(/-/g, "").replace(/[^0-9.]/g, "");
@@ -307,7 +324,7 @@ window.handleFxInput = function(el, isBlurOrChange) {
       el.value = "0";
       state.fxRate = 0;
       window.saveState();
-      window.renderAll();
+      window.refreshActiveViews();
     } else {
       el.value = cleaned;
     }
@@ -322,7 +339,7 @@ window.handleFxInput = function(el, isBlurOrChange) {
   if (el.value !== cleaned) el.value = cleaned;
   state.fxRate = num;
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews();
 };
 
 window.handlePaxKeydown = function(e) {
@@ -339,7 +356,7 @@ window.handlePaxInput = function(el, isBlurOrChange) {
       el.value = "1";
       state.paxCount = 1;
       window.saveState();
-      window.renderAll();
+      window.refreshActiveViews();
     } else {
       el.value = "";
     }
@@ -351,7 +368,7 @@ window.handlePaxInput = function(el, isBlurOrChange) {
   el.value = String(n);
   state.paxCount = n;
   window.saveState();
-  window.renderAll();
+  window.refreshActiveViews();
 };
 
 window.debouncedUpdateCustomTitle = window.debounce(function(val) {

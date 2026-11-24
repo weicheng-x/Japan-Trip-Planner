@@ -15,6 +15,11 @@ Interactive **Japan Master Trip & Budget Planner** available as a live **Web App
 - **Interactive Japan Route Map & Schedule Builder:** SVG route map synced with daily/hourly time-slot editing and city stops.
 - **Hotels, Multi-Currency Budget & Rail Pass Optimizer:** Track nightly stays, reconcile transport/accommodation/dining/shopping budgets across currencies, and compare Pay-As-You-Go vs. JR Pass options.
 - **Curated Tabelog Gourmet Guide, Transit & Shopping Tabs:** Built-in dining highlights, local transit references, and shopping checklist.
+- **Google Maps Aesthetics, Real MLIT Geography & Fast Workflow (`v2.3.0`):**
+  - **Survey-Grade Japan Map & City vs. Prefecture Highlights:** Real 47-prefecture + 95-city coastlines and borders (`src/data/japan-geo.js`) styled in Google Maps Light/Night palettes with smooth drag-pan, cursor-centered wheel zoom, and a floating Place Card. Clicking a common city highlights its exact municipality boundary; clicking an uncommon city or prefectural stop highlights the full prefecture boundary.
+  - **One-Click Map Stop → Schedule Day + 3–4★ Hotel Defaults:** Adding any stop on Tab 1 appends a new latest Day in Tab 2 and automatically assigns a curated 3–4★ hotel (covering all 80 priority cities and all 47 prefectures in `src/data/hotels-catalog.js`, preserving `¥0` rates in Clean Blank mode).
+  - **Drag-and-Drop Day Rearrangement:** Drag any day card (`⠿` handle) or quick-jump strip pill (`D15 → D2`) or use the direct `Move → D#` selector in Tab 2 to reorder days instantaneously with automatic date re-indexing and single-step Undo.
+  - **Modular Architecture & Speed Optimizations:** Split domain actions cleanly (`schedule-actions.js`, `map-interact.js`) and added active-tab lazy dirty rendering, `WeakMap`/`_rev` memoized metrics (`computeRailPassMetrics`, `isActiveTripDirty`, `getMatchedJapanLocations`), and visibility-aware canvas throttling.
 - **Preset Management, 47-Prefecture Regional Engine & Sharing (`v2.2.0`):**
   - **All 47 Prefectures + 80 Sightseeing City Catalogs:** Covers every prefecture plus 32+ priority cities (`Hachinohe`, `Shin-Aomori`, `Hirosaki`, `Nyuto Onsen`, `Kaminoyama`, `Kinugawa`, `Arima`, `Izu`, `Atami`, `Hamamatsu`, `Naha`, `Hakone`, `Shizuoka`, `Yokohama`, `Azumino`, `Hakuba`, `Takasaki`, `Nikko`, `Sado Island`, `Matsushima`, `Zao`, `Tsuruoka`, `Sapporo`, `Chitose`, `Asahikawa`, `Rebun Island`, `Matsue`, `Shimonoseki`, `Kurashiki`, `Awaji Island`, `Takamatsu`, `Matsuyama`, etc.) — city catalogs take priority when visited, falling back cleanly to prefectural guides.
   - **Prefecture Grouping, Un-Lumped Map Pins & Prefecture Zoom:** Distinct city pins (`Hachinohe`/`Hirosaki`/`Mutsu Bay`, `Sendai`/`Matsushima`, `Kobe`/`Himeji`/`Arima`, `Tottori`, `Shimane`), prefecture-grouped Schedule filter pills, and clickable Prefecture Zoom chips/halos on the interactive map.
@@ -31,7 +36,7 @@ Open **https://weicheng-x.github.io/Japan-Trip-Planner/** directly — no instal
 
 ### 2. Portable Windows Desktop App or Offline Single-File HTML
 Download the latest assets from **[GitHub Releases](https://github.com/weicheng-x/Japan-Trip-Planner/releases/latest)**:
-- **`JP Trip Planner 2.2.0.exe`** — Portable Windows Electron desktop app (run directly with no installer required; supports native file dialogs and local desktop persistence).
+- **`JP Trip Planner 2.3.0.exe`** — Portable Windows Electron desktop app (run directly with no installer required; supports native file dialogs and local desktop persistence).
 - **`JP_Trip_Planner.html`** — Standalone single-file offline HTML bundle with embedded styles, scripts, and seasonal hero images.
 
 ### 3. Run or Build from Source

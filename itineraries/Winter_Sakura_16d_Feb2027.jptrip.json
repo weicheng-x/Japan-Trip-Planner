@@ -1,9 +1,9 @@
 {
   "schema": "jp-trip-planner-preset-v2",
-  "exportedAt": "2026-11-24T18:37:48.061Z",
-  "appVersion": "2.2.0",
+  "exportedAt": "2026-11-24T19:50:01.716Z",
+  "appVersion": "2.3.0",
   "preset": {
-    "id": "userpreset_1795545468061_468",
+    "id": "userpreset_1795549801716_410",
     "labelEn": "[Winter] Tokyo, Kawazu Sakura, Fujikawa SA, Kyoto, Kanazawa, Takayama & Kusatsu (16 days)",
     "labelJa": "[冬] 東京・河津桜・富士川SA・京都・金沢・飛騨高山＆草津温泉 (16日間)",
     "startDate": "2027-02-21",
@@ -77,7 +77,8 @@
               "desc": "Evening view at Tokyo Metropolitan Gov't Bldg South Deck & yakitori dinner"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 2,
@@ -140,7 +141,8 @@
               "desc": "Evening Fuji Excursion return train to Shinjuku APA Hotel"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 3,
@@ -192,7 +194,8 @@
               "desc": "Sunset panorama from Shibuya Sky 46F rooftop over Tokyo & Mt. Fuji twilight"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 4,
@@ -253,7 +256,8 @@
               "desc": "JR Tokaido Line back via Atami to Shizuoka & check in APA Hotel Shizuoka-eki Kita"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 5,
@@ -307,7 +311,8 @@
               "desc": "Shizuoka dark-broth oden skewers & grilled black hanpen at Aoba Oden Alley (★3.56)"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 6,
@@ -360,7 +365,8 @@
               "desc": "Golden-hour Fushimi Inari Taisha climb, then crispy tonkatsu at Katsukura (★3.64)"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 7,
@@ -421,7 +427,8 @@
               "desc": "Lantern-lit Gion Hanamikoji stroll & Pontocho alley dinner (duck ramen ★3.70)"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 8,
@@ -474,7 +481,8 @@
               "desc": "Scenic Randen tram + bus to Kinkaku-ji Golden Pavilion & return to Kyoto Stn for Nakamura Tokichi matcha (★3.75)"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 9,
@@ -527,7 +535,8 @@
               "desc": "Walk Kenrokuen Garden under iconic winter yukitsuri pine ropes + Kanazawa Castle & Higashi Chaya gold-leaf soft serve (★3.55)"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 10,
@@ -589,7 +598,8 @@
               "desc": "Butcher-direct A5 Hida Wagyu grill & Hoba Miso dinner at Hidagyu Maruaki (Tabelog ★3.69)"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 11,
@@ -641,7 +651,8 @@
               "desc": "Return to Takayama for historic merchant streets, Takayama Jinya & Chuka Soba dinner (★3.74)"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 12,
@@ -695,7 +706,8 @@
               "desc": "JR Shinano to Nagano + Hokuriku Shinkansen to Takasaki & check in APA Hotel Takasaki Ekimae (Gunma Torimeshi dinner ★3.54)"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 13,
@@ -748,7 +760,8 @@
               "desc": "Huge open-air Sainokawara snow hot spring soak, Yubatake dusk lights & return to Takasaki APA"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 14,
@@ -801,7 +814,8 @@
               "desc": "Shibuya / Nakameguro evening stroll & Shinjuku Fuunji tsukemen dinner (★3.86)"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 15,
@@ -853,7 +867,8 @@
               "desc": "Akihabara electronics/pop-culture browsing & farewell Tokyo Station ramen street / Ginza Hachigou (★3.86)"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         },
         {
           "day": 16,
@@ -896,7 +911,8 @@
               "desc": "Airport express train transfer & international flight home"
             }
           ],
-          "_unrecognizedPlace": false
+          "_unrecognizedPlace": false,
+          "_unrecognizedRaw": ""
         }
       ],
       "hotels": [
@@ -3791,7 +3807,7 @@
       "weather": {}
     },
     "shoppingList": [],
-    "updatedAt": "2026-11-24T18:37:48.061Z",
+    "updatedAt": "2026-11-24T19:50:01.716Z",
     "_activeLangHint": "en"
   }
 }
