@@ -231,3 +231,46 @@ window.exportCsv = async function() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   window.showToast(en ? `📥 Downloaded ${filename}` : `📥 ${filename} をダウンロードしました`);
 };
+
+window.buildCatalogDisclaimerIconHtml = function(en) {
+  const titleText = en
+    ? "Pre-populated offline regional data — click for details"
+    : "事前収録のオフライン地域データについて";
+  const bodyText = en
+    ? "Note: Synced Gourmet, Transit & Guide entries are drawn from pre-populated offline data built into this app rather than a live online API. Ratings, train timetables, and store hours may have changed — always confirm latest info via the Tabelog / Official links."
+    : "ご注意：「旅程から同期」機能はアプリ内蔵の事前収録データ（オフライン）を参照しており、リアルタイムAPI検索ではありません。最新の評価点数・営業時間・時刻表は各Tabelog／公式リンクよりご確認ください。";
+  return `<span class="info-tip-wrap"><button type="button" class="info-tip-btn" aria-label="${window.escapeAttr(titleText)}" title="${window.escapeAttr(titleText)}" onclick="toggleInfoTipPopover(this, event)">?</button><span class="info-tip-popover" role="note"><strong>${en ? "ℹ️ Pre-Populated Offline Data" : "ℹ️ 事前収録データについて"}</strong><span>${window.escapeHtml(bodyText)}</span></span></span>`;
+};
+
+window.toggleInfoTipPopover = function(btn, evt) {
+  if (evt && evt.stopPropagation) evt.stopPropagation();
+  const wrap = btn && btn.closest ? btn.closest(".info-tip-wrap") : null;
+  const pop = wrap ? wrap.querySelector(".info-tip-popover") : null;
+  if (!pop) return;
+  const wasOpen = pop.classList.contains("open");
+  if (typeof document !== "undefined") {
+    document.querySelectorAll(".info-tip-popover.open").forEach(el => el.classList.remove("open"));
+  }
+  if (!wasOpen) {
+    if (btn && typeof btn.getBoundingClientRect === "function" && typeof window !== "undefined") {
+      const rect = btn.getBoundingClientRect();
+      const vw = window.innerWidth || 1200;
+      const openLeftward = (rect.left > vw - 330) || (rect.left > 340 && vw - rect.right < 290);
+      pop.classList.toggle("align-left", !openLeftward);
+      pop.classList.toggle("align-right", openLeftward);
+    }
+    pop.classList.add("open");
+  }
+};
+
+if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
+  document.addEventListener("click", evt => {
+    if (evt && evt.target && evt.target.closest && evt.target.closest(".info-tip-wrap")) return;
+    document.querySelectorAll(".info-tip-popover.open").forEach(el => el.classList.remove("open"));
+  });
+  document.addEventListener("keydown", evt => {
+    if (evt && evt.key === "Escape") {
+      document.querySelectorAll(".info-tip-popover.open").forEach(el => el.classList.remove("open"));
+    }
+  });
+}

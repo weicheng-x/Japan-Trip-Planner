@@ -429,10 +429,14 @@
       en ? "Access Notes" : "アクセス",
       en ? "Tag" : "分類",
       en ? "Notes" : "コメント",
-      en ? "Link" : "URL"
+      en ? "Restaurant Website" : "公式サイトURL",
+      en ? "Tabelog Rating Link" : "食べログURL"
     ]];
     foodList.forEach(f => {
-      foodRows.push([f.region || "", f.dish || "", f.place || "", f.tabelogScore || "", f.transitText || "", f.sourceTag || "", f.note || "", f.url || ""]);
+      const tbLink = typeof window.resolveTabelogUrlForItem === "function"
+        ? window.resolveTabelogUrlForItem(f, !en)
+        : (f.tabelogUrl || "");
+      foodRows.push([f.region || "", f.dish || "", f.place || "", f.tabelogScore || "", f.transitText || "", f.sourceTag || "", f.note || "", f.url || "", tbLink || ""]);
     });
 
     // 7. Transit & Guides Sheet
@@ -478,7 +482,7 @@
       { name: en ? "Hourly Time Slots" : "時間帯別プラン", freezeTopRow: true, cols: [6, 12, 9, 9, 14, 30, 54], rows: slotRows },
       { name: en ? "Hotels & Stays" : "宿泊ホテル", freezeTopRow: true, cols: [7, 16, 36, 13, 22, 8, 15, 15, 14, 38, 46, 28], rows: hotelRows },
       { name: en ? "Budget & Rail Pass" : "予算・鉄道パス", freezeTopRow: true, cols: [38, 22, 18, 54], rows: budgetRows },
-      { name: en ? "Gourmet Guide" : "グルメ案内", freezeTopRow: true, cols: [22, 36, 36, 14, 38, 20, 48, 30], rows: foodRows },
+      { name: en ? "Gourmet Guide" : "グルメ案内", freezeTopRow: true, cols: [22, 36, 36, 14, 38, 20, 48, 34, 38], rows: foodRows },
       { name: en ? "Transit & Guides" : "交通PDF・観光ガイド", freezeTopRow: true, cols: [18, 24, 22, 42, 52, 34], rows: guideRows },
       { name: en ? "Shopping List" : "買い物リスト", freezeTopRow: true, cols: [10, 32, 26, 13, 8, 14, 14, 32], rows: shopRows }
     ];

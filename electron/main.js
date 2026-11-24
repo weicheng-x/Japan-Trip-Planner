@@ -76,7 +76,11 @@ function createWindow() {
             heroImgSize: heroImg ? [heroImg.naturalWidth, heroImg.naturalHeight] : [0, 0],
             hasDesktopAPI: !!(window.jpDesktopAPI && window.jpDesktopAPI.exportXlsx && window.jpDesktopAPI.exportPreset),
             hasAutoPopulateGuides: typeof window.syncRegionalCatalogsFromSchedule === "function",
-            hasTransitLegEditor: typeof window.addDayTransitLeg === "function"
+            hasTransitLegEditor: typeof window.addDayTransitLeg === "function",
+            prefectureCount: (window.JAPAN_PREFECTURES || []).length,
+            prefCatalogCount: Object.keys(window.PREFECTURE_CATALOGS || {}).length,
+            cityCatalogCount: Object.keys(window.CITY_CATALOGS || {}).length,
+            hasRomanization: typeof window.normalizeJapanRomaji === "function"
           };
         })()`);
         console.log("SMOKE_PROBE:", JSON.stringify(probe));
@@ -85,7 +89,7 @@ function createWindow() {
           app.exit(1);
           return;
         }
-        if (!probe.heroImgComplete || probe.presetCount !== 7 || probe.hasCustomBlankInCatalog || !probe.hasFeb2027 || !probe.hasDesktopAPI || !probe.hasAutoPopulateGuides || !probe.hasTransitLegEditor) {
+        if (!probe.heroImgComplete || probe.presetCount !== 7 || probe.hasCustomBlankInCatalog || !probe.hasFeb2027 || !probe.hasDesktopAPI || !probe.hasAutoPopulateGuides || !probe.hasTransitLegEditor || probe.prefectureCount !== 47 || probe.prefCatalogCount !== 47 || probe.cityCatalogCount < 75 || !probe.hasRomanization) {
           console.error("SMOKE_FAILED_ASSERTIONS", probe);
           app.exit(1);
           return;

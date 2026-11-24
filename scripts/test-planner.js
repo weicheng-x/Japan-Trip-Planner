@@ -81,7 +81,10 @@ function createDomSandbox() {
 
   const loadOrder = [
     "data/tohoku22.js",
+    "data/romanization.js",
     "data/gazetteer.js",
+    "data/prefectures-catalog.js",
+    "data/cities-catalog.js",
     "data/catalogs.js",
     "data/presets.js",
     "data/feb2027-preset.js",
@@ -304,11 +307,137 @@ function run() {
   ctx.loadTripPreset("userpreset_feb2027_16d", { skipUndo: true, force: true });
   const presetExport = ctx.buildPresetExportPayload();
   assert.strictEqual(presetExport.envelope.schema, "jp-trip-planner-preset-v2");
-  assert.strictEqual(presetExport.envelope.appVersion, "2.1.0");
+  assert.strictEqual(presetExport.envelope.appVersion, "2.2.0");
   const xlsx = ctx.buildExcelWorkbookPayload();
   assert(xlsx.bytes.length > 20000);
   assert.strictEqual(xlsx.bytes[0], 0x50);
   assert.strictEqual(xlsx.bytes[1], 0x4B);
+
+  // 13. Critique 2: All 47 Prefectures + 32 Requested Priority Cities + Complete City Catalogs
+  assert.strictEqual(ctx.JAPAN_PREFECTURES.length, 47, "Expected all 47 Japan prefectures");
+  assert.strictEqual(Object.keys(ctx.PREFECTURE_CATALOGS).length, 47, "Expected all 47 prefecture catalogs");
+  const reqCityKeys = [
+    "hachinohe", "shin_aomori", "hirosaki", "kaminoyama_onsen", "kinugawa_onsen",
+    "nyuto_onsen", "arima_onsen", "izu", "atami", "hamamatsu", "naha", "hakone",
+    "shizuoka", "yokohama", "azumino", "hakuba", "takasaki", "nikko", "sado_island",
+    "matsushima", "zao", "tsuruoka", "sapporo", "chitose", "asahikawa", "rebun_island",
+    "matsue", "shimonoseki", "kurashiki", "awaji_island", "takamatsu", "matsuyama"
+  ];
+  reqCityKeys.forEach(ck => {
+    const p = ctx.CITY_CATALOGS[ck];
+    assert(p, `Missing priority city catalog: ${ck}`);
+    assert(p.food.length >= 3 && p.food.length <= 4, `${ck} food count out of range: ${p.food.length}`);
+    assert(p.access.length >= 1 && p.access.length <= 2, `${ck} access count out of range`);
+    assert(p.guides.length >= 1 && p.guides.length <= 2, `${ck} guides count out of range`);
+  });
+  Object.entries(Object.assign({}, ctx.PREFECTURE_CATALOGS, ctx.CITY_CATALOGS)).forEach(([k, p]) => {
+    assert(p.food.length >= 3 && p.food.length <= 4, `${k} food invalid len ${p.food.length}`);
+    assert(p.access.length >= 1 && p.access.length <= 2, `${k} access invalid len`);
+    assert(p.guides.length >= 1 && p.guides.length <= 2, `${k} guides invalid len`);
+    p.food.forEach((f, idx) => {
+      assert(f.url && !f.url.includes("tabelog.com"), `${k} food[${idx}] url must be restaurant homepage`);
+      assert(f.tabelogUrl && f.tabelogUrl.includes("tabelog.com"), `${k} food[${idx}] tabelogUrl must point to tabelog.com`);
+    });
+  });
+
+  // 14. Critique 4: Forgiving Romanization & False Positive Guards
+  ["Nyuto Onsen", "Nyuutou Onsen", "Nyuuto Onsen", "Nyutou Onsen", "Nyūtō Onsen"].forEach(variant => {
+    const matched = ctx.findMatchingGazetteerStops(variant);
+    assert(matched.some(m => m.id === "nyuto_onsen"), `Failed to recognize '${variant}' as nyuto_onsen`);
+  });
+  assert(ctx.findMatchingGazetteerStops("Sizuoka").some(m => m.id === "shizuoka"), "Sizuoka should match shizuoka");
+  assert(ctx.findMatchingGazetteerStops("Simane").some(m => m.id === "pref_shimane"), "Simane should match Shimane Pref.");
+  assert(ctx.findMatchingGazetteerStops("Matusima").some(m => m.id === "matsushima"), "Matusima should match matsushima");
+  assert(ctx.findMatchingGazetteerStops("Kurasiki").some(m => m.id === "kurashiki"), "Kurasiki should match kurashiki");
+  assert(ctx.findMatchingGazetteerStops("Shinaomori").some(m => m.id === "shin_aomori"), "Shinaomori should match shin_aomori");
+  assert(!ctx.findMatchingGazetteerStops("Hotel Nikko Osaka").some(m => m.id === "nikko"), "Hotel Nikko must NOT trigger Nikko");
+  assert(!ctx.findMatchingGazetteerStops("Saga-Arashiyama Bamboo Grove").some(m => m.id === "pref_saga" || m.id === "saga"), "Saga-Arashiyama must NOT trigger Saga Pref.");
+
+  // 15. Critique 1: Un-lumped Cities, Tottori/Shimane Accuracy, Tab 2 Prefecture Grouping & Interactive Prefecture Zoom
+  const kobeHits = ctx.findMatchingGazetteerStops("Kobe").map(m => m.id);
+  assert(kobeHits.includes("kobe") && !kobeHits.includes("himeji") && !kobeHits.includes("arima_onsen"), "Kobe must not lump Himeji or Arima");
+  const tottoriHits = ctx.findMatchingGazetteerStops("Tottori").map(m => m.id);
+  assert(tottoriHits.includes("tottori_city") && !tottoriHits.includes("okayama_city"), "Tottori must map to tottori_city, not Okayama");
+  const shimaneHits = ctx.findMatchingGazetteerStops("Shimane").map(m => m.id);
+  assert(shimaneHits.includes("pref_shimane"), "Shimane must be recognized as pref_shimane");
+
+  // Multi-stop Aomori + Miyagi schedule test
+  ctx.state.mapScopeMode = "schedule";
+  ctx.state.customMapLocations = [];
+  ctx.state.focusedPrefId = null;
+  ctx.state.activeRegionKey = "ALL";
+  ctx.state.dataEn.days = [
+    { day: 1, date: "2027-04-01", dow: "Thu", region: "Hachinohe", routeJp: "Hachinohe Hasshoku Center", routeEn: "Market", hotel: "APA Hachinohe", stay: 8000, travelBase: 2000, fun: 3000, legs: [], timeSlots: [] },
+    { day: 2, date: "2027-04-02", dow: "Fri", region: "Hirosaki", routeJp: "Hirosaki Castle Park", routeEn: "Cherry Blossoms", hotel: "APA Hirosaki", stay: 8000, travelBase: 1500, fun: 2000, legs: [], timeSlots: [] },
+    { day: 3, date: "2027-04-03", dow: "Sat", region: "Mutsu Bay", routeJp: "Mutsu Bay & Oma Coast", routeEn: "Cape Oma", hotel: "Mutsu Hotel", stay: 8000, travelBase: 3000, fun: 4000, legs: [], timeSlots: [] },
+    { day: 4, date: "2027-04-04", dow: "Sun", region: "Matsushima", routeJp: "Matsushima Bay Cruise", routeEn: "Three Views", hotel: "Matsushima Ryokan", stay: 12000, travelBase: 2000, fun: 4000, legs: [], timeSlots: [] },
+    { day: 5, date: "2027-04-05", dow: "Mon", region: "Sendai", routeJp: "Sendai Castle & Gyutan", routeEn: "City Walk", hotel: "APA Sendai", stay: 8000, travelBase: 1000, fun: 3000, legs: [], timeSlots: [] }
+  ];
+  ctx.state.dataJa.days = JSON.parse(JSON.stringify(ctx.state.dataEn.days));
+  const mapStopsMulti = ctx.getMatchedJapanLocations().map(s => s.id);
+  assert(mapStopsMulti.includes("hachinohe") && mapStopsMulti.includes("hirosaki") && mapStopsMulti.includes("mutsu_bay"), "All 3 Aomori stops must appear separately");
+  assert(mapStopsMulti.includes("matsushima") && mapStopsMulti.includes("sendai"), "Matsushima and Sendai must appear separately");
+
+  ctx.renderItineraryCards();
+  const regPillsHtml = getEl("regionFilters").innerHTML;
+  assert(regPillsHtml.includes("Aomori (3d)"), `Tab 2 must group Hachinohe/Hirosaki/Mutsu under Aomori (3d), got: ${regPillsHtml}`);
+  assert(regPillsHtml.includes("Miyagi (2d)"), `Tab 2 must group Matsushima/Sendai under Miyagi (2d), got: ${regPillsHtml}`);
+  const dayCardsHtml = getEl("itineraryList").innerHTML;
+  assert(dayCardsHtml.includes("Aomori Pref.") && dayCardsHtml.includes("Miyagi Pref."), "Day cards must show prefecture badges");
+
+  ctx.focusMapPrefecture("aomori");
+  const aomoriZoomHtml = ctx.buildInteractiveJapanMapHtml();
+  assert(aomoriZoomHtml.includes("Prefecture Zoom: Aomori (3 stops)"), "Focusing Aomori must display 3 stops zoomed header");
+  assert(aomoriZoomHtml.includes("Back to Full Route"), "Focusing prefecture must render Back to Full Route button");
+  ctx.focusMapPrefecture(null);
+  const fullMapHtml = ctx.buildInteractiveJapanMapHtml();
+  assert(fullMapHtml.includes('data-pref-id="aomori"') && fullMapHtml.includes("map-pref-cluster"), "Full route map must include clickable Aomori prefecture cluster halo");
+
+  // 16. Critique 2: City Priority vs Prefecture Fallback Sync
+  ctx.state.dataEn.days = [
+    { day: 1, date: "2027-05-01", dow: "Sat", region: "Matsue", routeJp: "Matsue Castle & Lake Shinji", routeEn: "Matsue", hotel: "Hotel Ichibata", stay: 9000, travelBase: 1000, fun: 3000, legs: [], timeSlots: [] },
+    { day: 2, date: "2027-05-02", dow: "Sun", region: "Saga", routeJp: "Saga Prefecture Ceramic Tour", routeEn: "Saga", hotel: "Saga City Hotel", stay: 9000, travelBase: 2000, fun: 3000, legs: [], timeSlots: [] }
+  ];
+  ctx.state.dataJa.days = JSON.parse(JSON.stringify(ctx.state.dataEn.days));
+  ctx.state.dataEn.food = [];
+  ctx.state.dataEn.access = [];
+  ctx.state.dataEn.guides = [];
+  ctx.state.dataJa.food = [];
+  ctx.state.dataJa.access = [];
+  ctx.state.dataJa.guides = [];
+  const syncRes = ctx.syncRegionalCatalogsFromSchedule();
+  assert(syncRes.detected.cityKeys.includes("matsue"), "Matsue should trigger city catalog");
+  assert(!syncRes.detected.fallbackPrefIds.includes("shimane"), "Shimane prefecture fallback must NOT duplicate when Matsue matched");
+  assert(syncRes.detected.fallbackPrefIds.includes("saga"), "Generic Saga day should fall back to Saga prefecture catalog");
+  assert(ctx.state.dataEn.food.length >= 6, "Sync should populate gourmet items from Matsue + Saga");
+  assert(ctx.state.dataEn.food.every(f => typeof f.id === "number" && f.transitText && f.sourceTag && f.tabelogUrl.includes("tabelog.com")), "Synced gourmet items must use exact UI fields and Tabelog links");
+
+  // 17. Critiques 3 & 5: Offline (?) Disclaimer & Tabelog vs Restaurant Homepage Separation
+  ctx.loadTripPreset("tohoku22", { skipUndo: true, force: true });
+  ctx.renderOverviewTab();
+  ctx.renderGourmet();
+  ctx.renderAccessTable();
+  ctx.renderGuidesTable();
+  assert(getEl("overviewLeftCol").innerHTML.includes("info-tip-btn"), "Overview must include (?) offline data icon");
+  assert(getEl("foodRegionPills").innerHTML.includes("info-tip-btn"), "Gourmet tab must include (?) offline data icon");
+  assert(getEl("accessAreaPills").innerHTML.includes("info-tip-btn"), "Access tab must include (?) offline data icon");
+  assert(getEl("guideAreaPills").innerHTML.includes("info-tip-btn"), "Guides tab must include (?) offline data icon");
+
+  const tohokuGrid = getEl("gourmetGrid").innerHTML;
+  assert(!tohokuGrid.includes("autoreserve.com") || tohokuGrid.indexOf("tabelog-badge") < tohokuGrid.indexOf("autoreserve.com"), "Gourmet rating badge must prioritize tabelog.com over autoreserve");
+  const badgeHrefs = [...tohokuGrid.matchAll(/class="tabelog-badge"[\s\S]*?<a href="([^"]+)"/g)].map(m => m[1]);
+  assert(badgeHrefs.length >= 5, "Tohoku Gourmet grid must render clickable rating links");
+  badgeHrefs.forEach(u => assert(/^https:\/\/(?:[a-z0-9-]+\.)?tabelog\.com\//i.test(u), `Rating badge must link to Tabelog, got: ${u}`));
+  assert(ctx.resolveTabelogUrlForItem({ place: "Aomori Gyosai Center Main Market", region: "Aomori & Morioka", tabelogUrl: "https://autoreserve.com/x" }, false).includes("/en/aomori/"), "Aomori Gyosai Center must resolve to /en/aomori/");
+  assert(ctx.resolveTabelogUrlForItem({ place: "Hasshoku Center Shichirin-mura", region: "Aomori & Morioka", tabelogUrl: "https://autoreserve.com/x" }, false).includes("/en/aomori/"), "Hasshoku Center must resolve to /en/aomori/");
+  assert(ctx.resolveTabelogUrlForItem({ place: "Sobadokoro Azumaya Morioka Ekimae", region: "Aomori & Morioka", tabelogUrl: "https://autoreserve.com/x" }, false).includes("/en/iwate/"), "Azumaya Morioka must resolve to /en/iwate/");
+
+  ctx.loadTripPreset("goldenRoute", { skipUndo: true, force: true });
+  ctx.renderGourmet();
+  const grGrid = getEl("gourmetGrid").innerHTML;
+  const grBadges = [...grGrid.matchAll(/class="tabelog-badge"[\s\S]*?<a href="([^"]+)"/g)].map(m => m[1]);
+  assert(grBadges.length >= 5 && grBadges.every(u => u.includes("tabelog.com")), "Golden Route rating badges must all point to Tabelog");
+  assert(getEl("foodFormBar").innerHTML.includes("newFoodTabelogUrl"), "Gourmet add form must accept separate restaurant & Tabelog URLs");
 
   console.log("ALL_UNIT_AND_AUDIT_TESTS_PASSED");
 }

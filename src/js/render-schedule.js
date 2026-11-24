@@ -17,14 +17,25 @@
   function getDynamicRegionPills() {
     const en = window.isEn();
     const days = (window.curData().days) || [];
-    const counts = {};
+    const groups = new Map();
     days.forEach(d => {
-      const r = d.region || (en ? "Tokyo" : "東京");
-      counts[r] = (counts[r] || 0) + 1;
+      const pref = typeof window.getPrimaryPrefectureForDay === "function"
+        ? window.getPrimaryPrefectureForDay(d)
+        : null;
+      const key = pref ? `PREF:${pref.id}` : (d.region || (en ? "Other" : "その他"));
+      if (!groups.has(key)) {
+        groups.set(key, { key, pref, count: 0 });
+      }
+      groups.get(key).count += 1;
     });
     const pills = [{ key: "ALL", label: en ? `All Days (${days.length}d)` : `全日程 (${days.length}日)` }];
-    Object.entries(counts).forEach(([reg, cnt]) => {
-      pills.push({ key: reg, label: en ? `${window.formatRegionLabel(reg, true)} (${cnt}d)` : `${reg} (${cnt}日)` });
+    groups.forEach(g => {
+      if (g.pref) {
+        const lbl = en ? `${g.pref.nameEn} (${g.count}d)` : `${g.pref.nameJa} (${g.count}日)`;
+        pills.push({ key: g.key, label: `📍 ${lbl}` });
+      } else {
+        pills.push({ key: g.key, label: en ? `${window.formatRegionLabel(g.key, true)} (${g.count}d)` : `${g.key} (${g.count}日)` });
+      }
     });
     return pills;
   }
@@ -568,8 +579,23 @@
     }
 
     const query = (searchBox.value || "").toLowerCase().trim();
+    const dayMatchesActiveKey = (d) => {
+      if (state.activeRegionKey === "ALL") return true;
+      const k = String(state.activeRegionKey || "");
+      if (k.startsWith("PREF:")) {
+        const targetPrefId = k.slice(5);
+        const pref = typeof window.getPrimaryPrefectureForDay === "function"
+          ? window.getPrimaryPrefectureForDay(d)
+          : null;
+        return !!(pref && pref.id === targetPrefId);
+      }
+      return d.region === k;
+    };
+    if (state.activeRegionKey !== "ALL" && !daysList.some(dayMatchesActiveKey)) {
+      state.activeRegionKey = "ALL";
+    }
     const filtered = daysList.filter(d => {
-      if (state.activeRegionKey !== "ALL" && d.region !== state.activeRegionKey) return false;
+      if (!dayMatchesActiveKey(d)) return false;
       if (query) {
         const slotText = (d.timeSlots || []).map(s => `${s.timeFrom} ${s.timeTo} ${s.locFrom} ${s.locTo} ${s.category} ${s.desc}`).join(" ");
         const hay = `${d.routeJp} ${d.routeEn} ${d.hotel} ${d.region} ${d.tip} ${(d.legs || []).join(" ")} ${slotText}`.toLowerCase();
@@ -655,6 +681,13 @@
         `;
       }).join("");
 
+      const dayPref = typeof window.getPrimaryPrefectureForDay === "function"
+        ? window.getPrimaryPrefectureForDay(d)
+        : null;
+      const prefBadgeHtml = dayPref
+        ? `<span class="pref-day-badge" title="${en ? "Detected Prefecture" : "判定された都道府県"}">📍 ${window.escapeHtml(en ? `${dayPref.nameEn} Pref.` : dayPref.nameJa)}</span>`
+        : "";
+
       return `
         <article id="day-card-${d.day}" class="day-card ${d.passCovered ? "pass-active" : ""} ${d.needsAttention || d._unrecognizedPlace ? "needs-attention" : ""}">
           <div class="day-header">
@@ -663,6 +696,7 @@
               <span class="day-date">${window.escapeHtml(d.date)} (${window.escapeHtml(d.dow)})</span>
               <input type="text" class="editable-text" style="width:130px;min-width:105px;font-weight:800;font-size:11.5px;padding:3px 8px;background:var(--surface-alt);border:1px solid var(--border);"
                 value="${window.escapeAttr(d.region || "")}" onchange="updateDayRegionAndMap(${idx}, this.value)" title="${en ? "Edit Region/City (updates Map)" : "エリア編集（地図連動）"}">
+              ${prefBadgeHtml}
               ${unrecHtml}
               <span style="font-size:11px;color:var(--ink-muted);background:var(--bg);border:1px solid var(--border);padding:2px 8px;border-radius:999px;font-weight:600;">${window.escapeHtml(weatherTip)}</span>
               ${d.passCovered ? `<span class="pass-badge">🚄 ${en ? "Pass Active" : "パス適用"}</span>` : ""}

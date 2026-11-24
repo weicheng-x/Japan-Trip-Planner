@@ -31,18 +31,31 @@ window.addCustomFood = function() {
   const place = (document.getElementById("newFoodPlace")?.value || "").trim();
   const rating = (document.getElementById("newFoodRating")?.value || "").trim();
   const access = (document.getElementById("newFoodAccess")?.value || "").trim();
+  const rawHomeUrl = (document.getElementById("newFoodUrl")?.value || "").trim();
+  const rawTbUrl = (document.getElementById("newFoodTabelogUrl")?.value || "").trim();
   if (!dish) {
     window.showToast(en ? "Please enter a specialty dish name" : "料理名を入力してください");
     return;
   }
+  const resolvedPlace = place || "Custom Spot";
   const newId = Date.now();
+  const tbEn = typeof window.resolveTabelogUrlForItem === "function"
+    ? window.resolveTabelogUrlForItem({ place: resolvedPlace, region: regVal, tabelogUrl: rawTbUrl }, false)
+    : rawTbUrl;
+  const tbJa = typeof window.resolveTabelogUrlForItem === "function"
+    ? window.resolveTabelogUrlForItem({ place: resolvedPlace, region: regVal, tabelogUrl: rawTbUrl }, true)
+    : rawTbUrl;
   const entryEn = {
-    id: newId, region: regVal, dish, place: place || "Custom Spot", url: "",
-    tabelogScore: rating ? `★ ${rating}` : "★ 3.55", tabelogUrl: "",
+    id: newId, region: regVal, dish, place: resolvedPlace, url: rawHomeUrl,
+    tabelogScore: rating ? `★ ${rating}` : "★ 3.55", tabelogUrl: tbEn,
     transitLevel: "easy", transitText: access ? `🟢 ${access}` : "🟢 Public Transit Accessible",
     sourceTag: "Custom Added", note: "User-added gourmet spot.", tried: false
   };
-  const entryJa = Object.assign({}, entryEn, { sourceTag: "カスタム追加", note: "プランナー上で追加したグルメ候補です。" });
+  const entryJa = Object.assign({}, entryEn, {
+    tabelogUrl: tbJa,
+    sourceTag: "カスタム追加",
+    note: "プランナー上で追加したグルメ候補です。"
+  });
   state.dataEn.food.unshift(entryEn);
   state.dataJa.food.unshift(entryJa);
   window.saveState();
@@ -58,8 +71,8 @@ window.renderGourmet = function() {
     ? `🍜 Regional Gourmet Guide (${foodList.length} Curated Spots)`
     : `🍜 ご当地グルメガイド（全${foodList.length}選）`;
   document.getElementById("gourmetTabLead").textContent = en
-    ? "Curated regional specialties with Tabelog ratings and station walkability badges. Add or remove spots anytime."
-    : "訪問エリアごとの必食グルメを厳選（食べログ参考スコア＆駅徒歩アクセス付）。自由に追加・削除が可能です。";
+    ? "Curated regional specialties — click the restaurant name for its official homepage, or click the Rating badge for Tabelog reviews."
+    : "訪問エリアごとの必食グルメを厳選（店名クリックで公式HP、評価バッジクリックで食べログへ遷移）。";
 
   const regCounts = {};
   foodList.forEach(f => { regCounts[f.region] = (regCounts[f.region] || 0) + 1; });
@@ -67,18 +80,21 @@ window.renderGourmet = function() {
   Object.entries(regCounts).forEach(([rName, cnt]) => { dynamicPills.push({ key: rName, label: `${rName} (${cnt})` }); });
   dynamicPills.push({ key: "EASY_ONLY", label: en ? "🟢 Station Walkable" : "🟢 駅チカ徒歩圏" });
 
+  const tipHtml = typeof window.buildCatalogDisclaimerIconHtml === "function" ? window.buildCatalogDisclaimerIconHtml(en) : "";
   document.getElementById("foodRegionPills").innerHTML = dynamicPills.map(rk => `
     <button type="button" class="pill ${state.activeFoodKey === rk.key ? "active" : ""}" data-key="${window.escapeAttr(rk.key)}" onclick="filterFoodKey(this.dataset.key)">${window.escapeHtml(rk.label)}</button>
-  `).join("") + `<button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;margin-left:4px;" onclick="syncRegionalCatalogsFromSchedule()">✨ ${en ? "Sync from Schedule" : "日程から自動追加"}</button>`;
+  `).join("") + `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:4px;"><button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;" onclick="syncRegionalCatalogsFromSchedule()">✨ ${en ? "Sync from Schedule" : "日程から自動追加"}</button>${tipHtml}</span>`;
 
   const regionOptions = Object.keys(regCounts).length > 0 ? Object.keys(regCounts) : [en ? "Tokyo" : "東京"];
   document.getElementById("foodFormBar").innerHTML = `
-    <input type="text" id="newFoodRegion" class="search-input" list="foodRegionDatalist" placeholder="${en ? "City / Region" : "エリア名"}" value="${window.escapeAttr(regionOptions[0] || "")}" style="min-width:155px;">
+    <input type="text" id="newFoodRegion" class="search-input" list="foodRegionDatalist" placeholder="${en ? "City / Region" : "エリア名"}" value="${window.escapeAttr(regionOptions[0] || "")}" style="min-width:140px;">
     <datalist id="foodRegionDatalist">${regionOptions.map(r => `<option value="${window.escapeAttr(r)}"></option>`).join("")}</datalist>
     <input type="text" id="newFoodDish" class="search-input" placeholder="${en ? "Specialty Dish" : "料理名"}">
     <input type="text" id="newFoodPlace" class="search-input" placeholder="${en ? "Restaurant Name" : "店名"}">
-    <input type="text" id="newFoodRating" class="search-input" placeholder="${en ? "Score (e.g. 3.65)" : "評価 (例: 3.65)"}" style="min-width:120px;">
-    <input type="text" id="newFoodAccess" class="search-input" placeholder="${en ? "Transit Access" : "駅アクセス"}" style="flex:1;">
+    <input type="text" id="newFoodRating" class="search-input" placeholder="${en ? "Score (e.g. 3.65)" : "評価 (例: 3.65)"}" style="min-width:110px;">
+    <input type="text" id="newFoodAccess" class="search-input" placeholder="${en ? "Transit Access" : "駅アクセス"}" style="min-width:140px;">
+    <input type="url" id="newFoodUrl" class="search-input" placeholder="${en ? "Restaurant URL (optional)" : "公式サイトURL（任意）"}" style="min-width:160px;">
+    <input type="url" id="newFoodTabelogUrl" class="search-input" placeholder="${en ? "Tabelog URL (optional)" : "食べログURL（任意）"}" style="min-width:160px;">
     <button type="button" class="btn btn-primary" onclick="addCustomFood()">${en ? "+ Add Gourmet" : "+ グルメ追加"}</button>
   `;
 
@@ -93,20 +109,22 @@ window.renderGourmet = function() {
     const m = String(f.tabelogScore || "").match(/(\d+\.\d+)/);
     const numScore = m ? parseFloat(m[1]) : 3.5;
     const barPct = Math.min(100, Math.max(40, Math.round(((numScore - 3.0) / 1.1) * 100)));
-    const pUrl = window.safeUrl(f.url);
-    const tUrl = window.safeUrl(f.tabelogUrl);
+    const rawHome = window.safeUrl(f.url);
+    const pUrl = (rawHome && !/^https?:\/\/(?:[a-z0-9-]+\.)?tabelog\.com\//i.test(rawHome)) ? rawHome : "";
+    const resolvedTb = typeof window.resolveTabelogUrlForItem === "function" ? window.resolveTabelogUrlForItem(f, !en) : (f.tabelogUrl || "");
+    const tUrl = window.safeUrl(resolvedTb);
 
     return `
       <div class="food-card ${f.tried ? "tried" : ""}">
         <div>
           <div class="food-header">
             <span class="region-tag">${window.escapeHtml(f.region)}</span>
-            <span class="tabelog-badge">🍽️ ${en ? "Rating:" : "評価:"} ${tUrl ? `<a href="${window.escapeAttr(tUrl)}" target="_blank" rel="noopener">${window.escapeHtml(f.tabelogScore)}</a>` : window.escapeHtml(f.tabelogScore)}</span>
+            <span class="tabelog-badge">🍽️ ${en ? "Tabelog" : "食べログ"} ${tUrl ? `<a href="${window.escapeAttr(tUrl)}" target="_blank" rel="noopener" title="${window.escapeAttr(en ? "View ratings & reviews on Tabelog" : "食べログで評価・口コミを見る")}">${window.escapeHtml(f.tabelogScore)} ↗</a>` : window.escapeHtml(f.tabelogScore)}</span>
           </div>
           <div class="score-bar-track"><div class="score-bar-fill" style="width:${barPct}%;"></div></div>
           <div class="food-title" style="margin-top:9px;">${window.escapeHtml(f.dish)}</div>
           <div style="font-size:13px;font-weight:800;margin:4px 0;">
-            📍 ${pUrl ? `<a href="${window.escapeAttr(pUrl)}" target="_blank" rel="noopener">${window.escapeHtml(f.place)} ↗</a>` : window.escapeHtml(f.place)}
+            📍 ${pUrl ? `<a href="${window.escapeAttr(pUrl)}" target="_blank" rel="noopener" title="${window.escapeAttr(en ? "Open restaurant homepage" : "店舗公式サイトを開く")}">${window.escapeHtml(f.place)} ↗</a>` : window.escapeHtml(f.place)}
             <span class="food-origin-tag" style="margin-left:5px;">${window.escapeHtml(f.sourceTag)}</span>
           </div>
           <div class="transit-badge ${tClass}">${window.escapeHtml(f.transitText)}</div>
@@ -183,9 +201,10 @@ window.renderAccessTable = function() {
   const pills = [{ key: "ALL", label: en ? `All Areas (${accessList.length})` : `全エリア (${accessList.length})` }];
   Object.entries(areaCounts).forEach(([aName, cnt]) => { pills.push({ key: aName, label: `${aName} (${cnt})` }); });
 
+  const tipHtml = typeof window.buildCatalogDisclaimerIconHtml === "function" ? window.buildCatalogDisclaimerIconHtml(en) : "";
   document.getElementById("accessAreaPills").innerHTML = pills.map(ak => `
     <button type="button" class="pill ${state.activeAccessKey === ak.key ? "active" : ""}" data-key="${window.escapeAttr(ak.key)}" onclick="filterAccessKey(this.dataset.key)">${window.escapeHtml(ak.label)}</button>
-  `).join("") + `<button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;margin-left:4px;" onclick="syncRegionalCatalogsFromSchedule()">✨ ${en ? "Sync from Schedule" : "日程から自動追加"}</button>`;
+  `).join("") + `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:4px;"><button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;" onclick="syncRegionalCatalogsFromSchedule()">✨ ${en ? "Sync from Schedule" : "日程から自動追加"}</button>${tipHtml}</span>`;
 
   const defaultArea = Object.keys(areaCounts)[0] || (en ? "Tokyo" : "東京");
   document.getElementById("accessFormBar").innerHTML = `
@@ -312,9 +331,10 @@ window.renderGuidesTable = function() {
   const pills = [{ key: "ALL", label: en ? `All Regions (${guidesList.length})` : `全エリア (${guidesList.length})` }];
   Object.entries(areaCounts).forEach(([aName, cnt]) => { pills.push({ key: aName, label: `${aName} (${cnt})` }); });
 
+  const tipHtml = typeof window.buildCatalogDisclaimerIconHtml === "function" ? window.buildCatalogDisclaimerIconHtml(en) : "";
   document.getElementById("guideAreaPills").innerHTML = pills.map(gk => `
     <button type="button" class="pill ${state.activeGuideKey === gk.key ? "active" : ""}" data-key="${window.escapeAttr(gk.key)}" onclick="filterGuideKey(this.dataset.key)">${window.escapeHtml(gk.label)}</button>
-  `).join("") + `<button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;margin-left:4px;" onclick="syncRegionalCatalogsFromSchedule()">✨ ${en ? "Sync from Schedule" : "日程から自動追加"}</button>`;
+  `).join("") + `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:4px;"><button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;" onclick="syncRegionalCatalogsFromSchedule()">✨ ${en ? "Sync from Schedule" : "日程から自動追加"}</button>${tipHtml}</span>`;
 
   const defaultArea = Object.keys(areaCounts)[0] || (en ? "Tokyo" : "東京");
   document.getElementById("guideFormBar").innerHTML = `

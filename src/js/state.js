@@ -26,6 +26,7 @@ window.state = {
   mapScopeMode: "schedule",
   customMapLocations: [],
   manualMapZoom: null,
+  focusedPrefId: null,
   startDate: "2026-10-21",
   endDate: "2026-11-11",
   customTitleEn: null,
@@ -267,7 +268,12 @@ window.switchTabById = function(tabId) {
 };
 
 window.jumpToRegionSchedule = function(regKey) {
-  state.activeRegionKey = regKey;
+  let targetKey = regKey || "ALL";
+  if (targetKey && targetKey !== "ALL" && !String(targetKey).startsWith("PREF:") && typeof window.getPrimaryPrefectureForDay === "function") {
+    const pref = window.getPrimaryPrefectureForDay({ region: targetKey, route: "", title: "", hotel: "", highlights: [] });
+    if (pref && pref.id) targetKey = `PREF:${pref.id}`;
+  }
+  state.activeRegionKey = targetKey;
   window.switchTabById("itinerary");
   window.renderItineraryCards();
 };

@@ -43,7 +43,10 @@ vm.createContext(ctx);
 
 [
   "data/tohoku22.js",
+  "data/romanization.js",
   "data/gazetteer.js",
+  "data/prefectures-catalog.js",
+  "data/cities-catalog.js",
   "data/catalogs.js",
   "data/presets.js",
   "data/feb2027-preset.js",

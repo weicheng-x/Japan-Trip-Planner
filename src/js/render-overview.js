@@ -39,8 +39,12 @@
       const dayCnt = p.endDay - p.startDay + 1;
       const summaryRoutes = p.routes.slice(0, 3).map(r => window.escapeHtml(r)).join(" • ") + (p.routes.length > 3 ? " …" : "");
       const safeReg = window.escapeAttr(p.region);
+      const prefMatch = typeof window.getPrimaryPrefectureForDay === "function"
+        ? window.getPrimaryPrefectureForDay({ region: p.region, routeJp: p.routes.join(" "), title: "", hotel: p.hotels.join(" "), highlights: [] })
+        : null;
+      const jumpKey = window.escapeAttr(prefMatch ? `PREF:${prefMatch.id}` : p.region);
       return `
-        <div class="phase-card" style="border-left-color:${col};" data-region="${safeReg}" onclick="jumpToRegionSchedule(this.dataset.region)">
+        <div class="phase-card" style="border-left-color:${col};" data-region="${safeReg}" data-jump-key="${jumpKey}" onclick="jumpToRegionSchedule(this.dataset.jumpKey || this.dataset.region)">
           <div class="phase-days">${daySpan}<br><small>${window.escapeHtml(dateSpan)} (${dayCnt}${en ? "d" : "日"})</small></div>
           <div class="phase-info">
             <h4>${idx + 1}. ${window.escapeHtml(window.formatRegionLabel(p.region, en))} ${p.hotels[0] ? `— ${window.escapeHtml(p.hotels[0])}` : ""}</h4>
@@ -115,8 +119,8 @@
       <div class="section-card">
         <h2>
           <span>🧭 ${en ? `${daysLen}-Day Route Masterplan` : `${daysLen}日間 ルート全体像（フェーズ一覧）`}</span>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button type="button" class="btn" style="font-size:11.5px;padding:5px 10px;" onclick="syncRegionalCatalogsFromSchedule()">✨ ${en ? "Sync Guides & Gourmet" : "グルメ・ガイド自動追加"}</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <span style="display:inline-flex;align-items:center;gap:4px;"><button type="button" class="btn" style="font-size:11.5px;padding:5px 10px;" onclick="syncRegionalCatalogsFromSchedule()">✨ ${en ? "Sync Guides & Gourmet" : "グルメ・ガイド自動追加"}</button>${typeof window.buildCatalogDisclaimerIconHtml === "function" ? window.buildCatalogDisclaimerIconHtml(en) : ""}</span>
             <button type="button" class="btn btn-primary" style="font-size:11.5px;padding:5px 10px;" onclick="addItineraryDay()">${en ? "+ Add Day" : "+ 日程追加"}</button>
             <button type="button" class="btn" style="font-size:11.5px;padding:5px 10px;" onclick="removeLastItineraryDay()">${en ? "− Remove Last" : "− 最終日削除"}</button>
           </div>

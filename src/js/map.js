@@ -1,32 +1,35 @@
 // Dynamic Multi-Island Japan Route Map with Collision-Avoided Labels & Unrecognized Fallback
 
 (function() {
-  window.gazetteerKeyMatches = function(textLower, keyLower) {
-    if (!textLower || !keyLower) return false;
-    if (/[^\x00-\x7F]/.test(keyLower)) {
-      return textLower.includes(keyLower);
-    }
-    const escaped = keyLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const rx = new RegExp("(^|[^a-z0-9])" + escaped + "(?=$|[^a-z0-9])", "i");
-    return rx.test(textLower);
-  };
-
   window.findMatchingGazetteerStops = function(rawText) {
-    const q = String(rawText || "").toLowerCase().trim();
-    if (!q) return [];
+    const prep = typeof window.prepareGazetteerText === "function"
+      ? window.prepareGazetteerText(rawText)
+      : { rawLower: String(rawText || "").toLowerCase().trim(), normText: String(rawText || "").toLowerCase().trim() };
+    if (!prep.rawLower) return [];
+
     const matches = [];
     (window.JAPAN_GAZETTEER || []).forEach(g => {
-      if (g.id === q || g.keys.some(k => window.gazetteerKeyMatches(q, k))) {
+      if (g.id === prep.rawLower || g.keys.some(k => window.gazetteerKeyMatches(prep, k))) {
         matches.push(g);
       }
     });
-    return matches;
+
+    // If Shin-Aomori matched, suppress Aomori/Hakkoda pin unless an explicit Hakkoda/Aomori-city term is present
+    const hasShinAomori = matches.some(m => m.id === "shin_aomori");
+    const hasExplicitAomoriCity = /(?:hakkoda|tsutanuma|jogakura|nebuta|aomori city|aomori station|八甲田|蔦沼|城ヶ倉|ねぶた|青森市|青森駅)/i.test(prep.rawLower);
+    const filteredAomori = (hasShinAomori && !hasExplicitAomoriCity)
+      ? matches.filter(m => m.id !== "aomori_city")
+      : matches;
+
+    // Suppress generic prefecture fallback entry when a specific city inside that prefecture matched the same text
+    const specificPrefs = new Set(filteredAomori.filter(m => !m.isPrefFallback && m.prefId).map(m => m.prefId));
+    return filteredAomori.filter(m => !m.isPrefFallback || !specificPrefs.has(m.prefId));
   };
 
   window.getMatchedJapanLocations = function() {
     const matchedMap = new Map();
     const tokyoStop = (window.JAPAN_GAZETTEER || []).find(g => g.id === "tokyo") || {
-      id: "tokyo", nameEn: "Tokyo Central", nameJa: "東京", regionKey: "Tokyo", x: 668, y: 518
+      id: "tokyo", prefId: "tokyo", cityKey: "tokyo", nameEn: "Tokyo Central", nameJa: "東京", regionKey: "Tokyo", x: 668, y: 518
     };
 
     const addStop = (gItem) => {
@@ -37,7 +40,7 @@
 
     if (Array.isArray(state.customMapLocations) && state.customMapLocations.length > 0) {
       state.customMapLocations.forEach((raw, idx) => {
-        const q = String(raw || "").toLowerCase().trim();
+        const q = String(raw || "").trim();
         if (!q) return;
         const foundList = window.findMatchingGazetteerStops(q);
         if (foundList.length > 0) {
@@ -46,6 +49,7 @@
           const unrecId = "unrec_custom_" + idx;
           matchedMap.set(unrecId, {
             id: unrecId,
+            prefId: "tokyo",
             nameEn: `❗ ${raw} → Tokyo (Not recognised in Japan)`,
             nameJa: `❗ ${raw} → 東京（日本の地名として未認識）`,
             rawInput: raw,
@@ -61,7 +65,7 @@
     if (!state.mapScopeMode || state.mapScopeMode === "schedule") {
       const days = (window.curData().days) || [];
       days.forEach(d => {
-        const text = `${d.region || ""} ${d.routeJp || ""} ${d.hotel || ""}`.replace(/\bhotel\s+nikko\b/gi, "");
+        const text = `${d.region || ""} ${d.routeJp || ""} ${d.hotel || ""}`;
         const dayMatches = window.findMatchingGazetteerStops(text);
         if (dayMatches.length > 0) {
           d._unrecognizedPlace = false;
@@ -78,6 +82,7 @@
             const unrecDayId = "unrec_day_" + d.day;
             matchedMap.set(unrecDayId, {
               id: unrecDayId,
+              prefId: "tokyo",
               nameEn: `❗ ${labelRaw} (D${d.day}) → Tokyo`,
               nameJa: `❗ ${labelRaw} (D${d.day}) → 東京`,
               rawInput: labelRaw,
@@ -92,14 +97,40 @@
     }
 
     if (matchedMap.size === 0) addStop(tokyoStop);
-    return Array.from(matchedMap.values());
+    const list = Array.from(matchedMap.values());
+    // Suppress prefecture-level fallback pin whenever any specific city pin inside that prefecture exists across the itinerary
+    const prefsWithSpecificCity = new Set(list.filter(s => !s.isPrefFallback && !s.unrecognized && s.prefId).map(s => s.prefId));
+    return list.filter(s => !s.isPrefFallback || !prefsWithSpecificCity.has(s.prefId));
   };
 
   function isTokyoOnlySet(stops) {
     return stops.length > 0 && stops.every(s => s.x >= 640 && s.x <= 700 && s.y >= 495 && s.y <= 545);
   }
 
-  function computeDynamicViewBox(stops) {
+  function computeDynamicViewBox(stops, focusedPrefId) {
+    if (focusedPrefId && stops && stops.length > 0) {
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      stops.forEach(s => {
+        if (s.x < minX) minX = s.x;
+        if (s.x > maxX) maxX = s.x;
+        if (s.y < minY) minY = s.y;
+        if (s.y > maxY) maxY = s.y;
+      });
+      const spanX = Math.max(maxX - minX, 52);
+      const spanY = Math.max(maxY - minY, 54);
+      const padX = Math.max(spanX * 0.36, 26);
+      const padY = Math.max(spanY * 0.34, 26);
+      const vx = Math.max(55, Math.round(minX - padX));
+      const vy = Math.max(45, Math.round(minY - padY));
+      const vw = Math.min(875, Math.round(spanX + padX * 2));
+      const vh = Math.min(930, Math.round(spanY + padY * 2));
+      const pref = window.getPrefectureById ? window.getPrefectureById(focusedPrefId) : null;
+      return {
+        vx, vy, vw, vh,
+        modeLabelEn: `Prefecture Zoom: ${pref ? pref.nameEn : focusedPrefId} (${stops.length} ${stops.length === 1 ? "stop" : "stops"})`,
+        modeLabelJa: `都道府県拡大：${pref ? pref.nameJa : focusedPrefId}（${stops.length}地点）`
+      };
+    }
     if (state.manualMapZoom === "allJapan") {
       return { vx: 70, vy: 55, vw: 795, vh: 915, modeLabelEn: "Nationwide Japan (Hokkaido to Okinawa)", modeLabelJa: "日本全域（北海道〜沖縄）" };
     }
@@ -146,6 +177,10 @@
   // Greedy 2D bounding-box + side-flip label de-overlap in SVG viewBox space
   function layoutMapLabels(stops, box, rHub, fontSz, en) {
     const placed = [];
+    stops.forEach(s => {
+      const rObs = rHub * 1.15;
+      placed.push({ x0: s.x - rObs, x1: s.x + rObs, y0: s.y - rObs, y1: s.y + rObs });
+    });
     const charW = en ? fontSz * 0.56 : fontSz * 0.92;
     const labelH = fontSz * 1.18;
     const padX = fontSz * 0.6;
@@ -210,10 +245,37 @@
     });
   }
 
+  window.focusMapPrefecture = function(prefId) {
+    const en = window.isEn();
+    state.focusedPrefId = prefId || null;
+    state.manualMapZoom = null;
+    if (prefId && window.getPrefectureById) {
+      const pref = window.getPrefectureById(prefId);
+      if (pref) {
+        window.showToast(en ? `🔍 Zoomed into ${pref.nameEn} Prefecture` : `🔍 ${pref.nameJa}へズームしました`);
+      }
+    }
+    window.saveState();
+    window.renderOverviewTab();
+  };
+
   window.buildInteractiveJapanMapHtml = function() {
     const en = window.isEn();
     const stops = window.getMatchedJapanLocations();
-    const box = computeDynamicViewBox(stops);
+    stops.forEach((s, i) => { s._routeIdx = i; });
+
+    const prefGroups = new Map();
+    stops.forEach(s => {
+      if (s.unrecognized || !s.prefId) return;
+      if (!prefGroups.has(s.prefId)) prefGroups.set(s.prefId, []);
+      prefGroups.get(s.prefId).push(s);
+    });
+
+    const activePrefId = (state.focusedPrefId && prefGroups.has(state.focusedPrefId)) ? state.focusedPrefId : null;
+    if (state.focusedPrefId && !activePrefId) state.focusedPrefId = null;
+
+    const focusedStops = activePrefId ? prefGroups.get(activePrefId) : stops;
+    const box = computeDynamicViewBox(focusedStops, activePrefId);
     const unrecStops = stops.filter(s => s.unrecognized);
 
     const scale = box.vw / 380;
@@ -228,34 +290,95 @@
       const a = stops[i];
       const b = stops[i + 1];
       const dist = Math.hypot(b.x - a.x, b.y - a.y);
+      const isFocusedEdge = !activePrefId || (a.prefId === activePrefId && b.prefId === activePrefId);
+      const edgeOpacity = isFocusedEdge ? (dist > 135 ? "0.88" : "0.9") : "0.18";
       if (dist > 135 || a.regionKey === "Okinawa" || b.regionKey === "Okinawa" || a.regionKey === "Hokkaido" || b.regionKey === "Hokkaido") {
         const mx = (a.x + b.x) / 2 - (b.y - a.y) * 0.16;
         const my = (a.y + b.y) / 2 + (b.x - a.x) * 0.12;
-        pathsSvg += `<path d="M${a.x},${a.y} Q${mx},${my} ${b.x},${b.y}" stroke="var(--accent)" stroke-width="${lineW}" stroke-dasharray="${lineW * 2},${lineW * 1.4}" fill="none" opacity="0.88"/>`;
+        pathsSvg += `<path d="M${a.x},${a.y} Q${mx},${my} ${b.x},${b.y}" stroke="var(--accent)" stroke-width="${lineW}" stroke-dasharray="${lineW * 2},${lineW * 1.4}" fill="none" opacity="${edgeOpacity}"/>`;
       } else {
-        pathsSvg += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="var(--forest)" stroke-width="${lineW}" stroke-linecap="round" opacity="0.9"/>`;
+        pathsSvg += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="var(--forest)" stroke-width="${lineW}" stroke-linecap="round" opacity="${edgeOpacity}"/>`;
       }
     }
 
-    const labelPositions = layoutMapLabels(stops, box, rHub, fontSz, en);
-    const pinsSvg = stops.map((s, idx) => {
+    // Multi-stop Prefecture clickable cluster halos in Full Route view
+    let clustersSvg = "";
+    if (!activePrefId) {
+      prefGroups.forEach((pStops, pId) => {
+        if (pStops.length < 2) return;
+        const pref = window.getPrefectureById ? window.getPrefectureById(pId) : null;
+        if (!pref) return;
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        pStops.forEach(s => {
+          if (s.x < minX) minX = s.x;
+          if (s.x > maxX) maxX = s.x;
+          if (s.y < minY) minY = s.y;
+          if (s.y > maxY) maxY = s.y;
+        });
+        const cx = (minX + maxX) / 2;
+        const cy = (minY + maxY) / 2;
+        const rx = Math.max((maxX - minX) / 2 + rHub * 2.1, rHub * 3.0);
+        const ry = Math.max((maxY - minY) / 2 + rHub * 2.1, rHub * 3.0);
+        const pillFont = Math.max(2.2, fontSz * 0.86);
+        const badgeY = Math.max(box.vy + pillFont * 1.4, cy - ry - pillFont * 0.45);
+        const prefLabel = `${en ? pref.nameEn : pref.nameJa} (${pStops.length}) 🔍`;
+        clustersSvg += `
+          <g class="map-pref-cluster" data-pref-id="${window.escapeAttr(pId)}" onclick="focusMapPrefecture(this.dataset.prefId)" title="${window.escapeAttr(en ? `Click to zoom into ${pref.nameEn} (${pStops.length} stops)` : `${pref.nameJa}を拡大表示（${pStops.length}地点）`)}">
+            <ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="rgba(217,119,6,0.09)" stroke="var(--accent)" stroke-width="${Math.max(0.5, 1.3 * scale).toFixed(2)}" stroke-dasharray="${(3.2 * scale).toFixed(1)},${(2.2 * scale).toFixed(1)}"/>
+            <text x="${cx.toFixed(1)}" y="${badgeY.toFixed(1)}" text-anchor="middle" font-size="${pillFont.toFixed(2)}" font-weight="800" fill="var(--accent-dark, #B45309)" style="paint-order:stroke;stroke:#FFFFFF;stroke-width:${(pillFont * 0.34).toFixed(2)}px;stroke-linejoin:round;">
+              ${window.escapeHtml(prefLabel)}
+            </text>
+          </g>
+        `;
+      });
+    }
+
+    const labelTargetStops = activePrefId ? focusedStops : stops;
+    const labelPositions = layoutMapLabels(labelTargetStops, box, rHub, fontSz, en);
+    const labelPosByStopId = new Map();
+    labelTargetStops.forEach((s, i) => labelPosByStopId.set(s.id, labelPositions[i]));
+
+    const pinsSvg = stops.map(s => {
       const label = window.escapeHtml(en ? s.nameEn : s.nameJa);
-      const pos = labelPositions[idx];
+      const pos = labelPosByStopId.get(s.id);
+      const isDimmed = !!(activePrefId && s.prefId !== activePrefId);
       const pinFill = s.unrecognized ? "#DC2626" : (s.isAir ? "var(--accent)" : "var(--indigo)");
       const safeId = window.escapeAttr(s.id);
-      const safeReg = window.escapeAttr(s.regionKey || "ALL");
+      const safeReg = window.escapeAttr(s.prefId ? `PREF:${s.prefId}` : (s.regionKey || "ALL"));
+      const routeNum = (typeof s._routeIdx === "number" ? s._routeIdx : 0) + 1;
+      const circleR = (s._routeIdx === 0 || s._routeIdx === stops.length - 1 || s.unrecognized) ? rHub : rPin;
       return `
-        <g class="map-node" data-loc-id="${safeId}" data-region="${safeReg}" onclick="jumpToLocationFilter(this.dataset.locId, this.dataset.region)">
-          <circle cx="${s.x}" cy="${s.y}" r="${idx === 0 || idx === stops.length - 1 || s.unrecognized ? rHub : rPin}" fill="${pinFill}" stroke="#FFFFFF" stroke-width="${strokeW}"/>
-          <text x="${pos.tx.toFixed(1)}" y="${pos.ty.toFixed(1)}" text-anchor="${pos.anchor}" font-size="${fontSz.toFixed(2)}" font-weight="800" fill="${s.unrecognized ? "#B91C1C" : "#1E293B"}" style="paint-order:stroke;stroke:#FFFFFF;stroke-width:${(fontSz * 0.28).toFixed(2)}px;stroke-linejoin:round;">
-            ${idx + 1}. ${label}
-          </text>
+        <g class="map-node" style="${isDimmed ? "opacity:0.2;" : ""}" data-loc-id="${safeId}" data-region="${safeReg}" onclick="jumpToLocationFilter(this.dataset.locId, this.dataset.region)">
+          <circle cx="${s.x}" cy="${s.y}" r="${circleR}" fill="${pinFill}" stroke="#FFFFFF" stroke-width="${strokeW}"/>
+          ${pos ? `<text x="${pos.tx.toFixed(1)}" y="${pos.ty.toFixed(1)}" text-anchor="${pos.anchor}" font-size="${fontSz.toFixed(2)}" font-weight="800" fill="${s.unrecognized ? "#B91C1C" : "#1E293B"}" style="paint-order:stroke;stroke:#FFFFFF;stroke-width:${(fontSz * 0.28).toFixed(2)}px;stroke-linejoin:round;">
+            ${routeNum}. ${label}
+          </text>` : ""}
         </g>
       `;
     }).join("");
 
+    // Prefecture Zoom Bar HTML (Multi-stop prefectures listed first so grouped stops are one click away)
+    const prefEntries = Array.from(prefGroups.entries()).sort((a, b) => {
+      const diff = (b[1].length > 1 ? 1 : 0) - (a[1].length > 1 ? 1 : 0);
+      if (diff !== 0) return diff;
+      return b[1].length - a[1].length;
+    });
+    const mapPrefBarHtml = prefEntries.length > 0 ? `
+      <div class="map-pref-zoom-bar" id="mapPrefZoomBar">
+        <span class="map-pref-bar-label">${en ? "Prefecture Zoom:" : "都道府県ズーム:"}</span>
+        ${activePrefId ? `<button type="button" class="btn map-pref-chip map-pref-back" onclick="focusMapPrefecture(null)">← ${en ? "Back to Full Route" : "全体ルートへ戻る"}</button>` : ""}
+        ${prefEntries.map(([pId, pStops]) => {
+          const pref = window.getPrefectureById ? window.getPrefectureById(pId) : null;
+          if (!pref) return "";
+          const isActive = activePrefId === pId;
+          const cnt = pStops.length;
+          return `<button type="button" class="pill map-pref-chip ${isActive ? "active" : ""}" data-pref-id="${window.escapeAttr(pId)}" onclick="focusMapPrefecture('${window.escapeAttr(pId)}')" title="${window.escapeAttr(en ? `Zoom to ${pref.nameEn} (${cnt})` : `${pref.nameJa}（${cnt}地点）を拡大`)}">📍 ${window.escapeHtml(en ? pref.nameEn : pref.nameJa)} (${cnt})${cnt >= 2 ? " 🔍" : ""}</button>`;
+        }).join("")}
+      </div>
+    ` : "";
+
     const customTagsHtml = (state.customMapLocations || []).map((loc, idx) => {
-      const q = String(loc || "").toLowerCase().trim();
+      const q = String(loc || "").trim();
       const isKnown = window.findMatchingGazetteerStops(q).length > 0;
       const safeLoc = window.escapeHtml(loc);
       return `
@@ -285,13 +408,13 @@
       </h2>
       <p class="lead" style="margin-bottom:10px;">
         ${en
-          ? "Automatically zooms & frames your itinerary stops. Add any Japan city below or click any pin to filter Schedule (unrecognised places default to Tokyo with ❗)."
-          : "行程や追加都市名に合わせて自動ズームします。地図のピンをクリックすると該当日のスケジュールへ移動します（未認識の地名は ❗ マーク付きで東京に設定）。"}
+          ? "Automatically zooms & frames your itinerary stops. Click any pin to filter Schedule, or click a Prefecture chip/halo to inspect stops inside that prefecture."
+          : "行程や都市名に合わせて自動ズームします。地図のピンで日程へ移動、都道府県チップ／枠クリックで都道府県内スポットへ拡大します。"}
       </p>
 
       <div class="map-control-bar">
         <input type="text" id="mapLocationInput" class="search-input" style="min-width:180px;flex:1;padding:6px 10px;font-size:12px;"
-          placeholder="${window.escapeAttr(en ? "Add Japan stop (e.g. Tokyo, Ishigaki, Kyoto, Sapporo)..." : "都市名を追加（例：東京、石垣島、京都、札幌）...")}"
+          placeholder="${window.escapeAttr(en ? "Add Japan stop (e.g. Hachinohe, Tottori, Shimane, Nyuutou Onsen)..." : "都市名を追加（例：八戸、鳥取、島根、乳頭温泉）...")}"
           onkeydown="if(event.key==='Enter'){addCustomMapLocation();}">
         <button type="button" class="btn btn-primary" style="padding:6px 10px;font-size:11.5px;" onclick="addCustomMapLocation()">
           ${en ? "+ Add Stop" : "+ 地点追加"}
@@ -303,6 +426,7 @@
         <button type="button" class="btn" style="padding:5px 8px;font-size:11px;" onclick="setMapQuickScope('schedule')">🔄 ${en ? "Sync" : "連動"}</button>
       </div>
 
+      ${mapPrefBarHtml}
       ${unrecBannerHtml}
       ${customTagsHtml ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">${customTagsHtml}</div>` : ""}
 
@@ -314,6 +438,7 @@
               <stop offset="100%" stop-color="#DFD4BE"/>
             </linearGradient>
           </defs>
+          ${mp.rebun ? `<path d="${mp.rebun}" fill="url(#landGrad)" stroke="#B7A389" stroke-width="${smallStroke}"/>` : ""}
           <path d="${mp.hokkaido}" fill="url(#landGrad)" stroke="#B7A389" stroke-width="${landStroke}"/>
           <path d="${mp.honshu}" fill="url(#landGrad)" stroke="#B7A389" stroke-width="${landStroke}"/>
           <path d="${mp.sado}" fill="url(#landGrad)" stroke="#B7A389" stroke-width="${smallStroke}"/>
@@ -328,6 +453,7 @@
           <path d="${mp.miyako}" fill="url(#landGrad)" stroke="#B7A389" stroke-width="${smallStroke}"/>
           <path d="${mp.ishigaki}" fill="url(#landGrad)" stroke="#B7A389" stroke-width="${smallStroke}"/>
           <path d="${mp.iriomote}" fill="url(#landGrad)" stroke="#B7A389" stroke-width="${smallStroke}"/>
+          ${clustersSvg}
           ${pathsSvg}
           ${pinsSvg}
         </svg>
@@ -344,6 +470,7 @@
     if (!Array.isArray(state.customMapLocations)) state.customMapLocations = [];
     state.customMapLocations.push(val);
     state.manualMapZoom = null;
+    state.focusedPrefId = null;
     inp.value = "";
     const isKnown = window.findMatchingGazetteerStops(val).length > 0;
     window.saveState();
@@ -357,12 +484,14 @@
     if (!Array.isArray(state.customMapLocations)) return;
     state.customMapLocations.splice(idx, 1);
     state.manualMapZoom = null;
+    state.focusedPrefId = null;
     window.saveState();
     window.renderOverviewTab();
   };
 
   window.setMapQuickScope = function(scope) {
     const en = window.isEn();
+    state.focusedPrefId = null;
     if (scope === "tokyoOnly") {
       state.mapScopeMode = "customOnly";
       state.customMapLocations = ["Haneda", "Tokyo", "Shinjuku", "Asakusa", "Narita"];
@@ -398,34 +527,27 @@
     const searchEl = document.getElementById("itinerarySearch");
     if (searchEl) searchEl.value = "";
 
+    const g = (window.JAPAN_GAZETTEER || []).find(x => x.id === locId);
     let targetDayNum = null;
-    if (regionKey && regionKey !== "ALL") {
-      const regMatch = days.find(d => d.region === regionKey);
-      if (regMatch) {
-        state.activeRegionKey = regionKey;
-        targetDayNum = regMatch.day;
-        window.renderItineraryCards();
-        const el = document.getElementById("day-card-" + targetDayNum);
-        if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "center" });
-        return;
-      }
-    }
-
     state.activeRegionKey = "ALL";
+
     if (String(locId || "").startsWith("unrec_day_")) {
       const parsedDay = parseInt(String(locId).replace("unrec_day_", ""), 10);
       if (parsedDay > 0) targetDayNum = parsedDay;
-    } else {
-      const g = (window.JAPAN_GAZETTEER || []).find(x => x.id === locId);
-      if (g && Array.isArray(g.keys)) {
-        const matchedDay = days.find(d => {
-          const text = `${d.region || ""} ${d.routeJp || ""} ${d.hotel || ""} ${d.routeEn || ""}`
-            .replace(/\bhotel\s+nikko\b/gi, "")
-            .toLowerCase();
-          return g.keys.some(k => window.gazetteerKeyMatches(text, k));
-        });
-        if (matchedDay) targetDayNum = matchedDay.day;
+    } else if (g && Array.isArray(g.keys)) {
+      const matchedDay = days.find(d => {
+        const text = `${d.region || ""} ${d.routeJp || ""} ${d.hotel || ""} ${d.routeEn || ""}`;
+        const prep = typeof window.prepareGazetteerText === "function"
+          ? window.prepareGazetteerText(text)
+          : { rawLower: text.toLowerCase(), normText: text.toLowerCase() };
+        return g.keys.some(k => window.gazetteerKeyMatches(prep, k));
+      });
+      if (matchedDay) {
+        targetDayNum = matchedDay.day;
+        if (g.prefId) state.activeRegionKey = `PREF:${g.prefId}`;
       }
+    } else if (regionKey && regionKey !== "ALL" && String(regionKey).startsWith("PREF:")) {
+      state.activeRegionKey = regionKey;
     }
 
     window.renderItineraryCards();

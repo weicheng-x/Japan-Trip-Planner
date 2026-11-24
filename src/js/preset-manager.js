@@ -348,6 +348,7 @@ window.submitNewBlankTrip = function() {
   state.activeGuideKey = "ALL";
   state.customMapLocations = [];
   state.manualMapZoom = null;
+  state.focusedPrefId = null;
   state.mapScopeMode = "schedule";
   state.syncedLocalTransit = false;
   state.customPassPrice = null;
@@ -433,6 +434,7 @@ window.loadTripPreset = function(presetKey, opts) {
   state.activeGuideKey = "ALL";
   state.customMapLocations = [];
   state.manualMapZoom = null;
+  state.focusedPrefId = null;
   state.mapScopeMode = "schedule";
   state.syncedLocalTransit = false;
   state.customPassPrice = null;
@@ -530,7 +532,7 @@ window.buildPresetExportPayload = function() {
   const envelope = {
     schema: "jp-trip-planner-preset-v2",
     exportedAt: new Date().toISOString(),
-    appVersion: "2.1.0",
+    appVersion: "2.2.0",
     preset: snap
   };
   const cleanName = window.sanitizeTripDescriptor(en ? snap.customTitleEn : snap.customTitleJa) || "Japan_Trip_Preset";

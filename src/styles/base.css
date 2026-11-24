@@ -1384,10 +1384,129 @@ table.data-table tr:hover td { background: var(--surface-alt); }
 }
 .leg-add-input:focus { border-style: solid; border-color: var(--accent); outline: none; }
 
+/* Offline Catalog Info Tip (?) & Popover */
+.info-tip-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.info-tip-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-alt);
+  color: var(--ink-muted);
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.info-tip-btn:hover,
+.info-tip-btn:focus-visible {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #FFFFFF;
+  outline: none;
+}
+.info-tip-popover {
+  display: none;
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  z-index: 60;
+  width: 310px;
+  max-width: min(320px, 84vw);
+  padding: 11px 13px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+}
+.info-tip-popover.align-left { left: 0; right: auto; }
+.info-tip-popover.align-right { right: 0; left: auto; }
+.info-tip-popover.open { display: flex; flex-direction: column; gap: 4px; }
+.info-tip-popover strong { font-size: 12.5px; font-weight: 800; color: var(--accent); }
+body.dark-mode .info-tip-popover {
+  background: #1E293B;
+  color: #F1F5F9;
+  border-color: #475569;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* Prefecture Grouping Badges & Interactive Map Prefecture Zoom */
+.pref-day-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--indigo);
+  background: rgba(79, 70, 229, 0.08);
+  border: 1px solid rgba(79, 70, 229, 0.24);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+body.dark-mode .pref-day-badge {
+  color: #C7D2FE;
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(129, 140, 248, 0.35);
+}
+.map-pref-zoom-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 7px 10px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.map-pref-bar-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ink-muted);
+  margin-right: 2px;
+}
+.map-pref-chip {
+  font-size: 11.5px !important;
+  padding: 3px 9px !important;
+}
+.map-pref-chip.active {
+  background: var(--accent) !important;
+  color: #FFFFFF !important;
+  border-color: var(--accent) !important;
+}
+.map-pref-back {
+  font-size: 11.5px !important;
+  padding: 3px 9px !important;
+  font-weight: 800;
+}
+.map-pref-cluster {
+  cursor: pointer;
+  transition: opacity 0.16s ease;
+}
+.map-pref-cluster:hover ellipse {
+  fill: rgba(217, 119, 6, 0.18);
+  stroke-width: 2.2;
+}
+
 /* Clean Print Stylesheet */
 @media print {
   .nav-wrapper, .filter-bar, .hero-controls, .day-jump-strip, .body-seasonal-canvas,
-  .hero-seasonal-scene, .map-control-bar, .action-bar, .btn, button,
+  .hero-seasonal-scene, .map-control-bar, .map-pref-zoom-bar, .info-tip-wrap, .action-bar, .btn, button,
   .slot-add-bar, .leg-del-btn, .leg-add-inline, .day-actions-mini,
   #foodFormBar, #accessFormBar, #guideFormBar, #shoppingFormBar {
     display: none !important;

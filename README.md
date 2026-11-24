@@ -15,11 +15,12 @@ Interactive **Japan Master Trip & Budget Planner** available as a live **Web App
 - **Interactive Japan Route Map & Schedule Builder:** SVG route map synced with daily/hourly time-slot editing and city stops.
 - **Hotels, Multi-Currency Budget & Rail Pass Optimizer:** Track nightly stays, reconcile transport/accommodation/dining/shopping budgets across currencies, and compare Pay-As-You-Go vs. JR Pass options.
 - **Curated Tabelog Gourmet Guide, Transit & Shopping Tabs:** Built-in dining highlights, local transit references, and shopping checklist.
-- **Preset Management, New Trip Wizard & Sharing (`v2.1.0`):**
-  - **`➕ New` Multi-City Trip Wizard:** Choose destinations, start date, duration, Clean Blank (`¥0`) vs. quick estimates, and clean empty hourly slots.
-  - **`✨ Sync Guides & Gourmet`:** Auto-populate regional Tabelog restaurants, official metro/bus PDFs, and sightseeing guides directly from any city you add to your schedule.
-  - **Inline Schedule, Transit Legs & Chained Hotels:** Edit hotel base, nightly/daily spend, and transit legs directly on every day card; duplicate days; auto-chain hotel check-in/out dates; and sync verified out-of-pocket Rail Pass fares back into the budget.
-  - **Save Overwrite Guard & Dual Export/Import:** Overwrite in place or Save as New (with unsaved-change indicator and duplicate guard), export/import `.jptrip.json` presets, or generate an **8-sheet `.xlsx` Excel workbook** (`Overview`, `Daily Schedule`, `Hourly Time Slots`, `Hotels & Stays`, `Budget & Rail Pass`, `Gourmet Guide`, `Transit & Guides`, `Shopping List`).
+- **Preset Management, 47-Prefecture Regional Engine & Sharing (`v2.2.0`):**
+  - **All 47 Prefectures + 80 Sightseeing City Catalogs:** Covers every prefecture plus 32+ priority cities (`Hachinohe`, `Shin-Aomori`, `Hirosaki`, `Nyuto Onsen`, `Kaminoyama`, `Kinugawa`, `Arima`, `Izu`, `Atami`, `Hamamatsu`, `Naha`, `Hakone`, `Shizuoka`, `Yokohama`, `Azumino`, `Hakuba`, `Takasaki`, `Nikko`, `Sado Island`, `Matsushima`, `Zao`, `Tsuruoka`, `Sapporo`, `Chitose`, `Asahikawa`, `Rebun Island`, `Matsue`, `Shimonoseki`, `Kurashiki`, `Awaji Island`, `Takamatsu`, `Matsuyama`, etc.) — city catalogs take priority when visited, falling back cleanly to prefectural guides.
+  - **Prefecture Grouping, Un-Lumped Map Pins & Prefecture Zoom:** Distinct city pins (`Hachinohe`/`Hirosaki`/`Mutsu Bay`, `Sendai`/`Matsushima`, `Kobe`/`Himeji`/`Arima`, `Tottori`, `Shimane`), prefecture-grouped Schedule filter pills, and clickable Prefecture Zoom chips/halos on the interactive map.
+  - **Forgiving Japanese Romanization:** Recognizes long-vowel and Hepburn/Kunrei-shiki variants (`Nyuto Onsen`, `Nyuutou Onsen`, `Nyuuto Onsen`, `Nyutou Onsen`, `Sizuoka`, `Simane`, `Matusima`, `Kurasiki`, etc.).
+  - **Tabelog vs Restaurant Homepages & Offline `(?)` Disclaimer:** Clicking the gourmet Rating badge goes to **Tabelog** reviews while clicking the restaurant name opens its homepage; an inline `(?)` info popover beside Sync clarifies that synced entries come from offline pre-populated data.
+  - **`➕ New` Multi-City Trip Wizard & Dual Export/Import:** Choose destinations, Clean Blank (`¥0`) vs. estimates, Overwrite/Save-as-New guard, `.jptrip.json` import/export, and an **8-sheet `.xlsx` Excel workbook** (including separate Restaurant Website & Tabelog columns).
 
 ---
 
@@ -30,7 +31,7 @@ Open **https://weicheng-x.github.io/Japan-Trip-Planner/** directly — no instal
 
 ### 2. Portable Windows Desktop App or Offline Single-File HTML
 Download the latest assets from **[GitHub Releases](https://github.com/weicheng-x/Japan-Trip-Planner/releases/latest)**:
-- **`JP Trip Planner 2.1.0.exe`** — Portable Windows Electron desktop app (run directly with no installer required; supports native file dialogs and local desktop persistence).
+- **`JP Trip Planner 2.2.0.exe`** — Portable Windows Electron desktop app (run directly with no installer required; supports native file dialogs and local desktop persistence).
 - **`JP_Trip_Planner.html`** — Standalone single-file offline HTML bundle with embedded styles, scripts, and seasonal hero images.
 
 ### 3. Run or Build from Source
@@ -61,7 +62,7 @@ npm run build:win
 ## Automated GitHub Workflows
 
 - **GitHub Pages (`.github/workflows/pages.yml`):** Automatically deploys `src/` to GitHub Pages on pushes to `main`.
-- **Windows Release Builder (`.github/workflows/release.yml`):** Pushing a version tag (`v*`, e.g. `v2.1.0`) or triggering manually builds `dist-web/JP_Trip_Planner.html` and the portable Windows `.exe`, then creates or updates the GitHub Release assets automatically.
+- **Windows Release Builder (`.github/workflows/release.yml`):** Pushing a version tag (`v*`, e.g. `v2.2.0`) or triggering manually builds `dist-web/JP_Trip_Planner.html` and the portable Windows `.exe`, then creates or updates the GitHub Release assets automatically.
 
 ---
 
