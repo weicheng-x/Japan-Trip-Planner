@@ -24,7 +24,7 @@
     });
     const pills = [{ key: "ALL", label: en ? `All Days (${days.length}d)` : `全日程 (${days.length}日)` }];
     Object.entries(counts).forEach(([reg, cnt]) => {
-      pills.push({ key: reg, label: en ? `${reg.replace("-", " & ")} (${cnt}d)` : `${reg} (${cnt}日)` });
+      pills.push({ key: reg, label: en ? `${window.formatRegionLabel(reg, true)} (${cnt}d)` : `${reg} (${cnt}日)` });
     });
     return pills;
   }
@@ -159,17 +159,24 @@
     window.pushUndoSnapshot("Insert day");
     const refEn = state.dataEn.days[idx] || {};
     const refJa = state.dataJa.days[idx] || {};
+    const isClean = state.activePreset === "__draft__" && (Number(refEn.stay) || 0) === 0 && (Number(refEn.fun) || 0) === 0;
     const newNum = idx + 2;
     state.dataEn.days.splice(idx + 1, 0, {
       day: newNum, dow: "Mon", date: refEn.date || state.startDate,
       region: refEn.region || "Tokyo",
       routeJp: `${refEn.region || "Tokyo"} Exploration Day`,
       routeEn: "Inserted custom sightseeing & dining day",
-      stay: refEn.stay || 12000, travelBase: 1500, travelActualAdd: 0, fun: 8000,
+      stay: isClean ? 0 : (refEn.stay || 12000),
+      travelBase: isClean ? 0 : 1500,
+      travelActualAdd: 0,
+      fun: isClean ? 0 : 8000,
       hotel: refEn.hotel || "Hotel Base", hotelUrl: refEn.hotelUrl || "",
-      passCovered: false, needsAttention: false, jrOnly: 1500, totalAllLegs: 1500,
-      legs: ["Local Transit (¥1,500)"],
-      tip: "Edit this inserted day's route, hotel, or costs anytime."
+      passCovered: false, needsAttention: false,
+      jrOnly: isClean ? 0 : 1500,
+      totalAllLegs: isClean ? 0 : 1500,
+      legs: isClean ? [] : ["Local Transit (¥1,500)"],
+      tip: "Edit this inserted day's route, hotel, or costs anytime.",
+      timeSlots: isClean ? [] : undefined
     });
     if (state.dataJa.days) {
       state.dataJa.days.splice(idx + 1, 0, {
@@ -177,11 +184,17 @@
         region: refJa.region || "東京",
         routeJp: `${refJa.region || "東京"} 観光・追加日`,
         routeEn: "自由散策・ご当地グルメ・現地移動",
-        stay: refJa.stay || 12000, travelBase: 1500, travelActualAdd: 0, fun: 8000,
+        stay: isClean ? 0 : (refJa.stay || 12000),
+        travelBase: isClean ? 0 : 1500,
+        travelActualAdd: 0,
+        fun: isClean ? 0 : 8000,
         hotel: refJa.hotel || "ホテル拠点", hotelUrl: refJa.hotelUrl || "",
-        passCovered: false, needsAttention: false, jrOnly: 1500, totalAllLegs: 1500,
-        legs: ["現地移動（¥1,500）"],
-        tip: "追加した日程のルート・ホテル・予算を自由に編集できます。"
+        passCovered: false, needsAttention: false,
+        jrOnly: isClean ? 0 : 1500,
+        totalAllLegs: isClean ? 0 : 1500,
+        legs: isClean ? [] : ["現地移動（¥1,500）"],
+        tip: "追加した日程のルート・ホテル・予算を自由に編集できます。",
+        timeSlots: isClean ? [] : undefined
       });
     }
     reindexDatesKeepingStart();
@@ -189,6 +202,79 @@
     window.saveState();
     window.renderAll();
     window.showToast(window.isEn() ? `➕ Inserted new day after Day ${idx + 1}` : `➕ Day ${idx + 1} の後に新しい日程を挿入しました`);
+  };
+
+  window.duplicateDay = function(idx, evt) {
+    if (evt && evt.stopPropagation) evt.stopPropagation();
+    const enSrc = state.dataEn.days && state.dataEn.days[idx];
+    if (!enSrc) return;
+    window.pushUndoSnapshot("Duplicate day");
+    const stamp = Date.now();
+    const cloneDayObj = (src) => {
+      if (!src) return null;
+      const copy = JSON.parse(JSON.stringify(src));
+      copy.legs = Array.isArray(src.legs) ? src.legs.slice() : [];
+      copy.timeSlots = Array.isArray(src.timeSlots)
+        ? src.timeSlots.map((sl, si) => Object.assign({}, sl, { id: `slot_dup_${stamp}_${si}` }))
+        : [];
+      return copy;
+    };
+    state.dataEn.days.splice(idx + 1, 0, cloneDayObj(enSrc));
+    if (state.dataJa.days && state.dataJa.days[idx]) {
+      state.dataJa.days.splice(idx + 1, 0, cloneDayObj(state.dataJa.days[idx]));
+    }
+    reindexDatesKeepingStart();
+    if (!state.expandedDays || typeof state.expandedDays !== "object") state.expandedDays = {};
+    state.expandedDays[idx + 2] = true;
+    window.saveState();
+    window.renderAll();
+    window.showToast(window.isEn() ? `📋 Duplicated Day ${idx + 1} → Day ${idx + 2}` : `📋 Day ${idx + 1} を複製しました（Day ${idx + 2}）`);
+  };
+
+  window.addDayTransitLeg = function(dayIdx, evt) {
+    if (evt && evt.stopPropagation) evt.stopPropagation();
+    const en = window.isEn();
+    const activeDays = window.curData().days || [];
+    const d = activeDays[dayIdx];
+    if (!d) return;
+    const inp = document.getElementById(`newLegInput_${d.day}`);
+    const text = inp ? inp.value.trim() : "";
+    if (!text) return;
+
+    window.pushUndoSnapshot("Add transit leg");
+    if (!Array.isArray(d.legs)) d.legs = [];
+    d.legs.push(text);
+    if (typeof window.shouldMirrorCustomText === "function" && window.shouldMirrorCustomText()) {
+      const otherDays = en ? state.dataJa.days : state.dataEn.days;
+      if (otherDays && otherDays[dayIdx]) {
+        if (!Array.isArray(otherDays[dayIdx].legs)) otherDays[dayIdx].legs = [];
+        otherDays[dayIdx].legs.push(text);
+      }
+    }
+    if (inp) inp.value = "";
+    window.saveState();
+    window.renderAll();
+    window.showToast(en ? `🚆 Added transit leg to Day ${d.day}` : `🚆 Day ${d.day} に移動区間を追加しました`);
+  };
+
+  window.removeDayTransitLeg = function(dayIdx, legIdx, evt) {
+    if (evt && evt.stopPropagation) evt.stopPropagation();
+    const en = window.isEn();
+    const activeDays = window.curData().days || [];
+    const d = activeDays[dayIdx];
+    if (!d || !Array.isArray(d.legs)) return;
+
+    window.pushUndoSnapshot("Remove transit leg");
+    d.legs.splice(legIdx, 1);
+    if (typeof window.shouldMirrorCustomText === "function" && window.shouldMirrorCustomText()) {
+      const otherDays = en ? state.dataJa.days : state.dataEn.days;
+      if (otherDays && otherDays[dayIdx] && Array.isArray(otherDays[dayIdx].legs) && legIdx < otherDays[dayIdx].legs.length) {
+        otherDays[dayIdx].legs.splice(legIdx, 1);
+      }
+    }
+    window.saveState();
+    window.renderAll();
+    window.showToast(en ? "🗑️ Removed transit leg" : "🗑️ 移動区間を削除しました");
   };
 
   window.moveDayOrder = function(idx, delta, evt) {
@@ -268,6 +354,10 @@
 
   window.updateDayRegionAndMap = function(idx, val) {
     if (window.curData().days[idx]) window.curData().days[idx].region = val;
+    if (typeof window.shouldMirrorCustomText === "function" && window.shouldMirrorCustomText()) {
+      const otherDays = window.isEn() ? state.dataJa.days : state.dataEn.days;
+      if (otherDays && otherDays[idx]) otherDays[idx].region = val;
+    }
     state.manualMapZoom = null;
     window.saveState();
     window.renderAll();
@@ -276,6 +366,10 @@
 
   window.updateDayRouteAndMap = function(idx, val) {
     if (window.curData().days[idx]) window.curData().days[idx].routeJp = val;
+    if (typeof window.shouldMirrorCustomText === "function" && window.shouldMirrorCustomText()) {
+      const otherDays = window.isEn() ? state.dataJa.days : state.dataEn.days;
+      if (otherDays && otherDays[idx]) otherDays[idx].routeJp = val;
+    }
     state.manualMapZoom = null;
     window.saveState();
     window.renderAll();
@@ -287,8 +381,12 @@
       const numVal = Math.max(0, Number(val) || 0);
       if (state.dataEn.days[idx]) state.dataEn.days[idx][field] = numVal;
       if (state.dataJa.days[idx]) state.dataJa.days[idx][field] = numVal;
-    } else if (window.curData().days[idx]) {
-      window.curData().days[idx][field] = val;
+    } else {
+      if (window.curData().days[idx]) window.curData().days[idx][field] = val;
+      if (typeof window.shouldMirrorCustomText === "function" && window.shouldMirrorCustomText()) {
+        const otherDays = window.isEn() ? state.dataJa.days : state.dataEn.days;
+        if (otherDays && otherDays[idx]) otherDays[idx][field] = val;
+      }
     }
     window.saveState();
     window.renderAll();
@@ -298,18 +396,70 @@
     window.ensureAllDaysHaveTimeSlots();
     const activeDays = window.curData().days;
     const otherDays = window.isEn() ? state.dataJa.days : state.dataEn.days;
+    const mirrorText = typeof window.shouldMirrorCustomText === "function" && window.shouldMirrorCustomText();
     if (activeDays[dayIdx] && Array.isArray(activeDays[dayIdx].timeSlots)) {
       const s = activeDays[dayIdx].timeSlots.find(x => x.id === slotId);
-      if (s) s[field] = val;
+      if (s) {
+        s[field] = val;
+        if ((field === "timeFrom" || field === "timeTo") && s.timeFrom && s.timeTo && s.timeTo < s.timeFrom) {
+          window.showToast(window.isEn()
+            ? `⚠️ End time (${s.timeTo}) is earlier than start time (${s.timeFrom})`
+            : `⚠️ 終了時刻 (${s.timeTo}) が開始時刻 (${s.timeFrom}) より前になっています`);
+        }
+      }
     }
     if (otherDays[dayIdx] && Array.isArray(otherDays[dayIdx].timeSlots)) {
       const sOther = otherDays[dayIdx].timeSlots.find(x => x.id === slotId);
-      if (sOther && (field === "timeFrom" || field === "timeTo" || field === "category")) {
+      if (sOther && (mirrorText || field === "timeFrom" || field === "timeTo" || field === "category")) {
         sOther[field] = val;
       }
     }
     window.saveState();
     if (field === "category") window.renderItineraryCards();
+  };
+
+  function addMinutesToHHMM(hhmm, deltaMins) {
+    const m = String(hhmm || "").match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return "10:30";
+    let total = parseInt(m[1], 10) * 60 + parseInt(m[2], 10) + deltaMins;
+    total = Math.max(0, Math.min(23 * 60 + 30, total));
+    return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+  }
+
+  function computeNextSlotDefaults(d, en) {
+    const slots = Array.isArray(d && d.timeSlots) ? d.timeSlots : [];
+    if (slots.length > 0) {
+      const last = slots[slots.length - 1];
+      const timeFrom = last.timeTo || "12:00";
+      return {
+        timeFrom,
+        timeTo: addMinutesToHHMM(timeFrom, 90),
+        locFrom: last.locTo || (d.region || (en ? "Tokyo" : "東京")),
+        locTo: ""
+      };
+    }
+    return {
+      timeFrom: "09:00",
+      timeTo: "10:30",
+      locFrom: (d && d.region) || (en ? "Tokyo" : "東京"),
+      locTo: ""
+    };
+  }
+
+  window.fillStarterTimeSlots = function(dayIdx, evt) {
+    if (evt && evt.stopPropagation) evt.stopPropagation();
+    const enDays = state.dataEn.days || [];
+    const jaDays = state.dataJa.days || [];
+    if (!enDays[dayIdx]) return;
+    window.pushUndoSnapshot("Fill starter time slots");
+    enDays[dayIdx].timeSlots = buildDefaultTimeSlotsForDay(enDays[dayIdx], false, dayIdx, enDays.length);
+    if (jaDays[dayIdx]) {
+      jaDays[dayIdx].timeSlots = buildDefaultTimeSlotsForDay(jaDays[dayIdx], true, dayIdx, jaDays.length);
+    }
+    state.expandedDays[enDays[dayIdx].day] = true;
+    window.saveState();
+    window.renderItineraryCards();
+    window.showToast(window.isEn() ? `✨ Generated starter hourly slots for Day ${dayIdx + 1}` : `✨ Day ${dayIdx + 1} の基本時間帯プランを生成しました`);
   };
 
   window.addDayTimeSlot = function(dayIdx, evt) {
@@ -393,7 +543,7 @@
 
     const filterGroup = document.getElementById("regionFilters");
     filterGroup.innerHTML = pills.map(rk => `
-      <button type="button" class="pill ${state.activeRegionKey === rk.key ? "active" : ""}" onclick="filterRegionKey('${window.escapeAttr(rk.key)}')">
+      <button type="button" class="pill ${state.activeRegionKey === rk.key ? "active" : ""}" data-key="${window.escapeAttr(rk.key)}" onclick="filterRegionKey(this.dataset.key)">
         ${window.escapeHtml(rk.label)}
       </button>
     `).join("") + `
@@ -438,10 +588,17 @@
       const idx = d.day - 1;
       const dayTotal = (Number(d.stay) || 0) + (Number(d.travelBase) || 0) + (Number(d.fun) || 0);
       const weatherTip = getSeasonWeatherTip(d.region, state.startDate || d.date, en);
-      const legsHtml = (d.legs || []).map(l => {
+      const legsHtml = (d.legs || []).map((l, legIdx) => {
         const isNonJr = /non-pass|post-pass|non-jr|パス対象外|パス期間後|jr以外|✈️/i.test(l);
-        return `<span class="leg-chip ${isNonJr ? "non-jr" : ""}">🚆 ${window.escapeHtml(l)}</span>`;
-      }).join("");
+        return `<span class="leg-chip ${isNonJr ? "non-jr" : ""}">🚆 ${window.escapeHtml(l)}<button type="button" class="leg-del-btn" onclick="removeDayTransitLeg(${idx}, ${legIdx}, event)" title="${en ? "Remove leg" : "区間を削除"}">×</button></span>`;
+      }).join("") + `
+        <span class="leg-add-inline">
+          <input type="text" id="newLegInput_${d.day}" class="leg-add-input"
+            placeholder="${window.escapeAttr(en ? "Add transit leg (e.g. Tokyo → Kyoto ¥14,170)..." : "移動区間を追加 (例: 東京→京都 新幹線)...")}"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();addDayTransitLeg(${idx}, event);}">
+          <button type="button" class="btn" style="padding:2px 8px;font-size:11.5px;" onclick="addDayTransitLeg(${idx}, event)" title="${en ? "Add transit leg" : "移動区間を追加"}">+</button>
+        </span>
+      `;
 
       const unrecHtml = d._unrecognizedPlace ? `
         <span class="unrecognized-badge">
@@ -450,11 +607,8 @@
       ` : "";
 
       const cleanUrl = window.safeUrl(d.hotelUrl);
-      const hotelSiteHtml = cleanUrl
-        ? `<a href="${window.escapeAttr(cleanUrl)}" target="_blank" rel="noopener">${window.escapeHtml(d.hotel)} ↗</a>`
-        : `${window.escapeHtml(d.hotel || "—")} <small style="color:var(--ink-muted);">(${en ? "No official site" : "公式URLなし"})</small>`;
-
       const slots = Array.isArray(d.timeSlots) ? d.timeSlots : [];
+      const nextSlotDef = computeNextSlotDefaults(d, en);
       const isExpanded = !!(state.expandedDays && state.expandedDays[d.day]);
 
       const catCounts = {};
@@ -465,7 +619,7 @@
 
       const slotRowsHtml = slots.length === 0 ? `
         <tr><td colspan="5" style="text-align:center;padding:12px;color:var(--ink-muted);font-weight:700;">
-          ${en ? "No time slots yet. Add your first slot below!" : "時間割はまだありません。下から予定を追加してください！"}
+          ${en ? "No time slots yet. Add your first slot below or click Fill Starter Slots above!" : "時間割はまだありません。下から予定を追加するか上の「基本枠を生成」をクリックできます。"}
         </td></tr>
       ` : slots.map(s => {
         const cKey = s.category || "sightseeing";
@@ -474,28 +628,28 @@
           <tr>
             <td style="width:210px;">
               <div class="slot-time-wrap">
-                <input type="time" class="slot-time-input" value="${window.escapeAttr(s.timeFrom || "09:00")}" onchange="updateDayTimeSlotField(${idx}, '${sIdAttr}', 'timeFrom', this.value)">
+                <input type="time" class="slot-time-input" value="${window.escapeAttr(s.timeFrom || "09:00")}" data-slot-id="${sIdAttr}" onchange="updateDayTimeSlotField(${idx}, this.dataset.slotId, 'timeFrom', this.value)">
                 <span style="color:var(--ink-muted);font-weight:800;">→</span>
-                <input type="time" class="slot-time-input" value="${window.escapeAttr(s.timeTo || "10:30")}" onchange="updateDayTimeSlotField(${idx}, '${sIdAttr}', 'timeTo', this.value)">
+                <input type="time" class="slot-time-input" value="${window.escapeAttr(s.timeTo || "10:30")}" data-slot-id="${sIdAttr}" onchange="updateDayTimeSlotField(${idx}, this.dataset.slotId, 'timeTo', this.value)">
               </div>
             </td>
             <td style="width:150px;">
-              <select class="slot-cat-select slot-cat-${cKey}" onchange="updateDayTimeSlotField(${idx}, '${sIdAttr}', 'category', this.value)">
+              <select class="slot-cat-select slot-cat-${cKey}" data-slot-id="${sIdAttr}" onchange="updateDayTimeSlotField(${idx}, this.dataset.slotId, 'category', this.value)">
                 ${window.SLOT_CATEGORIES.map(c => `<option value="${c.key}" ${c.key === cKey ? "selected" : ""}>${c.icon} ${en ? c.labelEn : c.labelJa}</option>`).join("")}
               </select>
             </td>
             <td style="width:255px;">
               <div class="slot-loc-wrap">
-                <input type="text" class="slot-loc-input" placeholder="${en ? "From..." : "出発地..."}" value="${window.escapeAttr(s.locFrom || "")}" onchange="updateDayTimeSlotField(${idx}, '${sIdAttr}', 'locFrom', this.value)">
+                <input type="text" class="slot-loc-input" placeholder="${en ? "From..." : "出発地..."}" value="${window.escapeAttr(s.locFrom || "")}" data-slot-id="${sIdAttr}" onchange="updateDayTimeSlotField(${idx}, this.dataset.slotId, 'locFrom', this.value)">
                 <span style="color:var(--ink-muted);font-weight:800;">→</span>
-                <input type="text" class="slot-loc-input" placeholder="${en ? "To..." : "目的地..."}" value="${window.escapeAttr(s.locTo || "")}" onchange="updateDayTimeSlotField(${idx}, '${sIdAttr}', 'locTo', this.value)">
+                <input type="text" class="slot-loc-input" placeholder="${en ? "To..." : "目的地..."}" value="${window.escapeAttr(s.locTo || "")}" data-slot-id="${sIdAttr}" onchange="updateDayTimeSlotField(${idx}, this.dataset.slotId, 'locTo', this.value)">
               </div>
             </td>
             <td>
-              <input type="text" class="slot-desc-input" placeholder="${en ? "Activity description..." : "予定内容..."}" value="${window.escapeAttr(s.desc || "")}" onchange="updateDayTimeSlotField(${idx}, '${sIdAttr}', 'desc', this.value)">
+              <input type="text" class="slot-desc-input" placeholder="${en ? "Activity description..." : "予定内容..."}" value="${window.escapeAttr(s.desc || "")}" data-slot-id="${sIdAttr}" onchange="updateDayTimeSlotField(${idx}, this.dataset.slotId, 'desc', this.value)">
             </td>
             <td style="width:48px;text-align:right;">
-              <button type="button" class="btn btn-danger" style="padding:3px 7px;font-size:11px;" onclick="deleteDayTimeSlot(${idx}, '${sIdAttr}', event)" title="${en ? "Delete slot" : "削除"}">🗑️</button>
+              <button type="button" class="btn btn-danger" style="padding:3px 7px;font-size:11px;" data-slot-id="${sIdAttr}" onclick="deleteDayTimeSlot(${idx}, this.dataset.slotId, event)" title="${en ? "Delete slot" : "削除"}">🗑️</button>
             </td>
           </tr>
         `;
@@ -515,6 +669,7 @@
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <div class="day-actions-mini">
+                <button type="button" class="btn" style="padding:3px 7px;font-size:11px;" onclick="duplicateDay(${idx}, event)" title="${en ? "Duplicate day" : "この日を複製"}">📋</button>
                 <button type="button" class="btn" style="padding:3px 7px;font-size:11px;" onclick="insertDayAfter(${idx}, event)" title="${en ? "Insert day after this" : "この後に1日追加"}">+📄</button>
                 <button type="button" class="btn" style="padding:3px 7px;font-size:11px;" onclick="moveDayOrder(${idx}, -1, event)" ${idx === 0 ? "disabled" : ""} title="${en ? "Move day earlier" : "上へ移動"}">↑</button>
                 <button type="button" class="btn" style="padding:3px 7px;font-size:11px;" onclick="moveDayOrder(${idx}, 1, event)" ${idx === daysList.length - 1 ? "disabled" : ""} title="${en ? "Move day later" : "下へ移動"}">↓</button>
@@ -528,10 +683,34 @@
           <input type="text" class="editable-text day-route-sub-input" value="${window.escapeAttr(d.routeEn || "")}" onchange="updateDayField(${idx}, 'routeEn', this.value)" title="${en ? "Edit route notes" : "詳細メモを編集"}">
 
           <div class="day-meta-grid">
-            <div class="meta-item"><strong>🏨 ${en ? "Hotel Base" : "宿泊先"}</strong><span>${hotelSiteHtml}</span></div>
-            <div class="meta-item"><strong>🛏️ ${en ? "Stay" : "宿泊費"}</strong><span>${window.fmtJpy(d.stay)} (${window.fmtSgd(d.stay)})</span></div>
-            <div class="meta-item"><strong>🚆 ${en ? "Travel" : "交通費"}</strong><span>${window.fmtJpy(d.travelBase)} (${window.fmtSgd(d.travelBase)})</span></div>
-            <div class="meta-item"><strong>🍱 ${en ? "Dining & Fun" : "食・遊"}</strong><span>${window.fmtJpy(d.fun)} (${window.fmtSgd(d.fun)})</span></div>
+            <div class="meta-item">
+              <strong>🏨 ${en ? "Hotel Base" : "宿泊先"}</strong>
+              <div style="display:flex;align-items:center;gap:5px;">
+                <input type="text" class="day-meta-hotel-input" value="${window.escapeAttr(d.hotel || "")}" onchange="updateDayField(${idx}, 'hotel', this.value)">
+                ${cleanUrl ? `<a href="${window.escapeAttr(cleanUrl)}" target="_blank" rel="noopener" title="${en ? "Open hotel site" : "公式サイトを開く"}" style="font-size:12px;font-weight:800;white-space:nowrap;">↗</a>` : ""}
+              </div>
+            </div>
+            <div class="meta-item">
+              <strong>🛏️ ${en ? "Stay (¥)" : "宿泊費 (¥)"}</strong>
+              <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                <input type="number" class="editable-num day-meta-num" min="0" step="100" value="${Number(d.stay) || 0}" onchange="updateDayField(${idx}, 'stay', this.value)">
+                <small style="color:var(--ink-muted);">(${window.fmtSgd(d.stay)})</small>
+              </div>
+            </div>
+            <div class="meta-item">
+              <strong>🚆 ${en ? "Travel (¥)" : "交通費 (¥)"}</strong>
+              <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                <input type="number" class="editable-num day-meta-num" min="0" step="100" value="${Number(d.travelBase) || 0}" onchange="updateDayField(${idx}, 'travelBase', this.value)">
+                <small style="color:var(--ink-muted);">(${window.fmtSgd(d.travelBase)})</small>
+              </div>
+            </div>
+            <div class="meta-item">
+              <strong>🍱 ${en ? "Dining & Fun (¥)" : "食・遊 (¥)"}</strong>
+              <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                <input type="number" class="editable-num day-meta-num" min="0" step="100" value="${Number(d.fun) || 0}" onchange="updateDayField(${idx}, 'fun', this.value)">
+                <small style="color:var(--ink-muted);">(${window.fmtSgd(d.fun)})</small>
+              </div>
+            </div>
           </div>
 
           <div class="legs-strip">${legsHtml}</div>
@@ -551,7 +730,10 @@
           <div class="day-detail-drawer ${isExpanded ? "open" : ""}" id="day-detail-drawer-${d.day}">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
               <div style="font-size:13px;font-weight:800;">📋 ${en ? `Day ${d.day} (${d.date}) Hourly Plan` : `Day ${d.day}（${d.date}）時間帯別スケジュール`}</div>
-              <button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;" onclick="sortDayTimeSlots(${idx}, event)">⇅ ${en ? "Sort by Time" : "時間順整列"}</button>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                ${slots.length === 0 ? `<button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;" onclick="fillStarterTimeSlots(${idx}, event)">✨ ${en ? "Fill Starter Slots" : "基本枠を生成"}</button>` : ""}
+                <button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;" onclick="sortDayTimeSlots(${idx}, event)">⇅ ${en ? "Sort by Time" : "時間順整列"}</button>
+              </div>
             </div>
             <div class="data-table-wrap" style="margin-bottom:10px;">
               <table class="slot-list-table">
@@ -572,9 +754,9 @@
               <div>
                 <label class="slot-field-lbl">${en ? "Time" : "時間"}</label>
                 <div class="slot-time-wrap">
-                  <input type="time" id="newSlotTimeFrom_${d.day}" class="slot-time-input" value="18:00">
+                  <input type="time" id="newSlotTimeFrom_${d.day}" class="slot-time-input" value="${window.escapeAttr(nextSlotDef.timeFrom)}">
                   <span>→</span>
-                  <input type="time" id="newSlotTimeTo_${d.day}" class="slot-time-input" value="19:30">
+                  <input type="time" id="newSlotTimeTo_${d.day}" class="slot-time-input" value="${window.escapeAttr(nextSlotDef.timeTo)}">
                 </div>
               </div>
               <div>
@@ -586,7 +768,7 @@
               <div>
                 <label class="slot-field-lbl">${en ? "From → To" : "出発地 → 目的地"}</label>
                 <div class="slot-loc-wrap">
-                  <input type="text" id="newSlotLocFrom_${d.day}" class="slot-loc-input" placeholder="${en ? "From..." : "出発地..."}">
+                  <input type="text" id="newSlotLocFrom_${d.day}" class="slot-loc-input" value="${window.escapeAttr(nextSlotDef.locFrom)}" placeholder="${en ? "From..." : "出発地..."}">
                   <span>→</span>
                   <input type="text" id="newSlotLocTo_${d.day}" class="slot-loc-input" placeholder="${en ? "To..." : "目的地..."}">
                 </div>

@@ -31,6 +31,22 @@ window.isEn = function() {
   return state.lang !== "ja";
 };
 
+window.formatRegionLabel = function(reg, en) {
+  const raw = String(reg || "");
+  if (!en) return raw;
+  const COMPOUND_MAP = {
+    "Iwate-Aomori": "Iwate & Aomori",
+    "Tochigi-Ibaraki": "Tochigi & Ibaraki"
+  };
+  return COMPOUND_MAP[raw] || raw;
+};
+
+window.csvSafeCell = function(val) {
+  let s = String(val == null ? "" : val);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return `"${s.replace(/"/g, '""')}"`;
+};
+
 window.fmtJpy = function(val) {
   return "¥" + Math.round(Number(val) || 0).toLocaleString("en-US");
 };
@@ -125,7 +141,7 @@ window.computeBudgetSummary = function() {
     const q = Math.max(1, parseInt(item.qty, 10) || 1);
     shoppingGross += p * q;
   });
-  const taxFreeDiscount = (state.taxFreeEnabled && shoppingGross >= 5000) ? Math.round(shoppingGross * 0.0909) : 0;
+  const taxFreeDiscount = (state.taxFreeEnabled && shoppingGross >= 5000) ? Math.floor(shoppingGross / 11) : 0;
   const shoppingNet = Math.max(0, shoppingGross - taxFreeDiscount);
 
   const itineraryBaselineGroup = stayGroup + travelGroup + funGroup;
@@ -167,22 +183,22 @@ window.buildCsvPayload = function() {
     const tot = stay + travel + fun;
     rows.push([
       d.day,
-      `"${String(d.dow || "").replace(/"/g, '""')}"`,
-      d.date || "",
-      `"${String(d.region || "").replace(/"/g, '""')}"`,
-      `"${String(d.routeJp || "").replace(/"/g, '""')}"`,
-      `"${String(d.hotel || "").replace(/"/g, '""')}"`,
+      window.csvSafeCell(d.dow || ""),
+      window.csvSafeCell(d.date || ""),
+      window.csvSafeCell(d.region || ""),
+      window.csvSafeCell(d.routeJp || ""),
+      window.csvSafeCell(d.hotel || ""),
       stay, travel, fun, tot, conv(tot)
     ]);
   });
 
   if (summary.unmergedTransitGroup > 0) {
-    rows.push(["", "", "", "", `"${en ? "Unmerged Local Transit" : "未合算現地交通費"}"`, "", 0, summary.unmergedTransitGroup, 0, summary.unmergedTransitGroup, conv(summary.unmergedTransitGroup)]);
+    rows.push(["", "", "", "", window.csvSafeCell(en ? "Unmerged Local Transit" : "未合算現地交通費"), "", 0, summary.unmergedTransitGroup, 0, summary.unmergedTransitGroup, conv(summary.unmergedTransitGroup)]);
   }
   if (summary.shoppingNet > 0) {
-    rows.push(["", "", "", "", `"${en ? "Shopping List (Net)" : "買い物リスト合計"}"`, "", 0, 0, summary.shoppingNet, summary.shoppingNet, conv(summary.shoppingNet)]);
+    rows.push(["", "", "", "", window.csvSafeCell(en ? "Shopping List (Net)" : "買い物リスト合計"), "", 0, 0, summary.shoppingNet, summary.shoppingNet, conv(summary.shoppingNet)]);
   }
-  rows.push(["", "", "", "", `"${en ? `Final Grand Total (${summary.pax} Pax)` : `最終総合計 (${summary.pax}名)`}"`, "", summary.stayGroup, summary.travelGroup + summary.unmergedTransitGroup, summary.funGroup + summary.shoppingNet, summary.finalGrandTotalGroup, conv(summary.finalGrandTotalGroup)]);
+  rows.push(["", "", "", "", window.csvSafeCell(en ? `Final Grand Total (${summary.pax} Pax)` : `最終総合計 (${summary.pax}名)`), "", summary.stayGroup, summary.travelGroup + summary.unmergedTransitGroup, summary.funGroup + summary.shoppingNet, summary.finalGrandTotalGroup, conv(summary.finalGrandTotalGroup)]);
 
   const rawTitle = (en ? state.customTitleEn : state.customTitleJa) || "Japan_Trip_Plan";
   const safeBase = rawTitle.replace(/[\\/:*?"<>|\[\]]+/g, "_").replace(/\s+/g, "_").replace(/^_+|_+$/g, "").slice(0, 60) || "Japan_Trip_Plan";
@@ -199,6 +215,8 @@ window.exportCsv = async function() {
     const res = await window.jpDesktopAPI.exportCsv(filename, csv);
     if (res && res.ok) {
       window.showToast(en ? `📥 Saved CSV: ${res.filePath}` : `📥 CSVを保存しました: ${res.filePath}`);
+    } else if (res && res.error) {
+      window.showToast(en ? `⚠️ CSV export failed: ${res.error}` : `⚠️ CSV保存に失敗しました: ${res.error}`);
     }
     return;
   }

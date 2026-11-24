@@ -124,48 +124,169 @@ window.PRESET_CATALOG_META = [
     const daysCount = Math.max(1, Math.min(60, parseInt(o.daysCount, 10) || 7));
     const descEn = String(o.titleEn || "").trim() || "Custom Japan Itinerary";
     const descJa = String(o.titleJa || "").trim() || (o.titleEn ? descEn : "カスタム日本旅行プラン");
+    const costMode = o.costMode === "estimate" ? "estimate" : "blank";
+    const emptySlots = o.emptySlots !== false;
+
+    const wizardList = Array.isArray(window.WIZARD_CITIES) ? window.WIZARD_CITIES : [];
+    const resolveCityMeta = (raw) => {
+      const q = String(raw || "").trim();
+      const found = wizardList.find(c =>
+        c.key.toLowerCase() === q.toLowerCase() ||
+        c.regEn.toLowerCase() === q.toLowerCase() ||
+        c.regJa === q
+      );
+      if (found) return found;
+      return {
+        key: q || "Tokyo",
+        regEn: q || "Tokyo",
+        regJa: q || "東京",
+        hotelEn: `${q || "Custom"} Hotel`,
+        hotelJa: `${q || "カスタム"} ホテル`,
+        foodKeys: ["Tokyo"],
+        accessKeys: ["Tokyo"],
+        guideKeys: ["Tokyo"]
+      };
+    };
+
+    const rawCities = Array.isArray(o.cities) && o.cities.length > 0 ? o.cities : ["Tokyo"];
+    const maxCityBlocks = daysCount > 1 ? Math.min(rawCities.length, daysCount - 1) : 1;
+    const selectedCities = rawCities.slice(0, maxCityBlocks).map(resolveCityMeta);
+
+    const nightsTotal = Math.max(0, daysCount - 1);
+    const dayCityList = [];
+    const hotelBlocks = [];
+
+    if (daysCount === 1) {
+      dayCityList.push({ city: selectedCities[0], isBlockStart: false, prevCity: null });
+    } else {
+      const baseN = Math.floor(nightsTotal / selectedCities.length);
+      const remN = nightsTotal % selectedCities.length;
+      let cursorDay = 1;
+      selectedCities.forEach((city, idx) => {
+        const n = baseN + (idx < remN ? 1 : 0);
+        const prev = idx > 0 ? selectedCities[idx - 1] : null;
+        hotelBlocks.push({
+          startDay: cursorDay,
+          nights: n,
+          rate: costMode === "estimate" ? 12000 : 0,
+          nameEn: city.hotelEn,
+          nameJa: city.hotelJa,
+          regEn: city.regEn,
+          regJa: city.regJa,
+          url: "",
+          accEn: `Near main station (${city.regEn})`,
+          accJa: `主要駅周辺（${city.regJa}）`,
+          hiEn: "Edit hotel name, rate, booking ref & official URL anytime.",
+          hiJa: "ホテル名・料金・予約番号・公式URLを自由に編集できます。"
+        });
+        for (let k = 0; k < n; k++) {
+          dayCityList.push({ city, isBlockStart: k === 0 && idx > 0, prevCity: prev });
+        }
+        cursorDay += n;
+      });
+      const lastCity = selectedCities[selectedCities.length - 1];
+      dayCityList.push({ city: lastCity, isBlockStart: false, prevCity: null });
+    }
+
     const specs = [];
-    for (let i = 1; i <= daysCount; i++) {
+    for (let i = 0; i < daysCount; i++) {
+      const entry = dayCityList[i] || { city: selectedCities[0], isBlockStart: false, prevCity: null };
+      const city = entry.city;
+      const isFirst = i === 0;
+      const isLast = i === daysCount - 1;
+      const isTransfer = entry.isBlockStart && entry.prevCity;
+
+      let titleEn, titleJa;
+      if (isFirst && daysCount === 1) {
+        titleEn = `${city.regEn}: Arrival & Day Exploration`;
+        titleJa = `${city.regJa}：到着＆日帰り観光`;
+      } else if (isFirst) {
+        titleEn = `Arrive Japan → ${city.regEn} Check-In & Exploration`;
+        titleJa = `到着 → ${city.regJa} チェックイン＆散策`;
+      } else if (isLast) {
+        titleEn = `${city.regEn}: Final Morning → Airport Departure`;
+        titleJa = `${city.regJa}：最終ショッピング → 空港出発帰国`;
+      } else if (isTransfer) {
+        titleEn = `${entry.prevCity.regEn} → ${city.regEn} Transit & Sightseeing`;
+        titleJa = `${entry.prevCity.regJa} → ${city.regJa} 移動＆観光`;
+      } else {
+        titleEn = `${city.regEn} Exploration & Dining`;
+        titleJa = `${city.regJa} 終日観光＆ご当地グルメ`;
+      }
+
+      let stay = 0, travelBase = 0, fun = 0, jrOnly = 0, totalAllLegs = 0;
+      let legsEn = [], legsJa = [];
+      if (costMode === "estimate") {
+        stay = isLast ? 0 : 12000;
+        fun = 9000;
+        if (isFirst || isLast) {
+          travelBase = 45000;
+          jrOnly = 1500;
+          totalAllLegs = 1500;
+        } else if (isTransfer) {
+          travelBase = 5000;
+          jrOnly = 5000;
+          totalAllLegs = 5000;
+          legsEn = [`${entry.prevCity.regEn} → ${city.regEn} Transit (¥5,000 est.)`];
+          legsJa = [`${entry.prevCity.regJa} → ${city.regJa} 鉄道移動（約¥5,000）`];
+        } else {
+          travelBase = 1500;
+          jrOnly = 1500;
+          totalAllLegs = 1500;
+        }
+      }
+
       specs.push({
-        regEn: "Tokyo", regJa: "東京",
-        titleEn: i === 1 ? "Tokyo Arrival & Neighborhood Exploration (Click to edit)" : (i === daysCount ? "Final Shopping → Airport Departure" : `Day ${i}: Enter Japan Destination & Activities`),
-        titleJa: i === 1 ? "東京到着＆市内散策（クリックして編集可）" : (i === daysCount ? "ショッピング → 空港出発帰国" : `Day ${i}：訪問地・観光予定を入力`),
-        subEn: "Click any route, hotel, or budget figure to customize this day",
-        subJa: "ルート・ホテル・金額をクリックして自由にカスタマイズできます",
-        stay: i === daysCount ? 0 : 12000,
-        travelBase: i === 1 || i === daysCount ? 45000 : 1500,
+        regEn: city.regEn,
+        regJa: city.regJa,
+        titleEn,
+        titleJa,
+        subEn: isLast ? "Check out, last-minute shopping & airport transfer" : "Edit daily highlight, budget & time slots inline",
+        subJa: isLast ? "チェックアウト・お土産購入・空港アクセス" : "スケジュール・金額・時間帯をこの画面から直接編集できます",
+        stay,
+        travelBase,
         travelActualAdd: 0,
-        fun: 9000,
-        hotelEn: i === daysCount ? "Departure Day" : "Custom Japan Hotel #1",
-        hotelJa: i === daysCount ? "帰国・出発日" : "カスタム日本ホテル #1",
+        fun,
+        hotelEn: isLast ? "Departure Day" : city.hotelEn,
+        hotelJa: isLast ? "帰国・出発日" : city.hotelJa,
         hotelUrl: "",
-        jrOnly: 1500,
-        totalAllLegs: 1500,
-        legsEn: ["Edit transit legs in Tab 4 Budget or Tab 5 Rail Optimizer"],
-        legsJa: ["移動区間はタブ4またはタブ5で自由に編集可能"],
-        tipEn: "Type any Japanese city in the route title (e.g., Tokyo, Kyoto, Kanazawa, Takayama, Atami) and the interactive map will automatically frame it!",
-        tipJa: "ルート名に日本の都市名（東京・京都・金沢・高山・熱海など）を入力すると全国マップが自動追従します！"
+        jrOnly,
+        totalAllLegs,
+        legsEn,
+        legsJa,
+        tipEn: "Edit Region or Route above to update the Map, then click Sync Guides & Gourmet for regional recommendations.",
+        tipJa: "エリア・ルートを変更すると全国マップが連動します。ガイド・グルメタブの自動取得も利用できます。"
       });
     }
+
     const { enDays, jaDays } = buildBilingualDays(start, specs);
-    const nights = Math.max(0, daysCount - 1);
-    const { enHotels, jaHotels } = nights > 0
-      ? buildBilingualHotels(start, [
-          { startDay: 1, nights, rate: 12000, nameEn: "Custom Japan Hotel #1", nameJa: "カスタム日本ホテル #1", regEn: "Tokyo", regJa: "東京", url: "", accEn: "Near JR / Subway Station", accJa: "JR・地下鉄駅徒歩圏内", hiEn: "Add or edit your hotels and official booking URLs in Tab 3.", hiJa: "宿泊先・単価・公式URLをタブ3で自由に追加・編集できます。" }
-        ])
+    if (emptySlots) {
+      enDays.forEach(d => { d.timeSlots = []; });
+      jaDays.forEach(d => { d.timeSlots = []; });
+    }
+
+    const { enHotels, jaHotels } = hotelBlocks.length > 0
+      ? buildBilingualHotels(start, hotelBlocks)
       : { enHotels: [], jaHotels: [] };
-    const gList = window.buildGourmetListFromLocations(["Tokyo"]);
-    const aList = window.buildAccessListFromKeys(["Tokyo"]);
-    const gdList = window.buildGuidesListFromKeys(["Tokyo"]);
+
+    const foodKeys = Array.from(new Set(selectedCities.flatMap(c => c.foodKeys || ["Tokyo"])));
+    const accessKeys = Array.from(new Set(selectedCities.flatMap(c => c.accessKeys || ["Tokyo"])));
+    const guideKeys = Array.from(new Set(selectedCities.flatMap(c => c.guideKeys || ["Tokyo"])));
+    const gList = window.buildGourmetListFromLocations(foodKeys);
+    const aList = window.buildAccessListFromKeys(accessKeys);
+    const gdList = window.buildGuidesListFromKeys(guideKeys);
     const prep = buildPrep();
+    const cityTrail = selectedCities.map(c => c.regEn).join(" → ");
+    const cityTrailJa = selectedCities.map(c => c.regJa).join(" → ");
+
     return {
       id: "__draft__",
       startDate: start,
       endDate: addDaysYmd(start, daysCount - 1).ymd,
       titleEn: descEn,
       titleJa: descJa,
-      subtitleEn: `Custom ${daysCount}-day Japan plan • Adjust dates, cities, hotels & rail passes freely`,
-      subtitleJa: `自由に編集できる${daysCount}日間プラン • 日付・都市・宿泊先・パスを自在に設定`,
+      subtitleEn: `Custom ${daysCount}-day route (${cityTrail}) • Built in New Trip Wizard`,
+      subtitleJa: `カスタム${daysCount}日間プラン（${cityTrailJa}）• 自由に編集可能`,
       selectedPassId: "none",
       passStartDay: 1,
       dataEn: { days: enDays, hotels: enHotels, food: gList.en, access: aList.en, guides: gdList.en, prep: prep.en, weather: {} },

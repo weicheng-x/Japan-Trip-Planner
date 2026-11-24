@@ -20,7 +20,9 @@ window.renderAll = function() {
     if (!localStorage.getItem(window.STORAGE_KEY) && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       state.animationsPaused = true;
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn("[JP Trip Planner] Reduced-motion check failed:", e);
+  }
 
   let hydratedFromDesktop = false;
   if (window.jpDesktopAPI && typeof window.jpDesktopAPI.loadState === "function") {
@@ -29,7 +31,9 @@ window.renderAll = function() {
       if (diskState && window.applyStateFromParsed(diskState)) {
         hydratedFromDesktop = true;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn("[JP Trip Planner] Desktop state load failed:", e);
+    }
   }
 
   if (!hydratedFromDesktop) {

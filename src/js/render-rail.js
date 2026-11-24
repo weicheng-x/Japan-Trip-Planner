@@ -28,9 +28,16 @@
 
   function dayMatchesPassScope(d, dayRegs, passObj) {
     if (!passObj || !passObj.days) return false;
-    if (Array.isArray(passObj.eligibleRegions) && passObj.eligibleRegions.length > 0 && dayRegs.size > 0) {
-      const regOk = passObj.eligibleRegions.some(r => dayRegs.has(r));
-      if (!regOk) return false;
+    if (Array.isArray(passObj.excludeKeywords) && passObj.excludeKeywords.length > 0) {
+      const text = `${d.routeJp || ""} ${d.routeEn || ""} ${(d.legs || []).join(" ")}`.toLowerCase();
+      if (passObj.excludeKeywords.some(kw => text.includes(String(kw).toLowerCase()))) {
+        return false;
+      }
+    }
+    if (Array.isArray(passObj.eligibleRegions) && passObj.eligibleRegions.length > 0) {
+      if (dayRegs.size === 0) return false;
+      const allInEligible = Array.from(dayRegs).every(r => passObj.eligibleRegions.includes(r));
+      if (!allInEligible) return false;
     }
     if (passObj.nonJr) {
       const legText = `${d.routeJp || ""} ${(d.legs || []).join(" ")}`.toLowerCase();
@@ -38,6 +45,29 @@
       return kws.length === 0 || kws.some(kw => legText.includes(kw));
     }
     return true;
+  }
+
+  function evaluateRailDay(d, passObj, startDay, endDay) {
+    const passDays = (passObj && passObj.days) || 0;
+    const jr = Math.max(0, Number(d.jrOnly) || 0);
+    const all = Math.max(jr, Number(d.totalAllLegs) || 0);
+    const nonJr = Math.max(0, all - jr);
+    const inWindow = passDays > 0 && d.day >= startDay && d.day <= endDay;
+    const dayRegs = getDayRegions(d);
+    const scopeOk = inWindow && dayMatchesPassScope(d, dayRegs, passObj);
+
+    let coveredJr = 0, coveredNonJr = 0, outOfPocketJr = jr, outOfPocketNonJr = nonJr;
+    if (passObj && passObj.nonJr) {
+      if (scopeOk && nonJr > 0) {
+        coveredNonJr = Math.min(nonJr, passObj.maxDailyCovered || nonJr);
+        outOfPocketNonJr = nonJr - coveredNonJr;
+      }
+    } else if (scopeOk) {
+      coveredJr = jr;
+      outOfPocketJr = 0;
+    }
+    const youPay = outOfPocketJr + outOfPocketNonJr;
+    return { jr, nonJr, all, inWindow, scopeOk, coveredJr, coveredNonJr, outOfPocketJr, outOfPocketNonJr, youPay };
   }
 
   function isPassEligibleForTrip(passObj, daysList, noPassEval) {
@@ -58,42 +88,27 @@
       });
     }
     if (!noPassEval || noPassEval.jrSum <= 0) return false;
-    return daysList.some(d => {
-      const dr = getDayRegions(d);
-      return (Number(d.jrOnly) || 0) > 0 && (!passObj.eligibleRegions || dr.size === 0 || passObj.eligibleRegions.some(r => dr.has(r)));
-    });
+    return daysList.some(d => (Number(d.jrOnly) || 0) > 0 && dayMatchesPassScope(d, getDayRegions(d), passObj));
   }
 
   function evaluatePassAcrossDays(daysList, passObj, passPrice, startDay) {
     const passDays = passObj.days || 0;
     const endDay = passDays > 0 ? (startDay + passDays - 1) : -1;
-    let jrSum = 0, nonJrSum = 0, allSum = 0, coveredJrSum = 0, coveredNonJrSum = 0, outOfPocketJrSum = 0;
+    let jrSum = 0, nonJrSum = 0, allSum = 0, coveredJrSum = 0, coveredNonJrSum = 0, outOfPocketJrSum = 0, outOfPocketNonJrSum = 0;
 
     daysList.forEach(d => {
-      const jr = Math.max(0, Number(d.jrOnly) || 0);
-      const all = Math.max(jr, Number(d.totalAllLegs) || 0);
-      const nonJr = Math.max(0, all - jr);
-      const inWindow = passDays > 0 && d.day >= startDay && d.day <= endDay;
-      const dayRegs = getDayRegions(d);
-      const scopeOk = inWindow && dayMatchesPassScope(d, dayRegs, passObj);
-
-      jrSum += jr;
-      nonJrSum += nonJr;
-      allSum += all;
-
-      if (passObj.nonJr) {
-        outOfPocketJrSum += jr;
-        if (scopeOk && nonJr > 0) {
-          coveredNonJrSum += Math.min(nonJr, passObj.maxDailyCovered || nonJr);
-        }
-      } else {
-        if (scopeOk) coveredJrSum += jr;
-        else outOfPocketJrSum += jr;
-      }
+      const ev = evaluateRailDay(d, passObj, startDay, endDay);
+      jrSum += ev.jr;
+      nonJrSum += ev.nonJr;
+      allSum += ev.all;
+      coveredJrSum += ev.coveredJr;
+      coveredNonJrSum += ev.coveredNonJr;
+      outOfPocketJrSum += ev.outOfPocketJr;
+      outOfPocketNonJrSum += ev.outOfPocketNonJr;
     });
 
     const coveredTotal = passObj.nonJr ? coveredNonJrSum : coveredJrSum;
-    const totalWithPass = passPrice + outOfPocketJrSum + (nonJrSum - coveredNonJrSum);
+    const totalWithPass = passPrice + outOfPocketJrSum + outOfPocketNonJrSum;
     const netSavings = coveredTotal - passPrice; // Positive means selected pass beats paying individual fares
     return {
       jrSum,
@@ -101,6 +116,7 @@
       allSum,
       coveredJrSum: coveredTotal,
       outOfPocketJrSum,
+      outOfPocketNonJrSum,
       totalWithPass,
       netSavings,
       startDay,
@@ -209,6 +225,37 @@
       : (en ? "🎫 Cleared active Rail Pass flags on Daily Schedule" : "🎫 パス適用フラグを解除しました"));
   };
 
+  window.syncRailFaresToBudget = function() {
+    const en = window.isEn();
+    const m = window.computeRailPassMetrics();
+    const { passObj, passPrice, currentEval } = m;
+    const startDay = currentEval.startDay;
+    const endDay = currentEval.endDay;
+    const hasPass = passObj && passObj.days > 0;
+
+    window.pushUndoSnapshot("Sync rail fares to budget");
+    [state.dataEn.days, state.dataJa.days].forEach(arr => {
+      if (!Array.isArray(arr)) return;
+      arr.forEach(d => {
+        const ev = evaluateRailDay(d, passObj, startDay, endDay);
+        const curTravel = Math.max(0, Number(d.travelBase) || 0);
+        const hasFlightNote = /flight|airfare|航空券|✈️/i.test(`${d.routeJp || ""} ${d.routeEn || ""} ${(d.legs || []).join(" ")}`);
+        const existingFlightBuffer = (hasFlightNote && curTravel > ev.all) ? (curTravel - ev.all) : 0;
+        const passAdd = (hasPass && d.day === startDay) ? passPrice : 0;
+        d.travelBase = ev.youPay + existingFlightBuffer + passAdd;
+        if (hasPass) {
+          d.passCovered = ev.inWindow && ev.scopeOk;
+        }
+      });
+    });
+
+    window.saveState();
+    window.renderAll();
+    window.showToast(en
+      ? "🔄 Synced Rail Pass out-of-pocket fares into Tab 4 Budget!"
+      : "🔄 パス試算後の実質交通費をタブ4予算台帳へ反映しました！");
+  };
+
   window.renderRailTable = function() {
     const en = window.isEn();
     const daysList = (window.curData().days) || [];
@@ -244,7 +291,7 @@
         </div>
         <ul style="font-size:12px;color:var(--ink-muted);padding-left:18px;line-height:1.6;">
           <li><strong>${en ? `Window (Days ${currentEval.startDay}–${Math.min(daysList.length, currentEval.endDay)}):` : `適用期間（Day ${currentEval.startDay}〜${Math.min(daysList.length, currentEval.endDay)}）：`}</strong> ${en ? `Pass cost ${window.fmtJpy(passPrice)} covers ${window.fmtJpy(currentEval.coveredJrSum)} of JR/transit fares` : `パス代 ${window.fmtJpy(passPrice)} で対象運賃 ${window.fmtJpy(currentEval.coveredJrSum)} をカバー`}</li>
-          <li><strong>${en ? "Out-of-Pocket Non-Covered Fares:" : "パス対象外（期間外JR＋私鉄/バス等）："}</strong> ${window.fmtJpy(currentEval.outOfPocketJrSum + currentEval.nonJrSum)}</li>
+          <li><strong>${en ? "Out-of-Pocket Non-Covered Fares:" : "パス対象外（期間外JR＋私鉄/バス等）："}</strong> ${window.fmtJpy(currentEval.outOfPocketJrSum + currentEval.outOfPocketNonJrSum)}</li>
           <li><strong>${en ? "Net Difference vs Point-to-Point:" : "通常きっぷとの差額："}</strong> <strong style="color:${passBeatsPoint ? "var(--forest)" : "var(--accent)"};">${currentEval.netSavings >= 0 ? (en ? `Save ${window.fmtJpy(currentEval.netSavings)}` : `${window.fmtJpy(currentEval.netSavings)} お得`) : (en ? `Costs ${window.fmtJpy(Math.abs(currentEval.netSavings))} more` : `${window.fmtJpy(Math.abs(currentEval.netSavings))} 割高`)}</strong></li>
         </ul>
       </div>
@@ -347,6 +394,8 @@
 
     const applyBtn = document.getElementById("btnApplyPassWindow");
     if (applyBtn) applyBtn.textContent = en ? "✓ Sync Window to Schedule" : "✓ 日別スケジュールへ反映";
+    const syncBudgetBtn = document.getElementById("btnSyncRailToBudget");
+    if (syncBudgetBtn) syncBudgetBtn.textContent = en ? "🔄 Sync Rail Fares → Tab 4 Budget" : "🔄 実質交通費を予算表へ反映";
 
     document.getElementById("passSimSummary").innerHTML = hasPass
       ? (en
@@ -369,11 +418,15 @@
     `;
 
     document.getElementById("railTableBody").innerHTML = daysList.map((d, idx) => {
-      const inWindow = hasPass && d.day >= currentEval.startDay && d.day <= currentEval.endDay;
-      const jr = Math.max(0, Number(d.jrOnly) || 0);
-      const all = Math.max(jr, Number(d.totalAllLegs) || 0);
-      const nonJr = Math.max(0, all - jr);
-      const youPay = (inWindow ? 0 : jr) + nonJr;
+      const ev = evaluateRailDay(d, passObj, currentEval.startDay, currentEval.endDay);
+      let statusBadgeHtml;
+      if (ev.inWindow && ev.scopeOk && (ev.coveredJr > 0 || ev.coveredNonJr > 0)) {
+        statusBadgeHtml = `<span class="pass-badge">✓ ${en ? `Covered (${d.day - currentEval.startDay + 1}/${passObj.days})` : `適用 (${d.day - currentEval.startDay + 1}/${passObj.days})`}</span>`;
+      } else if (ev.inWindow && !ev.scopeOk && (ev.jr > 0 || (passObj.nonJr && ev.nonJr > 0))) {
+        statusBadgeHtml = `<span class="leg-chip non-jr" style="font-size:11px;padding:2px 7px;">${en ? "Out of Area" : "対象外エリア"}</span>`;
+      } else {
+        statusBadgeHtml = `<span style="font-size:11.5px;color:var(--ink-muted);font-weight:600;">${en ? "IC / Ticket" : "通常・IC"}</span>`;
+      }
 
       return `
         <tr>
@@ -381,15 +434,11 @@
           <td style="white-space:nowrap;">${window.escapeHtml(d.date)} (${window.escapeHtml(d.dow)})</td>
           <td><strong>${window.escapeHtml(d.routeJp)}</strong></td>
           <td style="font-size:12px;color:var(--ink-muted);">${(d.legs || []).map(l => window.escapeHtml(l)).join(en ? " / " : " ／ ")}</td>
-          <td>
-            ${inWindow
-              ? `<span class="pass-badge">✓ ${en ? `Covered (${d.day - currentEval.startDay + 1}/${passObj.days})` : `適用 (${d.day - currentEval.startDay + 1}/${passObj.days})`}</span>`
-              : `<span style="font-size:11.5px;color:var(--ink-muted);font-weight:600;">${en ? "IC / Ticket" : "通常・IC"}</span>`}
-          </td>
-          <td class="num-col"><input type="number" class="editable-num" value="${jr}" min="0" step="100" onchange="updateRailDayFare(${idx}, 'jr', this.value)"></td>
-          <td class="num-col"><input type="number" class="editable-num" value="${nonJr}" min="0" step="100" onchange="updateRailDayFare(${idx}, 'nonJr', this.value)"></td>
-          <td class="num-col">${window.fmtJpy(all)}</td>
-          <td class="num-col"><strong>${window.fmtJpy(youPay)}</strong></td>
+          <td>${statusBadgeHtml}</td>
+          <td class="num-col"><input type="number" class="editable-num" value="${ev.jr}" min="0" step="100" onchange="updateRailDayFare(${idx}, 'jr', this.value)"></td>
+          <td class="num-col"><input type="number" class="editable-num" value="${ev.nonJr}" min="0" step="100" onchange="updateRailDayFare(${idx}, 'nonJr', this.value)"></td>
+          <td class="num-col">${window.fmtJpy(ev.all)}</td>
+          <td class="num-col"><strong>${window.fmtJpy(ev.youPay)}</strong></td>
         </tr>
       `;
     }).join("");

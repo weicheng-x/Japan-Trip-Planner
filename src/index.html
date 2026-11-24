@@ -47,10 +47,10 @@
 
 <!-- Create New Blank Trip Modal -->
 <div id="newTripModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="newTripModalTitle" onclick="if(event.target===this)closeAllModals()">
-  <div class="modal-card">
+  <div class="modal-card wide">
     <h3 id="newTripModalTitle">➕ Create New Blank Japan Trip</h3>
-    <p id="newTripModalDesc">Start a fresh blank itinerary with customizable dates, cities, hotels, and budget tracker.</p>
-    <div style="display:grid;gap:11px;margin-bottom:16px;">
+    <p id="newTripModalDesc">Start a fresh itinerary by picking destinations, dates, and clean blank vs estimated starting costs.</p>
+    <div style="display:grid;gap:12px;margin-bottom:16px;">
       <div>
         <label for="newTripTitleInput" id="lblNewTripName" style="display:block;font-size:12px;font-weight:800;margin-bottom:4px;">Trip Description</label>
         <input type="text" id="newTripTitleInput" class="search-input" style="width:100%;" placeholder="e.g., Spring Hokkaido Explorer">
@@ -64,6 +64,23 @@
           <label for="newTripDaysInput" id="lblNewTripDays" style="display:block;font-size:12px;font-weight:800;margin-bottom:4px;">Days (1–60)</label>
           <input type="number" id="newTripDaysInput" class="search-input" style="width:100%;min-width:0;" min="1" max="60" value="7">
         </div>
+      </div>
+      <div>
+        <span id="lblNewTripCities" style="display:block;font-size:12px;font-weight:800;margin-bottom:5px;">Destinations / Cities (select one or more)</span>
+        <div id="newTripCityChips" class="wizard-city-grid"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;">
+        <div>
+          <label for="newTripCostMode" id="lblNewTripCostMode" style="display:block;font-size:12px;font-weight:800;margin-bottom:4px;">Starting Budget Mode</label>
+          <select id="newTripCostMode" class="search-input" style="width:100%;min-width:0;">
+            <option value="blank" id="optNewTripCostBlank">Clean Blank (¥0 — enter your own)</option>
+            <option value="estimate" id="optNewTripCostEst">Quick Estimates (avg hotel/food/flight)</option>
+          </select>
+        </div>
+        <label style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;cursor:pointer;background:var(--surface-alt);border:1px solid var(--border);padding:8px 10px;border-radius:8px;">
+          <input type="checkbox" id="newTripEmptySlots" checked>
+          <span id="lblNewTripEmptySlots">Start with clean empty hourly time slots</span>
+        </label>
       </div>
     </div>
     <div class="modal-actions">
@@ -327,7 +344,10 @@
     <div class="section-card">
       <h2>
         <span id="hotelsTabTitle">🏨 Hotel & Accommodation Ledger</span>
-        <span style="font-size:14px;font-weight:800;color:var(--indigo);" id="hotelSummaryHeader"></span>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="pass-badge" id="hotelCoverageBadge" style="font-size:12px;"></span>
+          <span style="font-size:14px;font-weight:800;color:var(--indigo);" id="hotelSummaryHeader"></span>
+        </div>
       </h2>
       <p class="lead" id="hotelsTabLead"></p>
       <div class="hotel-grid" id="hotelGrid"></div>
@@ -383,6 +403,7 @@
           <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
             <select id="passStartSelect" class="search-input" style="min-width:250px;font-weight:700;" onchange="updatePassStartDay(this.value)"></select>
             <button type="button" class="btn btn-primary" id="btnApplyPassWindow" onclick="applyPassWindowToSchedule()">✓ Apply to Schedule</button>
+            <button type="button" class="btn" id="btnSyncRailToBudget" onclick="syncRailFaresToBudget()">🔄 Sync Rail Fares → Tab 4 Budget</button>
           </div>
         </div>
         <div id="passSimSummary" style="margin-top:10px;font-size:13px;font-weight:600;color:var(--indigo);"></div>
@@ -483,6 +504,7 @@
 <script src="js/excel-export.js"></script>
 <script src="js/themes.js"></script>
 <script src="js/state.js"></script>
+<script src="js/preset-manager.js"></script>
 <script src="js/map.js"></script>
 <script src="js/render-rail.js"></script>
 <script src="js/render-chrome.js"></script>

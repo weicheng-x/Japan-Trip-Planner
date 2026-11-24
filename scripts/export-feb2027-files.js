@@ -51,6 +51,7 @@ vm.createContext(ctx);
   "js/excel-export.js",
   "js/themes.js",
   "js/state.js",
+  "js/preset-manager.js",
   "js/map.js",
   "js/render-rail.js",
   "js/render-chrome.js",

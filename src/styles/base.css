@@ -1342,11 +1342,54 @@ table.data-table tr:hover td { background: var(--surface-alt); }
 .prep-error-banner { background: #FEF2F2; border: 1px solid #FCA5A5; color: #B91C1C; font-size: 12.5px; font-weight: 700; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; display: none; }
 .prep-error-banner.show { display: block; }
 
+/* Fresh-Itinerary Wizard & Inline Schedule Helpers */
+.wizard-city-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.wizard-city-chip { padding: 5px 10px; font-size: 11.5px; }
+#btnSaveCustomPreset.has-unsaved { box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.55); }
+.day-meta-num { width: 78px !important; padding: 2px 6px !important; font-size: 12px !important; }
+.day-meta-hotel-input {
+  width: 100%;
+  min-width: 110px;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 6px;
+  color: var(--ink);
+}
+.day-meta-hotel-input:focus { border-color: var(--accent); outline: none; }
+.leg-chip { display: inline-flex; align-items: center; gap: 5px; }
+.leg-del-btn {
+  border: none;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 0 2px;
+  line-height: 1;
+}
+.leg-del-btn:hover { color: #DC2626; }
+.leg-add-inline { display: inline-flex; align-items: center; gap: 4px; }
+.leg-add-input {
+  min-width: 210px;
+  max-width: 310px;
+  font-size: 11.5px;
+  padding: 3px 8px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink);
+}
+.leg-add-input:focus { border-style: solid; border-color: var(--accent); outline: none; }
+
 /* Clean Print Stylesheet */
 @media print {
   .nav-wrapper, .filter-bar, .hero-controls, .day-jump-strip, .body-seasonal-canvas,
   .hero-seasonal-scene, .map-control-bar, .action-bar, .btn, button,
-  .slot-add-bar, #foodFormBar, #accessFormBar, #guideFormBar, #shoppingFormBar {
+  .slot-add-bar, .leg-del-btn, .leg-add-inline, .day-actions-mini,
+  #foodFormBar, #accessFormBar, #guideFormBar, #shoppingFormBar {
     display: none !important;
   }
   .hero {

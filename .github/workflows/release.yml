@@ -35,6 +35,9 @@ jobs:
           }
           Write-Host "Checked $($files.Count) JS files."
 
+      - name: Run automated planner tests
+        run: npm test
+
       - name: Build Standalone HTML & Portable Windows EXE
         run: npm run build:win
 

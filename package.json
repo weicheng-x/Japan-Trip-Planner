@@ -1,10 +1,11 @@
 {
   "name": "jp-trip-planner",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Japan Master Trip & Budget Planner (EN <-> JP) Desktop Application",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
+    "test": "node scripts/test-planner.js",
     "smoke": "electron . --smoke-test",
     "build:html": "node scripts/build-standalone.js",
     "build:win": "node scripts/build-standalone.js && electron-builder --win portable"

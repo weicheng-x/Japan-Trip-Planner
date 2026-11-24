@@ -74,7 +74,9 @@ function createWindow() {
             kpiAllIn: document.getElementById("kpiReconciledJpy")?.textContent,
             heroImgComplete: !!(heroImg && heroImg.complete && heroImg.naturalWidth > 0),
             heroImgSize: heroImg ? [heroImg.naturalWidth, heroImg.naturalHeight] : [0, 0],
-            hasDesktopAPI: !!(window.jpDesktopAPI && window.jpDesktopAPI.exportXlsx && window.jpDesktopAPI.exportPreset)
+            hasDesktopAPI: !!(window.jpDesktopAPI && window.jpDesktopAPI.exportXlsx && window.jpDesktopAPI.exportPreset),
+            hasAutoPopulateGuides: typeof window.syncRegionalCatalogsFromSchedule === "function",
+            hasTransitLegEditor: typeof window.addDayTransitLeg === "function"
           };
         })()`);
         console.log("SMOKE_PROBE:", JSON.stringify(probe));
@@ -83,7 +85,7 @@ function createWindow() {
           app.exit(1);
           return;
         }
-        if (!probe.heroImgComplete || probe.presetCount !== 7 || probe.hasCustomBlankInCatalog || !probe.hasFeb2027 || !probe.hasDesktopAPI) {
+        if (!probe.heroImgComplete || probe.presetCount !== 7 || probe.hasCustomBlankInCatalog || !probe.hasFeb2027 || !probe.hasDesktopAPI || !probe.hasAutoPopulateGuides || !probe.hasTransitLegEditor) {
           console.error("SMOKE_FAILED_ASSERTIONS", probe);
           app.exit(1);
           return;
@@ -147,9 +149,12 @@ function buildMenu() {
     {
       label: "Edit",
       submenu: [
+        { role: "undo" },
+        { role: "redo" },
+        { type: "separator" },
         {
           label: "Undo Last Planner Change",
-          accelerator: "CmdOrCtrl+Z",
+          accelerator: "CmdOrCtrl+Shift+Z",
           click: () => mainWindow && mainWindow.webContents.executeJavaScript("window.undoLastChange && window.undoLastChange()")
         },
         { type: "separator" },
@@ -222,91 +227,119 @@ ipcMain.handle("save-state", async (_evt, stateObj) => {
 });
 
 ipcMain.handle("export-json", async (_evt, defaultName, content) => {
-  const res = await dialog.showSaveDialog(mainWindow, {
-    title: "Save Japan Trip Backup (JSON)",
-    defaultPath: defaultName || "Japan_Trip_Plan.json",
-    filters: [{ name: "JSON Files", extensions: ["json"] }]
-  });
-  if (res.canceled || !res.filePath) return { ok: false, canceled: true };
-  fs.writeFileSync(res.filePath, content, "utf8");
-  return { ok: true, filePath: res.filePath };
+  try {
+    const res = await dialog.showSaveDialog(mainWindow, {
+      title: "Save Japan Trip Backup (JSON)",
+      defaultPath: defaultName || "Japan_Trip_Plan.json",
+      filters: [{ name: "JSON Files", extensions: ["json"] }]
+    });
+    if (res.canceled || !res.filePath) return { ok: false, canceled: true };
+    fs.writeFileSync(res.filePath, content, "utf8");
+    return { ok: true, filePath: res.filePath };
+  } catch (err) {
+    return { ok: false, error: err && err.message ? err.message : String(err) };
+  }
 });
 
 ipcMain.handle("import-json", async () => {
-  const res = await dialog.showOpenDialog(mainWindow, {
-    title: "Open Japan Trip Backup (JSON)",
-    properties: ["openFile"],
-    filters: [{ name: "JSON Files", extensions: ["json"] }]
-  });
-  if (res.canceled || !res.filePaths || !res.filePaths[0]) return { ok: false, canceled: true };
-  const content = fs.readFileSync(res.filePaths[0], "utf8");
-  return { ok: true, content, filePath: res.filePaths[0] };
+  try {
+    const res = await dialog.showOpenDialog(mainWindow, {
+      title: "Open Japan Trip Backup (JSON)",
+      properties: ["openFile"],
+      filters: [{ name: "JSON Files", extensions: ["json"] }]
+    });
+    if (res.canceled || !res.filePaths || !res.filePaths[0]) return { ok: false, canceled: true };
+    const content = fs.readFileSync(res.filePaths[0], "utf8");
+    return { ok: true, content, filePath: res.filePaths[0] };
+  } catch (err) {
+    return { ok: false, error: err && err.message ? err.message : String(err) };
+  }
 });
 
 ipcMain.handle("export-preset", async (_evt, defaultName, content) => {
-  const res = await dialog.showSaveDialog(mainWindow, {
-    title: "Share / Export Trip Preset (for JP Trip Planner)",
-    defaultPath: defaultName || "Japan_Trip_Preset.jptrip.json",
-    filters: [
-      { name: "JP Trip Preset (*.jptrip.json)", extensions: ["jptrip.json", "json"] },
-      { name: "All JSON Files", extensions: ["json"] }
-    ]
-  });
-  if (res.canceled || !res.filePath) return { ok: false, canceled: true };
-  fs.writeFileSync(res.filePath, content, "utf8");
-  return { ok: true, filePath: res.filePath };
+  try {
+    const res = await dialog.showSaveDialog(mainWindow, {
+      title: "Share / Export Trip Preset (for JP Trip Planner)",
+      defaultPath: defaultName || "Japan_Trip_Preset.jptrip.json",
+      filters: [
+        { name: "JP Trip Preset (*.jptrip.json)", extensions: ["jptrip.json", "json"] },
+        { name: "All JSON Files", extensions: ["json"] }
+      ]
+    });
+    if (res.canceled || !res.filePath) return { ok: false, canceled: true };
+    fs.writeFileSync(res.filePath, content, "utf8");
+    return { ok: true, filePath: res.filePath };
+  } catch (err) {
+    return { ok: false, error: err && err.message ? err.message : String(err) };
+  }
 });
 
 ipcMain.handle("import-preset", async () => {
-  const res = await dialog.showOpenDialog(mainWindow, {
-    title: "Import Shared Trip Preset or Backup",
-    properties: ["openFile"],
-    filters: [
-      { name: "JP Trip Preset & JSON", extensions: ["jptrip.json", "json"] }
-    ]
-  });
-  if (res.canceled || !res.filePaths || !res.filePaths[0]) return { ok: false, canceled: true };
-  const content = fs.readFileSync(res.filePaths[0], "utf8");
-  return { ok: true, content, filePath: res.filePaths[0] };
+  try {
+    const res = await dialog.showOpenDialog(mainWindow, {
+      title: "Import Shared Trip Preset or Backup",
+      properties: ["openFile"],
+      filters: [
+        { name: "JP Trip Preset & JSON", extensions: ["jptrip.json", "json"] }
+      ]
+    });
+    if (res.canceled || !res.filePaths || !res.filePaths[0]) return { ok: false, canceled: true };
+    const content = fs.readFileSync(res.filePaths[0], "utf8");
+    return { ok: true, content, filePath: res.filePaths[0] };
+  } catch (err) {
+    return { ok: false, error: err && err.message ? err.message : String(err) };
+  }
 });
 
 ipcMain.handle("export-xlsx", async (_evt, defaultName, base64Data) => {
-  const res = await dialog.showSaveDialog(mainWindow, {
-    title: "Export Trip Workbook (Excel .xlsx)",
-    defaultPath: defaultName || "Japan_Trip_Plan.xlsx",
-    filters: [{ name: "Excel Workbook (*.xlsx)", extensions: ["xlsx"] }]
-  });
-  if (res.canceled || !res.filePath) return { ok: false, canceled: true };
-  fs.writeFileSync(res.filePath, Buffer.from(base64Data, "base64"));
-  return { ok: true, filePath: res.filePath };
+  try {
+    const res = await dialog.showSaveDialog(mainWindow, {
+      title: "Export Trip Workbook (Excel .xlsx)",
+      defaultPath: defaultName || "Japan_Trip_Plan.xlsx",
+      filters: [{ name: "Excel Workbook (*.xlsx)", extensions: ["xlsx"] }]
+    });
+    if (res.canceled || !res.filePath) return { ok: false, canceled: true };
+    fs.writeFileSync(res.filePath, Buffer.from(base64Data, "base64"));
+    return { ok: true, filePath: res.filePath };
+  } catch (err) {
+    return { ok: false, error: err && err.message ? err.message : String(err) };
+  }
 });
 
 ipcMain.handle("export-csv", async (_evt, defaultName, content) => {
-  const res = await dialog.showSaveDialog(mainWindow, {
-    title: "Export Trip Budget CSV",
-    defaultPath: defaultName || "Japan_Trip_Budget.csv",
-    filters: [{ name: "CSV Spreadsheet", extensions: ["csv"] }]
-  });
-  if (res.canceled || !res.filePath) return { ok: false, canceled: true };
-  fs.writeFileSync(res.filePath, content, "utf8");
-  return { ok: true, filePath: res.filePath };
+  try {
+    const res = await dialog.showSaveDialog(mainWindow, {
+      title: "Export Trip Budget CSV",
+      defaultPath: defaultName || "Japan_Trip_Budget.csv",
+      filters: [{ name: "CSV Spreadsheet", extensions: ["csv"] }]
+    });
+    if (res.canceled || !res.filePath) return { ok: false, canceled: true };
+    fs.writeFileSync(res.filePath, content, "utf8");
+    return { ok: true, filePath: res.filePath };
+  } catch (err) {
+    return { ok: false, error: err && err.message ? err.message : String(err) };
+  }
 });
 
 ipcMain.handle("print-pdf", async () => {
-  if (!mainWindow) return { ok: false };
-  const res = await dialog.showSaveDialog(mainWindow, {
-    title: "Export Itinerary & Budget as PDF",
-    defaultPath: "Japan_Trip_Plan.pdf",
-    filters: [{ name: "PDF Document", extensions: ["pdf"] }]
-  });
-  if (res.canceled || !res.filePath) return { ok: false, canceled: true };
-  const pdfBuf = await mainWindow.webContents.printToPDF({
-    printBackground: true,
-    landscape: false,
-    margins: { top: 0.4, bottom: 0.4, left: 0.4, right: 0.4 }
-  });
-  fs.writeFileSync(res.filePath, pdfBuf);
-  return { ok: true, filePath: res.filePath };
+  try {
+    if (!mainWindow) return { ok: false, error: "Window unavailable" };
+    const res = await dialog.showSaveDialog(mainWindow, {
+      title: "Export Itinerary & Budget as PDF",
+      defaultPath: "Japan_Trip_Plan.pdf",
+      filters: [{ name: "PDF Document", extensions: ["pdf"] }]
+    });
+    if (res.canceled || !res.filePath) return { ok: false, canceled: true };
+    const pdfBuf = await mainWindow.webContents.printToPDF({
+      printBackground: true,
+      landscape: false,
+      margins: { top: 0.4, bottom: 0.4, left: 0.4, right: 0.4 }
+    });
+    fs.writeFileSync(res.filePath, pdfBuf);
+    return { ok: true, filePath: res.filePath };
+  } catch (err) {
+    return { ok: false, error: err && err.message ? err.message : String(err) };
+  }
 });
 
 app.whenReady().then(createWindow);

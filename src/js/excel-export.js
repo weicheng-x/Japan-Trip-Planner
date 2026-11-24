@@ -534,7 +534,10 @@
     if (window.jpDesktopAPI && typeof window.jpDesktopAPI.exportXlsx === "function") {
       const res = await window.jpDesktopAPI.exportXlsx(filename, base64);
       if (res && res.ok) {
+        if (typeof window.closeAllModals === "function") window.closeAllModals();
         window.showToast(en ? `📊 Exported Excel workbook: ${res.filePath}` : `📊 Excelブックを保存しました: ${res.filePath}`);
+      } else if (res && res.error) {
+        window.showToast(en ? `⚠️ Excel export failed: ${res.error}` : `⚠️ Excel書き出しに失敗しました: ${res.error}`);
       }
       return;
     }
@@ -547,6 +550,7 @@
     link.click();
     document.body.removeChild(link);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+    if (typeof window.closeAllModals === "function") window.closeAllModals();
     window.showToast(en ? `📊 Downloaded Excel workbook: ${filename}` : `📊 Excelブック ${filename} を保存しました`);
   };
 })();

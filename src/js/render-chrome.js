@@ -110,7 +110,11 @@ window.renderStaticChrome = function() {
   const newBtn = document.getElementById("btnNewBlankTrip");
   if (newBtn) newBtn.textContent = en ? "➕ New" : "➕ 新規作成";
   const saveBtn = document.getElementById("btnSaveCustomPreset");
-  if (saveBtn) saveBtn.textContent = en ? "💾 Save" : "💾 保存";
+  if (saveBtn) {
+    const dirty = typeof window.isActiveTripDirty === "function" && window.isActiveTripDirty();
+    saveBtn.classList.toggle("has-unsaved", dirty);
+    saveBtn.textContent = (en ? "💾 Save" : "💾 保存") + (dirty ? " ●" : "");
+  }
   const shareBtn = document.getElementById("btnHeroShareExport");
   if (shareBtn) shareBtn.textContent = en ? "📤 Share / Export" : "📤 共有・書出";
   const impBtn = document.getElementById("btnHeroImportPreset");
@@ -136,14 +140,24 @@ window.renderStaticChrome = function() {
   if (ntTitle) ntTitle.textContent = en ? "➕ Create New Blank Japan Trip" : "➕ 新規カスタム空白プランを作成";
   const ntDesc = document.getElementById("newTripModalDesc");
   if (ntDesc) ntDesc.textContent = en
-    ? "Start a fresh blank itinerary with customizable dates, cities, hotels, and budget tracker."
-    : "日付・訪問都市・宿泊先・予算をゼロから自由に設定できる新しいプランを作成します。";
+    ? "Start a fresh itinerary by picking destinations, dates, and clean blank vs estimated starting costs."
+    : "訪問都市・日付・初期費用モード（¥0空白または概算）を選んで新しい旅程を作成します。";
   const ntLblN = document.getElementById("lblNewTripName");
   if (ntLblN) ntLblN.textContent = en ? "Trip Description" : "旅行タイトル（説明）";
   const ntLblS = document.getElementById("lblNewTripStart");
   if (ntLblS) ntLblS.textContent = en ? "Start Date" : "出発日";
   const ntLblD = document.getElementById("lblNewTripDays");
   if (ntLblD) ntLblD.textContent = en ? "Days (1–60)" : "日数（1〜60日）";
+  const ntLblC = document.getElementById("lblNewTripCities");
+  if (ntLblC) ntLblC.textContent = en ? "Destinations / Cities (select one or more)" : "訪問都市・エリア（複数選択可）";
+  const ntLblM = document.getElementById("lblNewTripCostMode");
+  if (ntLblM) ntLblM.textContent = en ? "Starting Budget Mode" : "初期予算モード";
+  const ntOptB = document.getElementById("optNewTripCostBlank");
+  if (ntOptB) ntOptB.textContent = en ? "Clean Blank (¥0 — enter your own)" : "完全空白（¥0・後から手入力）";
+  const ntOptE = document.getElementById("optNewTripCostEst");
+  if (ntOptE) ntOptE.textContent = en ? "Quick Estimates (avg hotel/food/flight)" : "参考概算入り（宿・食事・航空券目安）";
+  const ntLblSl = document.getElementById("lblNewTripEmptySlots");
+  if (ntLblSl) ntLblSl.textContent = en ? "Start with clean empty hourly time slots" : "時間別スケジュールを空欄で開始";
   const ntCancel = document.getElementById("btnCancelNewTrip");
   if (ntCancel) ntCancel.textContent = en ? "Cancel" : "キャンセル";
   const ntOk = document.getElementById("btnConfirmNewTrip");

@@ -95,7 +95,7 @@ window.renderBudgetTable = function() {
     const fun = Number(d.fun) || 0;
     const rowTotal = stay + travel + fun;
 
-    const rLabel = en ? (d.region || "Japan").replace("-", " & ") : (d.region || "日本");
+    const rLabel = window.formatRegionLabel(d.region || (en ? "Japan" : "日本"), en);
     if (!regMap[rLabel]) regMap[rLabel] = 0;
     regMap[rLabel] += stay + (d.day > 1 && d.day < daysList.length ? travel : 0) + fun;
 

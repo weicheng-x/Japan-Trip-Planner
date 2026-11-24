@@ -68,8 +68,8 @@ window.renderGourmet = function() {
   dynamicPills.push({ key: "EASY_ONLY", label: en ? "🟢 Station Walkable" : "🟢 駅チカ徒歩圏" });
 
   document.getElementById("foodRegionPills").innerHTML = dynamicPills.map(rk => `
-    <button type="button" class="pill ${state.activeFoodKey === rk.key ? "active" : ""}" onclick="filterFoodKey('${window.escapeAttr(rk.key)}')">${window.escapeHtml(rk.label)}</button>
-  `).join("");
+    <button type="button" class="pill ${state.activeFoodKey === rk.key ? "active" : ""}" data-key="${window.escapeAttr(rk.key)}" onclick="filterFoodKey(this.dataset.key)">${window.escapeHtml(rk.label)}</button>
+  `).join("") + `<button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;margin-left:4px;" onclick="syncRegionalCatalogsFromSchedule()">✨ ${en ? "Sync from Schedule" : "日程から自動追加"}</button>`;
 
   const regionOptions = Object.keys(regCounts).length > 0 ? Object.keys(regCounts) : [en ? "Tokyo" : "東京"];
   document.getElementById("foodFormBar").innerHTML = `
@@ -132,10 +132,16 @@ window.filterAccessKey = function(key) {
 window.updateAccessField = function(id, field, val) {
   const item = (window.curData().access || []).find(a => a.id === id);
   if (item) item[field] = val;
+  if (typeof window.shouldMirrorCustomText === "function" && window.shouldMirrorCustomText()) {
+    const other = (window.isEn() ? state.dataJa : state.dataEn).access || [];
+    const otherItem = other.find(a => a.id === id);
+    if (otherItem) otherItem[field] = val;
+  }
   window.saveState();
 };
 
 window.deleteAccessRow = function(id) {
+  window.pushUndoSnapshot("Delete transit link");
   state.dataEn.access = (state.dataEn.access || []).filter(a => a.id !== id);
   state.dataJa.access = (state.dataJa.access || []).filter(a => a.id !== id);
   window.saveState();
@@ -178,8 +184,8 @@ window.renderAccessTable = function() {
   Object.entries(areaCounts).forEach(([aName, cnt]) => { pills.push({ key: aName, label: `${aName} (${cnt})` }); });
 
   document.getElementById("accessAreaPills").innerHTML = pills.map(ak => `
-    <button type="button" class="pill ${state.activeAccessKey === ak.key ? "active" : ""}" onclick="filterAccessKey('${window.escapeAttr(ak.key)}')">${window.escapeHtml(ak.label)}</button>
-  `).join("");
+    <button type="button" class="pill ${state.activeAccessKey === ak.key ? "active" : ""}" data-key="${window.escapeAttr(ak.key)}" onclick="filterAccessKey(this.dataset.key)">${window.escapeHtml(ak.label)}</button>
+  `).join("") + `<button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;margin-left:4px;" onclick="syncRegionalCatalogsFromSchedule()">✨ ${en ? "Sync from Schedule" : "日程から自動追加"}</button>`;
 
   const defaultArea = Object.keys(areaCounts)[0] || (en ? "Tokyo" : "東京");
   document.getElementById("accessFormBar").innerHTML = `
@@ -205,15 +211,15 @@ window.renderAccessTable = function() {
       <tr>
         <td><strong>${window.escapeHtml(a.area)}</strong></td>
         <td style="white-space:nowrap;font-size:12px;color:var(--ink-muted);">${window.escapeHtml(a.day)}</td>
-        <td><input type="text" class="editable-text" style="font-weight:700;" value="${window.escapeAttr(a.place || "")}" onchange="updateAccessField('${safeId}', 'place', this.value)"></td>
+        <td><input type="text" class="editable-text" style="font-weight:700;" value="${window.escapeAttr(a.place || "")}" data-id="${safeId}" onchange="updateAccessField(this.dataset.id, 'place', this.value)"></td>
         <td style="white-space:nowrap;">
           ${cleanUrl
             ? `<a href="${window.escapeAttr(cleanUrl)}" target="_blank" rel="noopener" class="btn ${isPdf ? "btn-primary" : ""}" style="border-bottom:none;font-size:12px;${isPdf ? "color:#FFF;" : ""}">${isPdf ? (en ? "📄 Open PDF ↗" : "📄 PDFを開く ↗") : (en ? "🚌 Timetable ↗" : "🚌 時刻表を開く ↗")}</a>`
             : `<span class="no-site-badge">${en ? "No URL" : "URLなし"}</span>`}
         </td>
-        <td><input type="text" class="editable-text" style="font-size:12px;color:var(--ink-muted);" value="${window.escapeAttr(a.note || "")}" onchange="updateAccessField('${safeId}', 'note', this.value)"></td>
+        <td><input type="text" class="editable-text" style="font-size:12px;color:var(--ink-muted);" value="${window.escapeAttr(a.note || "")}" data-id="${safeId}" onchange="updateAccessField(this.dataset.id, 'note', this.value)"></td>
         <td style="white-space:nowrap;">${isPdf ? `<span class="existing-badge">${en ? "📄 Official PDF" : "📄 公式PDF"}</span>` : `<span class="added-badge">${en ? "🚌 Transit Link" : "🚌 交通案内"}</span>`}</td>
-        <td><button type="button" class="btn btn-danger" style="padding:4px 8px;font-size:11.5px;" onclick="deleteAccessRow('${safeId}')">🗑️</button></td>
+        <td><button type="button" class="btn btn-danger" style="padding:4px 8px;font-size:11.5px;" data-id="${safeId}" onclick="deleteAccessRow(this.dataset.id)">🗑️</button></td>
       </tr>
     `;
   }).join("");
@@ -228,10 +234,16 @@ window.filterGuideKey = function(key) {
 window.updateGuideField = function(id, field, val) {
   const item = (window.curData().guides || []).find(g => g.id === id);
   if (item) item[field] = val;
+  if (typeof window.shouldMirrorCustomText === "function" && window.shouldMirrorCustomText()) {
+    const other = (window.isEn() ? state.dataJa : state.dataEn).guides || [];
+    const otherItem = other.find(g => g.id === id);
+    if (otherItem) otherItem[field] = val;
+  }
   window.saveState();
 };
 
 window.deleteGuideRow = function(id) {
+  window.pushUndoSnapshot("Delete sightseeing guide");
   state.dataEn.guides = (state.dataEn.guides || []).filter(g => g.id !== id);
   state.dataJa.guides = (state.dataJa.guides || []).filter(g => g.id !== id);
   window.saveState();
@@ -301,8 +313,8 @@ window.renderGuidesTable = function() {
   Object.entries(areaCounts).forEach(([aName, cnt]) => { pills.push({ key: aName, label: `${aName} (${cnt})` }); });
 
   document.getElementById("guideAreaPills").innerHTML = pills.map(gk => `
-    <button type="button" class="pill ${state.activeGuideKey === gk.key ? "active" : ""}" onclick="filterGuideKey('${window.escapeAttr(gk.key)}')">${window.escapeHtml(gk.label)}</button>
-  `).join("");
+    <button type="button" class="pill ${state.activeGuideKey === gk.key ? "active" : ""}" data-key="${window.escapeAttr(gk.key)}" onclick="filterGuideKey(this.dataset.key)">${window.escapeHtml(gk.label)}</button>
+  `).join("") + `<button type="button" class="btn" style="padding:4px 10px;font-size:11.5px;margin-left:4px;" onclick="syncRegionalCatalogsFromSchedule()">✨ ${en ? "Sync from Schedule" : "日程から自動追加"}</button>`;
 
   const defaultArea = Object.keys(areaCounts)[0] || (en ? "Tokyo" : "東京");
   document.getElementById("guideFormBar").innerHTML = `
@@ -327,10 +339,10 @@ window.renderGuidesTable = function() {
       <tr>
         <td><strong>${window.escapeHtml(g.area)}</strong></td>
         <td style="white-space:nowrap;font-size:12px;color:var(--ink-muted);">${window.escapeHtml(g.day)}</td>
-        <td><input type="text" class="editable-text" style="font-weight:700;" value="${window.escapeAttr(g.location || "")}" onchange="updateGuideField('${safeId}', 'location', this.value)"></td>
+        <td><input type="text" class="editable-text" style="font-weight:700;" value="${window.escapeAttr(g.location || "")}" data-id="${safeId}" onchange="updateGuideField(this.dataset.id, 'location', this.value)"></td>
         <td style="white-space:nowrap;">${cleanUrl ? `<a href="${window.escapeAttr(cleanUrl)}" target="_blank" rel="noopener" class="btn" style="border-bottom:none;font-size:12px;">📖 ${en ? "Open Guide ↗" : "ガイドを開く ↗"}</a>` : `<span class="no-site-badge">No URL</span>`}</td>
-        <td><input type="text" class="editable-text" style="font-size:12px;color:var(--ink-muted);" value="${window.escapeAttr(g.note || "")}" onchange="updateGuideField('${safeId}', 'note', this.value)"></td>
-        <td><button type="button" class="btn btn-danger" style="padding:4px 8px;font-size:11.5px;" onclick="deleteGuideRow('${safeId}')">🗑️</button></td>
+        <td><input type="text" class="editable-text" style="font-size:12px;color:var(--ink-muted);" value="${window.escapeAttr(g.note || "")}" data-id="${safeId}" onchange="updateGuideField(this.dataset.id, 'note', this.value)"></td>
+        <td><button type="button" class="btn btn-danger" style="padding:4px 8px;font-size:11.5px;" data-id="${safeId}" onclick="deleteGuideRow(this.dataset.id)">🗑️</button></td>
       </tr>
     `;
   }).join("");
@@ -444,15 +456,15 @@ window.renderShoppingTab = function() {
       const safeId = window.escapeAttr(it.id);
       return `
         <tr style="${it.bought ? "opacity:0.65;" : ""}">
-          <td style="text-align:center;"><input type="checkbox" ${it.bought ? "checked" : ""} onchange="updateShoppingItem('${safeId}', 'bought', this.checked)"></td>
-          <td><input type="text" class="editable-text" style="font-weight:700;${it.bought ? "text-decoration:line-through;" : ""}" value="${window.escapeAttr(it.name || "")}" onchange="updateShoppingItem('${safeId}', 'name', this.value)"></td>
-          <td><input type="text" class="editable-text" style="font-size:12px;" value="${window.escapeAttr(it.store || "")}" placeholder="${en ? "Store..." : "店舗..."}" onchange="updateShoppingItem('${safeId}', 'store', this.value)"></td>
+          <td style="text-align:center;"><input type="checkbox" ${it.bought ? "checked" : ""} data-id="${safeId}" onchange="updateShoppingItem(this.dataset.id, 'bought', this.checked)"></td>
+          <td><input type="text" class="editable-text" style="font-weight:700;${it.bought ? "text-decoration:line-through;" : ""}" value="${window.escapeAttr(it.name || "")}" data-id="${safeId}" onchange="updateShoppingItem(this.dataset.id, 'name', this.value)"></td>
+          <td><input type="text" class="editable-text" style="font-size:12px;" value="${window.escapeAttr(it.store || "")}" placeholder="${en ? "Store..." : "店舗..."}" data-id="${safeId}" onchange="updateShoppingItem(this.dataset.id, 'store', this.value)"></td>
           <td>${cleanUrl ? `<a href="${window.escapeAttr(cleanUrl)}" target="_blank" rel="noopener" class="btn" style="font-size:11.5px;border-bottom:none;">🔗 ${en ? "Open ↗" : "開く ↗"}</a>` : `<span class="no-site-badge">—</span>`}</td>
-          <td class="num-col"><input type="number" class="editable-num" value="${p}" min="0" step="100" onchange="updateShoppingItem('${safeId}', 'price', this.value)"></td>
-          <td class="num-col"><input type="number" class="editable-num" style="width:62px;" value="${q}" min="1" max="999" onchange="updateShoppingItem('${safeId}', 'qty', this.value)"></td>
+          <td class="num-col"><input type="number" class="editable-num" value="${p}" min="0" step="100" data-id="${safeId}" onchange="updateShoppingItem(this.dataset.id, 'price', this.value)"></td>
+          <td class="num-col"><input type="number" class="editable-num" style="width:62px;" value="${q}" min="1" max="999" data-id="${safeId}" onchange="updateShoppingItem(this.dataset.id, 'qty', this.value)"></td>
           <td class="num-col"><strong>${window.fmtJpy(sub)}</strong></td>
           <td class="num-col" style="color:var(--ink-muted);">${window.fmtSgd(sub)}</td>
-          <td><button type="button" class="btn btn-danger" style="padding:3px 7px;font-size:11px;" onclick="deleteShoppingItem('${safeId}')">🗑️</button></td>
+          <td><button type="button" class="btn btn-danger" style="padding:3px 7px;font-size:11px;" data-id="${safeId}" onclick="deleteShoppingItem(this.dataset.id)">🗑️</button></td>
         </tr>
       `;
     }).join("");

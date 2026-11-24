@@ -72,7 +72,8 @@ window.JR_PASS_CATALOG = [
     days: 5,
     price: 17000,
     eligibleRegions: ["Kansai", "Chugoku"],
-    requiresRegions: ["Kansai", "Chugoku"]
+    requiresRegions: ["Kansai", "Chugoku"],
+    excludeKeywords: ["tokaido shinkansen", "東海道新幹線"]
   },
   {
     id: "kansai5",
@@ -81,7 +82,8 @@ window.JR_PASS_CATALOG = [
     days: 5,
     price: 12000,
     eligibleRegions: ["Kansai"],
-    requiresRegions: ["Kansai"]
+    requiresRegions: ["Kansai"],
+    excludeKeywords: ["tokaido shinkansen", "東海道新幹線"]
   },
   {
     id: "kyushu7",
@@ -414,4 +416,212 @@ window.buildGuidesListFromKeys = function(keys) {
     });
   });
   return { en: enArr, ja: jaArr };
+};
+
+window.WIZARD_CITIES = [
+  { key: "Tokyo", labelEn: "🗼 Tokyo", labelJa: "🗼 東京", regEn: "Tokyo", regJa: "東京", hotelEn: "Tokyo Station / Shinjuku Hotel", hotelJa: "東京・新宿ベースホテル", foodKeys: ["Tokyo"], accessKeys: ["Tokyo"], guideKeys: ["Tokyo"] },
+  { key: "Kyoto", labelEn: "⛩️ Kyoto", labelJa: "⛩️ 京都", regEn: "Kyoto", regJa: "京都", hotelEn: "Kyoto Station Hotel", hotelJa: "京都駅周辺ホテル", foodKeys: ["Kyoto"], accessKeys: ["Kansai"], guideKeys: ["Kyoto"] },
+  { key: "Osaka", labelEn: "🏮 Osaka", labelJa: "🏮 大阪", regEn: "Osaka", regJa: "大阪", hotelEn: "Namba / Umeda Hotel (Osaka)", hotelJa: "なんば・梅田ホテル（大阪）", foodKeys: ["Osaka"], accessKeys: ["Kansai"], guideKeys: ["Osaka"] },
+  { key: "FujiHakone", labelEn: "🗻 Mt. Fuji / Hakone", labelJa: "🗻 富士山・箱根", regEn: "Mt. Fuji & Hakone", regJa: "富士山・箱根", hotelEn: "Kawaguchiko / Hakone Onsen Hotel", hotelJa: "河口湖・箱根温泉宿", foodKeys: ["Onsen"], accessKeys: ["Onsen"], guideKeys: ["Onsen"] },
+  { key: "Kanazawa", labelEn: "🏯 Kanazawa", labelJa: "🏯 金沢", regEn: "Kanazawa", regJa: "金沢", hotelEn: "Kanazawa Station Hotel", hotelJa: "金沢駅周辺ホテル", foodKeys: ["Kanazawa"], accessKeys: ["Kanazawa"], guideKeys: ["Kanazawa"] },
+  { key: "Takayama", labelEn: "🏔️ Takayama", labelJa: "🏔️ 高山・白川郷", regEn: "Takayama & Shirakawa-go", regJa: "高山・白川郷", hotelEn: "Hida Takayama Station Hotel", hotelJa: "飛騨高山駅周辺ホテル", foodKeys: ["Takayama"], accessKeys: ["Kanazawa", "GunmaAlps"], guideKeys: ["Takayama"] },
+  { key: "Hiroshima", labelEn: "🦌 Hiroshima", labelJa: "🦌 広島・宮島", regEn: "Hiroshima & Miyajima", regJa: "広島・宮島", hotelEn: "JR Hiroshima Station Hotel", hotelJa: "広島駅周辺ホテル", foodKeys: ["Hiroshima"], accessKeys: ["Kansai"], guideKeys: ["Hiroshima"] },
+  { key: "Sapporo", labelEn: "❄️ Sapporo", labelJa: "❄️ 札幌・小樽", regEn: "Sapporo & Otaru", regJa: "札幌・小樽", hotelEn: "Sapporo Station / Odori Hotel", hotelJa: "札幌・大通周辺ホテル", foodKeys: ["Sapporo"], accessKeys: ["Hokkaido"], guideKeys: ["Sapporo"] },
+  { key: "Fukuoka", labelEn: "🍜 Fukuoka", labelJa: "🍜 福岡・博多", regEn: "Fukuoka & Kyushu", regJa: "福岡・九州", hotelEn: "JR Hakata Station Hotel (Fukuoka)", hotelJa: "博多駅周辺ホテル（福岡）", foodKeys: ["Fukuoka"], accessKeys: ["Kyushu"], guideKeys: ["Fukuoka"] },
+  { key: "Okinawa", labelEn: "🌺 Okinawa", labelJa: "🌺 沖縄", regEn: "Okinawa", regJa: "沖縄本島", hotelEn: "Naha Kokusai Dori Hotel (Okinawa)", hotelJa: "那覇国際通りホテル（沖縄）", foodKeys: ["Okinawa", "Ishigaki"], accessKeys: ["Okinawa"], guideKeys: ["Okinawa", "Ishigaki"] },
+  { key: "AtamiShizuoka", labelEn: "🌸 Atami / Shizuoka", labelJa: "🌸 熱海・静岡", regEn: "Atami & Shizuoka", regJa: "熱海・静岡", hotelEn: "Shizuoka / Atami Station Hotel", hotelJa: "静岡・熱海駅周辺ホテル", foodKeys: ["IzuShizuoka"], accessKeys: ["IzuShizuoka"], guideKeys: ["IzuShizuoka"] },
+  { key: "KusatsuMatsumoto", labelEn: "♨️ Kusatsu / Matsumoto", labelJa: "♨️ 草津温泉・松本", regEn: "Kusatsu & Matsumoto", regJa: "草津温泉・松本", hotelEn: "Takasaki / Matsumoto Station Hotel", hotelJa: "高崎・松本駅周辺ホテル", foodKeys: ["GunmaAlps"], accessKeys: ["GunmaAlps"], guideKeys: ["GunmaAlps"] }
+];
+
+window.detectCatalogKeysFromSchedule = function() {
+  const GAZETTEER_TO_CATALOG = {
+    sapporo: { f: "Sapporo", a: "Hokkaido", g: "Sapporo" },
+    otaru: { f: "Sapporo", a: "Hokkaido", g: "Sapporo" },
+    niseko: { f: "Sapporo", a: "Hokkaido", g: "Sapporo" },
+    asahikawa: { f: "Sapporo", a: "Hokkaido", g: "Sapporo" },
+    kushiro: { f: "Sapporo", a: "Hokkaido", g: "Sapporo" },
+    noboribetsu: { f: "Noboribetsu", a: "Hokkaido", g: "Noboribetsu" },
+    hakodate: { f: "Hakodate", a: "Hokkaido", g: "Hakodate" },
+    tokyo: { f: "Tokyo", a: "Tokyo", g: "Tokyo" },
+    shinjuku: { f: "Tokyo", a: "Tokyo", g: "Tokyo" },
+    asakusa: { f: "Tokyo", a: "Tokyo", g: "Tokyo" },
+    haneda: { f: "Tokyo", a: "Tokyo", g: "Tokyo" },
+    narita: { f: "Tokyo", a: "Tokyo", g: "Tokyo" },
+    yokohama: { f: "Tokyo", a: "Tokyo", g: "Tokyo" },
+    hakone: { f: "Onsen", a: "Onsen", g: "Onsen" },
+    fuji: { f: "Onsen", a: "Onsen", g: "Onsen" },
+    atami: { f: "IzuShizuoka", a: "IzuShizuoka", g: "IzuShizuoka" },
+    shizuoka: { f: "IzuShizuoka", a: "IzuShizuoka", g: "IzuShizuoka" },
+    kusatsu: { f: "GunmaAlps", a: "GunmaAlps", g: "GunmaAlps" },
+    takasaki: { f: "GunmaAlps", a: "GunmaAlps", g: "GunmaAlps" },
+    nagano: { f: "GunmaAlps", a: "GunmaAlps", g: "GunmaAlps" },
+    kanazawa: { f: "Kanazawa", a: "Kanazawa", g: "Kanazawa" },
+    kaga: { f: "Kanazawa", a: "Kanazawa", g: "Kanazawa" },
+    gokayama: { f: "Takayama", a: "Kanazawa", g: "Takayama" },
+    takayama: { f: "Takayama", a: "Kanazawa", g: "Takayama" },
+    kyoto: { f: "Kyoto", a: "Kansai", g: "Kyoto" },
+    nara: { f: "Kyoto", a: "Kansai", g: "Kyoto" },
+    osaka: { f: "Osaka", a: "Kansai", g: "Osaka" },
+    kobe: { f: "Kobe", a: "Kansai", g: "Kobe" },
+    hiroshima: { f: "Hiroshima", a: "Kansai", g: "Hiroshima" },
+    okayama: { f: "Hiroshima", a: "Kansai", g: "Hiroshima" },
+    fukuoka: { f: "Fukuoka", a: "Kyushu", g: "Fukuoka" },
+    dazaifu: { f: "Fukuoka", a: "Kyushu", g: "Fukuoka" },
+    beppu: { f: "Beppu", a: "Kyushu", g: "Beppu" },
+    kurokawa: { f: "Beppu", a: "Kyushu", g: "Beppu" },
+    kumamoto: { f: "Kumamoto", a: "Kyushu", g: "Kumamoto" },
+    nagasaki: { f: "Kumamoto", a: "Kyushu", g: "Kumamoto" },
+    kagoshima: { f: "Kumamoto", a: "Kyushu", g: "Kumamoto" },
+    okinawa_north: { f: "Okinawa", a: "Okinawa", g: "Okinawa" },
+    chatan: { f: "Okinawa", a: "Okinawa", g: "Okinawa" },
+    naha: { f: "Okinawa", a: "Okinawa", g: "Okinawa" },
+    kerama: { f: "Okinawa", a: "Okinawa", g: "Okinawa" },
+    ishigaki: { f: "Ishigaki", a: "Okinawa", g: "Ishigaki" },
+    taketomi: { f: "Ishigaki", a: "Okinawa", g: "Ishigaki" },
+    miyakojima: { f: "Ishigaki", a: "Okinawa", g: "Ishigaki" }
+  };
+
+  const foodSet = new Set();
+  const accessSet = new Set();
+  const guideSet = new Set();
+
+  const scanText = (txt) => {
+    if (!txt || typeof window.findMatchingGazetteerStops !== "function") return;
+    window.findMatchingGazetteerStops(txt).forEach(stop => {
+      const m = GAZETTEER_TO_CATALOG[stop.id];
+      if (m) {
+        if (m.f) foodSet.add(m.f);
+        if (m.a) accessSet.add(m.a);
+        if (m.g) guideSet.add(m.g);
+      }
+    });
+  };
+
+  const enDays = (window.state && state.dataEn && state.dataEn.days) || [];
+  const jaDays = (window.state && state.dataJa && state.dataJa.days) || [];
+  enDays.forEach((d, i) => {
+    const dj = jaDays[i] || {};
+    const combined = `${d.region || ""} ${d.routeJp || ""} ${d.routeEn || ""} ${d.hotel || ""} ${dj.region || ""} ${dj.routeJp || ""}`
+      .replace(/\bhotel\s+nikko\b/gi, "");
+    scanText(combined);
+  });
+  ((window.state && state.customMapLocations) || []).forEach(loc => scanText(loc));
+
+  if (foodSet.size === 0) foodSet.add("Tokyo");
+  if (accessSet.size === 0) accessSet.add("Tokyo");
+  if (guideSet.size === 0) guideSet.add("Tokyo");
+
+  return {
+    foodKeys: Array.from(foodSet),
+    accessKeys: Array.from(accessSet),
+    guideKeys: Array.from(guideSet)
+  };
+};
+
+window.syncRegionalCatalogsFromSchedule = function() {
+  if (!window.state || !state.dataEn || !state.dataJa) return { foodAdded: 0, accessAdded: 0, guidesAdded: 0 };
+  const en = typeof window.isEn === "function" ? window.isEn() : true;
+  const { foodKeys, accessKeys, guideKeys } = window.detectCatalogKeysFromSchedule();
+
+  const candFood = window.buildGourmetListFromLocations(foodKeys);
+  const candAccess = window.buildAccessListFromKeys(accessKeys);
+  const candGuides = window.buildGuidesListFromKeys(guideKeys);
+
+  if (!Array.isArray(state.dataEn.food)) state.dataEn.food = [];
+  if (!Array.isArray(state.dataJa.food)) state.dataJa.food = [];
+  if (!Array.isArray(state.dataEn.access)) state.dataEn.access = [];
+  if (!Array.isArray(state.dataJa.access)) state.dataJa.access = [];
+  if (!Array.isArray(state.dataEn.guides)) state.dataEn.guides = [];
+  if (!Array.isArray(state.dataJa.guides)) state.dataJa.guides = [];
+
+  const norm = (s) => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+
+  // Check duplicates before pushing undo snapshot
+  const foodKeysEn = new Set(state.dataEn.food.map(f => `${norm(f.dish)}||${norm(f.place)}`));
+  const foodKeysJa = new Set(state.dataJa.food.map(f => `${norm(f.dish)}||${norm(f.place)}`));
+  const newFoodIdx = [];
+  candFood.en.forEach((fEn, i) => {
+    const fJa = candFood.ja[i];
+    const kEn = `${norm(fEn.dish)}||${norm(fEn.place)}`;
+    const kJa = fJa ? `${norm(fJa.dish)}||${norm(fJa.place)}` : kEn;
+    if (!foodKeysEn.has(kEn) && !foodKeysJa.has(kJa)) {
+      foodKeysEn.add(kEn);
+      foodKeysJa.add(kJa);
+      newFoodIdx.push(i);
+    }
+  });
+
+  const accKeysEn = new Set(state.dataEn.access.map(a => norm(a.url) || norm(a.place)));
+  const accKeysJa = new Set(state.dataJa.access.map(a => norm(a.url) || norm(a.place)));
+  const newAccIdx = [];
+  candAccess.en.forEach((aEn, i) => {
+    const aJa = candAccess.ja[i];
+    const kEn = norm(aEn.url) || norm(aEn.place);
+    const kJa = aJa ? (norm(aJa.url) || norm(aJa.place)) : kEn;
+    if (kEn && !accKeysEn.has(kEn) && !accKeysJa.has(kJa)) {
+      accKeysEn.add(kEn);
+      accKeysJa.add(kJa);
+      newAccIdx.push(i);
+    }
+  });
+
+  const gdKeysEn = new Set(state.dataEn.guides.map(g => norm(g.url) || norm(g.location)));
+  const gdKeysJa = new Set(state.dataJa.guides.map(g => norm(g.url) || norm(g.location)));
+  const newGdIdx = [];
+  candGuides.en.forEach((gEn, i) => {
+    const gJa = candGuides.ja[i];
+    const kEn = norm(gEn.url) || norm(gEn.location);
+    const kJa = gJa ? (norm(gJa.url) || norm(gJa.location)) : kEn;
+    if (kEn && !gdKeysEn.has(kEn) && !gdKeysJa.has(kJa)) {
+      gdKeysEn.add(kEn);
+      gdKeysJa.add(kJa);
+      newGdIdx.push(i);
+    }
+  });
+
+  const foodAdded = newFoodIdx.length;
+  const accessAdded = newAccIdx.length;
+  const guidesAdded = newGdIdx.length;
+
+  if (foodAdded + accessAdded + guidesAdded === 0) {
+    if (typeof window.showToast === "function") {
+      window.showToast(en
+        ? "✓ Gourmet, Metro PDFs & Sightseeing Guides are already up to date for all cities in your schedule"
+        : "✓ グルメ・路線図PDF・観光ガイドは現在の訪問都市に合わせて最新です");
+    }
+    return { foodAdded: 0, accessAdded: 0, guidesAdded: 0 };
+  }
+
+  if (typeof window.pushUndoSnapshot === "function") {
+    window.pushUndoSnapshot("Sync regional catalogs");
+  }
+
+  let nextFoodId = state.dataEn.food.reduce((m, x) => Math.max(m, Number(x.id) || 0), 0) + 1;
+  newFoodIdx.forEach(i => {
+    const nid = nextFoodId++;
+    state.dataEn.food.push(Object.assign({}, candFood.en[i], { id: nid }));
+    state.dataJa.food.push(Object.assign({}, candFood.ja[i], { id: nid }));
+  });
+
+  const stamp = Date.now();
+  newAccIdx.forEach((i, n) => {
+    const aid = `acc_sync_${stamp}_${n}`;
+    state.dataEn.access.push(Object.assign({}, candAccess.en[i], { id: aid }));
+    state.dataJa.access.push(Object.assign({}, candAccess.ja[i], { id: aid }));
+  });
+
+  newGdIdx.forEach((i, n) => {
+    const gid = `gd_sync_${stamp}_${n}`;
+    state.dataEn.guides.push(Object.assign({}, candGuides.en[i], { id: gid }));
+    state.dataJa.guides.push(Object.assign({}, candGuides.ja[i], { id: gid }));
+  });
+
+  if (typeof window.saveState === "function") window.saveState();
+  if (typeof window.renderAll === "function") window.renderAll();
+  if (typeof window.showToast === "function") {
+    window.showToast(en
+      ? `✨ Synced from Schedule: +${foodAdded} Gourmet, +${accessAdded} Transit PDFs, +${guidesAdded} Guides`
+      : `✨ 日程から自動追加：グルメ+${foodAdded}件・交通PDF+${accessAdded}件・ガイド+${guidesAdded}件`);
+  }
+  return { foodAdded, accessAdded, guidesAdded };
 };

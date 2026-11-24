@@ -43,7 +43,7 @@
         if (foundList.length > 0) {
           foundList.forEach(g => addStop(g));
         } else {
-          const unrecId = "unrec_custom_" + idx + "_" + q;
+          const unrecId = "unrec_custom_" + idx;
           matchedMap.set(unrecId, {
             id: unrecId,
             nameEn: `❗ ${raw} → Tokyo (Not recognised in Japan)`,
@@ -245,7 +245,7 @@
       const safeId = window.escapeAttr(s.id);
       const safeReg = window.escapeAttr(s.regionKey || "ALL");
       return `
-        <g class="map-node" onclick="jumpToLocationFilter('${safeId}', '${safeReg}')">
+        <g class="map-node" data-loc-id="${safeId}" data-region="${safeReg}" onclick="jumpToLocationFilter(this.dataset.locId, this.dataset.region)">
           <circle cx="${s.x}" cy="${s.y}" r="${idx === 0 || idx === stops.length - 1 || s.unrecognized ? rHub : rPin}" fill="${pinFill}" stroke="#FFFFFF" stroke-width="${strokeW}"/>
           <text x="${pos.tx.toFixed(1)}" y="${pos.ty.toFixed(1)}" text-anchor="${pos.anchor}" font-size="${fontSz.toFixed(2)}" font-weight="800" fill="${s.unrecognized ? "#B91C1C" : "#1E293B"}" style="paint-order:stroke;stroke:#FFFFFF;stroke-width:${(fontSz * 0.28).toFixed(2)}px;stroke-linejoin:round;">
             ${idx + 1}. ${label}
@@ -393,21 +393,49 @@
   };
 
   window.jumpToLocationFilter = function(locId, regionKey) {
-    window.switchTabById("itinerary");
+    window.switchTab("itinerary", null);
+    const days = (window.curData().days) || [];
+    const searchEl = document.getElementById("itinerarySearch");
+    if (searchEl) searchEl.value = "";
+
+    let targetDayNum = null;
     if (regionKey && regionKey !== "ALL") {
-      const hasRegion = (window.curData().days || []).some(d => d.region === regionKey);
-      if (hasRegion) {
+      const regMatch = days.find(d => d.region === regionKey);
+      if (regMatch) {
         state.activeRegionKey = regionKey;
+        targetDayNum = regMatch.day;
         window.renderItineraryCards();
+        const el = document.getElementById("day-card-" + targetDayNum);
+        if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
     }
+
     state.activeRegionKey = "ALL";
-    const searchEl = document.getElementById("itinerarySearch");
-    if (searchEl) {
+    if (String(locId || "").startsWith("unrec_day_")) {
+      const parsedDay = parseInt(String(locId).replace("unrec_day_", ""), 10);
+      if (parsedDay > 0) targetDayNum = parsedDay;
+    } else {
       const g = (window.JAPAN_GAZETTEER || []).find(x => x.id === locId);
-      searchEl.value = g ? (window.isEn() ? g.nameEn.split(" ")[0] : g.nameJa.split("（")[0]) : "";
+      if (g && Array.isArray(g.keys)) {
+        const matchedDay = days.find(d => {
+          const text = `${d.region || ""} ${d.routeJp || ""} ${d.hotel || ""} ${d.routeEn || ""}`
+            .replace(/\bhotel\s+nikko\b/gi, "")
+            .toLowerCase();
+          return g.keys.some(k => window.gazetteerKeyMatches(text, k));
+        });
+        if (matchedDay) targetDayNum = matchedDay.day;
+      }
     }
+
     window.renderItineraryCards();
+    if (targetDayNum) {
+      const el = document.getElementById("day-card-" + targetDayNum);
+      if (el && el.scrollIntoView) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+    }
+    window.scrollTo({ top: 180, behavior: "smooth" });
   };
 })();
