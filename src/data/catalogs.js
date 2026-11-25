@@ -262,6 +262,8 @@ const LEGACY_KEY_TO_PACKS = {
   Ishigaki: [{ type: "city", key: "ishigaki" }, { type: "city", key: "taketomi" }],
   Onsen: [{ type: "city", key: "hakone" }, { type: "city", key: "kawaguchiko" }],
   Hakone: [{ type: "city", key: "hakone" }],
+  Aomori: [{ type: "city", key: "shin_aomori" }, { type: "city", key: "hirosaki" }, { type: "pref", key: "aomori" }],
+  Sendai: [{ type: "city", key: "sendai" }, { type: "city", key: "matsushima" }],
   IzuShizuoka: [{ type: "city", key: "atami" }, { type: "city", key: "izu" }, { type: "city", key: "shizuoka" }],
   GunmaAlps: [{ type: "city", key: "matsumoto" }, { type: "city", key: "kusatsu_onsen" }, { type: "city", key: "takasaki" }],
   Hokkaido: [{ type: "pref", key: "hokkaido" }],
@@ -369,20 +371,23 @@ function buildListsFromPacks(packs, idBase) {
 }
 
 function resolvePacksForLegacyKeys(keys) {
+  const seen = new Set();
   const packs = [];
   (keys || []).forEach(k => {
     const refs = LEGACY_KEY_TO_PACKS[k];
     if (refs) {
       refs.forEach(r => {
         const p = getPackByRef(r);
-        if (p) packs.push(p);
+        if (p && !seen.has(p)) { seen.add(p); packs.push(p); }
       });
       return;
     }
     if (window.CITY_CATALOGS && window.CITY_CATALOGS[k]) {
-      packs.push(window.CITY_CATALOGS[k]);
+      const p = window.CITY_CATALOGS[k];
+      if (!seen.has(p)) { seen.add(p); packs.push(p); }
     } else if (window.PREFECTURE_CATALOGS && window.PREFECTURE_CATALOGS[k]) {
-      packs.push(window.PREFECTURE_CATALOGS[k]);
+      const p = window.PREFECTURE_CATALOGS[k];
+      if (!seen.has(p)) { seen.add(p); packs.push(p); }
     }
   });
   return packs;
@@ -412,18 +417,18 @@ Object.keys(LEGACY_KEY_TO_PACKS).forEach(k => {
 });
 
 window.WIZARD_CITIES = [
-  { key: "Tokyo", labelEn: "🗼 Tokyo", labelJa: "🗼 東京", regEn: "Tokyo", regJa: "東京", hotelEn: "Tokyo Station / Shinjuku Hotel", hotelJa: "東京・新宿ベースホテル", foodKeys: ["Tokyo"], accessKeys: ["Tokyo"], guideKeys: ["Tokyo"] },
-  { key: "Kyoto", labelEn: "⛩️ Kyoto", labelJa: "⛩️ 京都", regEn: "Kyoto", regJa: "京都", hotelEn: "Kyoto Station Hotel", hotelJa: "京都駅周辺ホテル", foodKeys: ["Kyoto"], accessKeys: ["Kansai"], guideKeys: ["Kyoto"] },
-  { key: "Osaka", labelEn: "🏮 Osaka", labelJa: "🏮 大阪", regEn: "Osaka", regJa: "大阪", hotelEn: "Namba / Umeda Hotel (Osaka)", hotelJa: "なんば・梅田ホテル（大阪）", foodKeys: ["Osaka"], accessKeys: ["Kansai"], guideKeys: ["Osaka"] },
-  { key: "FujiHakone", labelEn: "🗻 Mt. Fuji / Hakone", labelJa: "🗻 富士山・箱根", regEn: "Mt. Fuji & Hakone", regJa: "富士山・箱根", hotelEn: "Kawaguchiko / Hakone Onsen Hotel", hotelJa: "河口湖・箱根温泉宿", foodKeys: ["Onsen"], accessKeys: ["Onsen"], guideKeys: ["Onsen"] },
-  { key: "Kanazawa", labelEn: "🏯 Kanazawa", labelJa: "🏯 金沢", regEn: "Kanazawa", regJa: "金沢", hotelEn: "Kanazawa Station Hotel", hotelJa: "金沢駅周辺ホテル", foodKeys: ["Kanazawa"], accessKeys: ["Kanazawa"], guideKeys: ["Kanazawa"] },
-  { key: "Takayama", labelEn: "🏔️ Takayama", labelJa: "🏔️ 高山・白川郷", regEn: "Takayama & Shirakawa-go", regJa: "高山・白川郷", hotelEn: "Hida Takayama Station Hotel", hotelJa: "飛騨高山駅周辺ホテル", foodKeys: ["Takayama"], accessKeys: ["Kanazawa", "GunmaAlps"], guideKeys: ["Takayama"] },
-  { key: "Hiroshima", labelEn: "🦌 Hiroshima", labelJa: "🦌 広島・宮島", regEn: "Hiroshima & Miyajima", regJa: "広島・宮島", hotelEn: "JR Hiroshima Station Hotel", hotelJa: "広島駅周辺ホテル", foodKeys: ["Hiroshima"], accessKeys: ["Kansai"], guideKeys: ["Hiroshima"] },
-  { key: "Sapporo", labelEn: "❄️ Sapporo", labelJa: "❄️ 札幌・小樽", regEn: "Sapporo & Otaru", regJa: "札幌・小樽", hotelEn: "Sapporo Station / Odori Hotel", hotelJa: "札幌・大通周辺ホテル", foodKeys: ["Sapporo"], accessKeys: ["Hokkaido"], guideKeys: ["Sapporo"] },
-  { key: "Fukuoka", labelEn: "🍜 Fukuoka", labelJa: "🍜 福岡・博多", regEn: "Fukuoka & Kyushu", regJa: "福岡・九州", hotelEn: "JR Hakata Station Hotel (Fukuoka)", hotelJa: "博多駅周辺ホテル（福岡）", foodKeys: ["Fukuoka"], accessKeys: ["Kyushu"], guideKeys: ["Fukuoka"] },
-  { key: "Okinawa", labelEn: "🌺 Okinawa", labelJa: "🌺 沖縄", regEn: "Okinawa", regJa: "沖縄本島", hotelEn: "Naha Kokusai Dori Hotel (Okinawa)", hotelJa: "那覇国際通りホテル（沖縄）", foodKeys: ["Okinawa", "Ishigaki"], accessKeys: ["Okinawa"], guideKeys: ["Okinawa", "Ishigaki"] },
-  { key: "AtamiShizuoka", labelEn: "🌸 Atami / Shizuoka", labelJa: "🌸 熱海・静岡", regEn: "Atami & Shizuoka", regJa: "熱海・静岡", hotelEn: "Shizuoka / Atami Station Hotel", hotelJa: "静岡・熱海駅周辺ホテル", foodKeys: ["IzuShizuoka"], accessKeys: ["IzuShizuoka"], guideKeys: ["IzuShizuoka"] },
-  { key: "KusatsuMatsumoto", labelEn: "♨️ Kusatsu / Matsumoto", labelJa: "♨️ 草津温泉・松本", regEn: "Kusatsu & Matsumoto", regJa: "草津温泉・松本", hotelEn: "Takasaki / Matsumoto Station Hotel", hotelJa: "高崎・松本駅周辺ホテル", foodKeys: ["GunmaAlps"], accessKeys: ["GunmaAlps"], guideKeys: ["GunmaAlps"] }
+  { key: "Tokyo", icon: "🗼", labelEn: "🗼 Tokyo", labelJa: "🗼 東京", regEn: "Tokyo", regJa: "東京", hotelEn: "Mitsui Garden Hotel Nihonbashi Premier", hotelJa: "三井ガーデンホテル日本橋プレミア", foodKeys: ["Tokyo"], accessKeys: ["Tokyo"], guideKeys: ["Tokyo"] },
+  { key: "Kyoto", icon: "⛩️", labelEn: "⛩️ Kyoto", labelJa: "⛩️ 京都", regEn: "Kyoto", regJa: "京都", hotelEn: "Mitsui Garden Hotel Kyoto Shijo", hotelJa: "三井ガーデンホテル京都四条", foodKeys: ["Kyoto"], accessKeys: ["Kansai"], guideKeys: ["Kyoto"] },
+  { key: "Osaka", icon: "🏮", labelEn: "🏮 Osaka", labelJa: "🏮 大阪", regEn: "Osaka", regJa: "大阪", hotelEn: "Cross Hotel Osaka", hotelJa: "クロスホテル大阪", foodKeys: ["Osaka"], accessKeys: ["Kansai"], guideKeys: ["Osaka"] },
+  { key: "Hiroshima", icon: "🦌", labelEn: "🦌 Hiroshima", labelJa: "🦌 広島", regEn: "Hiroshima", regJa: "広島", hotelEn: "Hotel Granvia Hiroshima", hotelJa: "ホテルグランヴィア広島", foodKeys: ["Hiroshima"], accessKeys: ["Kansai"], guideKeys: ["Hiroshima"] },
+  { key: "Hakone", icon: "♨️", labelEn: "♨️ Hakone", labelJa: "♨️ 箱根", regEn: "Hakone", regJa: "箱根", hotelEn: "Hakone Kowakien Ten-yu", hotelJa: "箱根小涌園 天悠", foodKeys: ["Hakone"], accessKeys: ["Hakone"], guideKeys: ["Hakone"] },
+  { key: "Kanazawa", icon: "🏯", labelEn: "🏯 Kanazawa", labelJa: "🏯 金沢", regEn: "Kanazawa", regJa: "金沢", hotelEn: "Mitsui Garden Hotel Kanazawa", hotelJa: "三井ガーデンホテル金沢", foodKeys: ["Kanazawa"], accessKeys: ["Kanazawa"], guideKeys: ["Kanazawa"] },
+  { key: "Takayama", icon: "🏔️", labelEn: "🏔️ Takayama", labelJa: "🏔️ 高山", regEn: "Takayama", regJa: "高山", hotelEn: "Mercure Hida Takayama", hotelJa: "メルキュール飛騨高山", foodKeys: ["Takayama"], accessKeys: ["Kanazawa", "GunmaAlps"], guideKeys: ["Takayama"] },
+  { key: "Aomori", icon: "🍎", labelEn: "🍎 Aomori", labelJa: "🍎 青森", regEn: "Aomori", regJa: "青森", hotelEn: "Daiwa Roynet Hotel Aomori", hotelJa: "ダイワロイネットホテル青森", foodKeys: ["Aomori"], accessKeys: ["Aomori"], guideKeys: ["Aomori"] },
+  { key: "Fukuoka", icon: "🍜", labelEn: "🍜 Fukuoka", labelJa: "🍜 福岡", regEn: "Fukuoka", regJa: "福岡", hotelEn: "Mitsui Garden Hotel Fukuoka Gion", hotelJa: "三井ガーデンホテル福岡祇園", foodKeys: ["Fukuoka"], accessKeys: ["Kyushu"], guideKeys: ["Fukuoka"] },
+  { key: "Sapporo", icon: "❄️", labelEn: "❄️ Sapporo", labelJa: "❄️ 札幌", regEn: "Sapporo", regJa: "札幌", hotelEn: "Cross Hotel Sapporo", hotelJa: "クロスホテル札幌", foodKeys: ["Sapporo"], accessKeys: ["Hokkaido"], guideKeys: ["Sapporo"] },
+  { key: "Okinawa", icon: "🌺", labelEn: "🌺 Okinawa", labelJa: "🌺 沖縄", regEn: "Okinawa", regJa: "沖縄", hotelEn: "Hotel Collective Naha Okinawa", hotelJa: "ホテル コレクティブ 那覇", foodKeys: ["Okinawa", "Ishigaki"], accessKeys: ["Okinawa"], guideKeys: ["Okinawa", "Ishigaki"] },
+  { key: "Sendai", icon: "🎋", labelEn: "🎋 Sendai", labelJa: "🎋 仙台", regEn: "Sendai", regJa: "仙台", hotelEn: "Hotel Metropolitan Sendai East", hotelJa: "ホテルメトロポリタン仙台イースト", foodKeys: ["Sendai"], accessKeys: ["Sendai"], guideKeys: ["Sendai"] }
 ];
 
 window.detectCatalogPacksFromSchedule = function() {
@@ -446,7 +451,12 @@ window.detectCatalogPacksFromSchedule = function() {
     ].filter(Boolean).join(" | ");
     if (!rawText || typeof window.findMatchingGazetteerStops !== "function") continue;
 
-    const matchedStops = window.findMatchingGazetteerStops(rawText);
+    const regExplicit = (de && de.region && typeof window.resolveLocationInputStops === "function")
+      ? window.resolveLocationInputStops(de.region)
+      : [];
+    const matchedStops = (regExplicit && regExplicit.length > 0 && de && de._regionOverridden)
+      ? regExplicit
+      : (window.findMatchingGazetteerStops(rawText).length > 0 ? window.findMatchingGazetteerStops(rawText) : regExplicit);
     matchedStops.forEach(stop => {
       if (stop.prefId && !prefSeen.has(stop.prefId)) {
         prefSeen.add(stop.prefId);

@@ -163,9 +163,12 @@
 
   window.resolveDefaultHotelForLocation = function(rawLocationText) {
     const q = String(rawLocationText || "").trim();
-    const matches = (q && typeof window.findMatchingGazetteerStops === "function")
-      ? window.findMatchingGazetteerStops(q)
+    const resolved = (q && typeof window.resolveLocationInputStops === "function")
+      ? window.resolveLocationInputStops(q)
       : [];
+    const matches = resolved.length > 0
+      ? resolved
+      : ((q && typeof window.findMatchingGazetteerStops === "function") ? window.findMatchingGazetteerStops(q) : []);
 
     const cityStop = matches.find(m => !m.isPrefFallback && m.cityKey && window.CITY_HOTELS[m.cityKey]);
     if (cityStop) {

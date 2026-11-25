@@ -16,10 +16,12 @@
 
   function withProj(entry) {
     const pt = projectCoords(entry.lat, entry.lng);
-    const hasCityGeo = !!(window.JAPAN_CITY_PATHS && window.JAPAN_CITY_PATHS[entry.id]);
+    const gId = entry.geoId || entry.id;
+    const hasCityGeo = !!(window.JAPAN_CITY_PATHS && window.JAPAN_CITY_PATHS[gId]);
     return Object.assign({}, entry, {
       x: pt.x,
       y: pt.y,
+      geoId: gId,
       hasCityBoundary: hasCityGeo
     });
   }
@@ -110,7 +112,8 @@
     { id: "nyuto_onsen", prefId: "akita", cityKey: "nyuto_onsen", keys: ["nyuto", "nyuto onsen", "nyuutou", "nyuuto", "nyutou", "tsurunoyu", "taenoyu", "ganiba", "乳頭温泉", "鶴の湯"], nameEn: "Nyuto Onsen", nameJa: "乳頭温泉郷", regionKey: "Tohoku", lat: 39.77, lng: 140.76 },
     { id: "kakunodate", prefId: "akita", cityKey: "nyuto_onsen", keys: ["kakunodate", "tazawako", "akita", "oga", "角館", "田沢湖", "秋田市", "男鹿"], nameEn: "Akita / Kakunodate", nameJa: "秋田・角館", regionKey: "Tohoku", lat: 39.60, lng: 140.56 },
     { id: "matsushima", prefId: "miyagi", cityKey: "matsushima", keys: ["matsushima", "entuuin", "zuiganji", "shiogama", "松島", "松島海岸", "瑞巌寺", "円通院", "塩竈"], nameEn: "Matsushima", nameJa: "松島", regionKey: "Miyagi", lat: 38.37, lng: 141.07 },
-    { id: "sendai", prefId: "miyagi", cityKey: "sendai", keys: ["sendai", "akiu", "rairaikyo", "zuihoden", "ayashi", "仙台", "秋保", "磊々峡", "瑞鳳殿"], nameEn: "Sendai", nameJa: "仙台", regionKey: "Miyagi", lat: 38.27, lng: 140.87 },
+    { id: "akiu", prefId: "miyagi", cityKey: "sendai", geoId: "akiu", keys: ["akiu", "akiu onsen", "akiu great falls", "rairaikyo", "秋保", "秋保温泉", "秋保大滝", "磊々峡"], nameEn: "Akiu Onsen (Sendai)", nameJa: "秋保温泉（仙台）", regionKey: "Miyagi", lat: 38.225, lng: 140.718 },
+    { id: "sendai", prefId: "miyagi", cityKey: "sendai", keys: ["sendai", "zuihoden", "ayashi", "jozenji", "仙台", "瑞鳳殿", "愛子"], nameEn: "Sendai", nameJa: "仙台", regionKey: "Miyagi", lat: 38.27, lng: 140.87 },
     { id: "naruko", prefId: "miyagi", cityKey: "sendai", keys: ["naruko", "furukawa", "鳴子", "鳴子峡", "古川"], nameEn: "Naruko Gorge", nameJa: "鳴子峡", regionKey: "Miyagi", lat: 38.74, lng: 140.72 },
     { id: "tsuruoka", prefId: "yamagata", cityKey: "tsuruoka", keys: ["tsuruoka", "kamo aquarium", "haguro", "dewa sanzan", "shonai", "鶴岡", "加茂水族館", "羽黒山", "出羽三山", "庄内"], nameEn: "Tsuruoka", nameJa: "鶴岡", regionKey: "Yamagata", lat: 38.73, lng: 139.83 },
     { id: "ginzan_onsen", prefId: "yamagata", cityKey: "ginzan_onsen", keys: ["ginzan", "ginzan onsen", "oishida", "銀山温泉", "大石田"], nameEn: "Ginzan Onsen", nameJa: "銀山温泉", regionKey: "Yamagata", lat: 38.57, lng: 140.53 },
@@ -137,9 +140,10 @@
 
     // CHUBU & HOKURIKU
     { id: "sado_island", prefId: "niigata", cityKey: "sado_island", keys: ["sado", "sado island", "sado gold mine", "ryotsu", "tarai", "佐渡", "佐渡島", "佐渡ヶ島", "両津"], nameEn: "Sado Island", nameJa: "佐渡島", regionKey: "Chubu", lat: 38.02, lng: 138.37, isAir: true },
-    { id: "kawaguchiko", prefId: "yamanashi", cityKey: "kawaguchiko", keys: ["kawaguchiko", "fuji", "mount fuji", "mt fuji", "chureito", "fujiyoshida", "oishi park", "arakurayama", "河口湖", "富士山", "忠霊塔", "富士吉田", "富士五湖"], nameEn: "Mt. Fuji / Kawaguchiko", nameJa: "富士山・河口湖", regionKey: "Chubu", lat: 35.51, lng: 138.76 },
+    { id: "kawaguchiko", prefId: "yamanashi", cityKey: "kawaguchiko", keys: ["kawaguchiko", "fujikawaguchiko", "chureito", "fujiyoshida", "oishi park", "arakurayama", "fuji five lakes", "河口湖", "富士河口湖", "忠霊塔", "富士吉田", "富士五湖"], nameEn: "Mt. Fuji / Kawaguchiko", nameJa: "富士山・河口湖", regionKey: "Chubu", lat: 35.51, lng: 138.76 },
     { id: "hakuba", prefId: "nagano", cityKey: "hakuba", keys: ["hakuba", "happo one", "tsugaike", "goryu", "白馬", "八方尾根"], nameEn: "Hakuba", nameJa: "白馬", regionKey: "Chubu", lat: 36.70, lng: 137.86 },
     { id: "azumino", prefId: "nagano", cityKey: "azumino", keys: ["azumino", "daio wasabi", "hotaka", "安曇野", "大王わさび農場", "穂高"], nameEn: "Azumino", nameJa: "安曇野", regionKey: "Chubu", lat: 36.30, lng: 137.90 },
+    { id: "achi_village", prefId: "nagano", cityKey: "matsumoto", geoId: "achi_village", keys: ["achi", "achi village", "hirugami", "hirugami onsen", "heavens sonohara", "阿智", "阿智村", "昼神温泉"], nameEn: "Achi Village", nameJa: "阿智村", regionKey: "Chubu", lat: 35.442, lng: 137.734 },
     { id: "matsumoto", prefId: "nagano", cityKey: "matsumoto", keys: ["matsumoto", "nawate", "matsumoto castle", "kamikochi", "norikura", "松本", "松本城", "上高地", "乗鞍"], nameEn: "Matsumoto", nameJa: "松本", regionKey: "Chubu", lat: 36.24, lng: 137.97 },
     { id: "karuizawa", prefId: "nagano", cityKey: "karuizawa", keys: ["karuizawa", "kyu karuizawa", "shiraito karuizawa", "軽井沢", "旧軽井沢"], nameEn: "Karuizawa", nameJa: "軽井沢", regionKey: "Chubu", lat: 36.35, lng: 138.60 },
     { id: "nagano_city", prefId: "nagano", cityKey: "matsumoto", keys: ["nagano", "zenkoji", "yudanaka", "jigokudani monkey", "snow monkey", "長野", "善光寺", "湯田中"], nameEn: "Nagano", nameJa: "長野", regionKey: "Chubu", lat: 36.65, lng: 138.19 },
@@ -160,7 +164,7 @@
     { id: "nara", prefId: "nara", cityKey: "nara", keys: ["nara", "todai", "kasuga", "yoshino", "asuka", "奈良", "東大寺", "春日大社", "吉野"], nameEn: "Nara", nameJa: "奈良", regionKey: "Kansai", lat: 34.68, lng: 135.83 },
     { id: "koyasan", prefId: "wakayama", cityKey: "koyasan", keys: ["koyasan", "koya", "okunoin", "kongobuji", "nachi", "kumano", "高野山", "奥の院", "那智", "熊野"], nameEn: "Koyasan", nameJa: "高野山", regionKey: "Kansai", lat: 34.21, lng: 135.59 },
     { id: "osaka", prefId: "osaka", cityKey: "osaka", keys: ["osaka", "dotonbori", "umeda", "namba", "shinsaibashi", "shinsekai", "usj", "kuromon", "kix", "kansai airport", "大阪", "道頓堀", "梅田", "難波", "なんば", "黒門", "関空"], nameEn: "Osaka", nameJa: "大阪", regionKey: "Kansai", lat: 34.69, lng: 135.50, isAir: true },
-    { id: "kobe", prefId: "hyogo", cityKey: "kobe", keys: ["kobe", "sannomiya", "meriken", "harborland", "kitano", "nankinmachi", "rokko", "motomachi", "神戸", "三宮", "メリケン", "南京町", "六甲"], nameEn: "Kobe", nameJa: "神戸", regionKey: "Kansai", lat: 34.69, lng: 135.19 },
+    { id: "kobe", prefId: "hyogo", cityKey: "kobe", keys: ["kobe", "sannomiya", "meriken", "harborland", "kitano ijinkan", "nankinmachi", "rokko", "motomachi", "神戸", "三宮", "メリケン", "南京町", "六甲", "北野異人館"], nameEn: "Kobe", nameJa: "神戸", regionKey: "Kansai", lat: 34.69, lng: 135.19 },
     { id: "arima_onsen", prefId: "hyogo", cityKey: "arima_onsen", keys: ["arima", "arima onsen", "kinsen", "有馬", "有馬温泉", "金の湯"], nameEn: "Arima Onsen", nameJa: "有馬温泉", regionKey: "Kansai", lat: 34.80, lng: 135.25 },
     { id: "himeji", prefId: "hyogo", cityKey: "himeji", keys: ["himeji", "himeji castle", "kokoen", "shoshazan", "姫路", "姫路城"], nameEn: "Himeji", nameJa: "姫路", regionKey: "Kansai", lat: 34.83, lng: 134.69 },
     { id: "kinosaki_onsen", prefId: "hyogo", cityKey: "kinosaki_onsen", keys: ["kinosaki", "kinosaki onsen", "城崎", "城崎温泉"], nameEn: "Kinosaki Onsen", nameJa: "城崎温泉", regionKey: "Kansai", lat: 35.62, lng: 134.81 },
@@ -222,7 +226,14 @@
   window.JAPAN_GAZETTEER = CITY_STOPS.concat(PREFECTURE_FALLBACK_STOPS);
 
   window.getPrimaryPrefectureForDay = function(dayObj) {
-    if (!dayObj || typeof window.findMatchingGazetteerStops !== "function") return null;
+    if (!dayObj) return null;
+    if (dayObj.region && typeof window.resolveLocationInputStops === "function") {
+      const explicit = window.resolveLocationInputStops(dayObj.region);
+      if (explicit && explicit.length > 0 && explicit[0].prefId) {
+        return window.getPrefectureById(explicit[0].prefId);
+      }
+    }
+    if (typeof window.findMatchingGazetteerStops !== "function") return null;
     const checkText = (txt) => {
       if (!txt) return null;
       const matches = window.findMatchingGazetteerStops(txt);

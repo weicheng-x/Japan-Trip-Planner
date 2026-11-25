@@ -1,4 +1,4 @@
-// Automated Regression & Self-Audit Test Suite for JP Trip Planner v2.3.0
+// Automated Regression & Self-Audit Test Suite for JP Trip Planner v2.0.0
 const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
@@ -84,6 +84,7 @@ function createDomSandbox() {
     "data/romanization.js",
     "data/japan-geo.js",
     "data/gazetteer.js",
+    "data/japan-places-index.js",
     "data/prefectures-catalog.js",
     "data/cities-catalog.js",
     "data/hotels-catalog.js",
@@ -95,6 +96,7 @@ function createDomSandbox() {
     "js/themes.js",
     "js/state.js",
     "js/preset-manager.js",
+    "js/wizard-picker.js",
     "js/map.js",
     "js/map-interact.js",
     "js/render-rail.js",
@@ -311,7 +313,7 @@ function run() {
   ctx.loadTripPreset("userpreset_feb2027_16d", { skipUndo: true, force: true });
   const presetExport = ctx.buildPresetExportPayload();
   assert.strictEqual(presetExport.envelope.schema, "jp-trip-planner-preset-v2");
-  assert.strictEqual(presetExport.envelope.appVersion, "2.3.0");
+  assert.strictEqual(presetExport.envelope.appVersion, "2.0.0");
   const xlsx = ctx.buildExcelWorkbookPayload();
   assert(xlsx.bytes.length > 20000);
   assert.strictEqual(xlsx.bytes[0], 0x50);
@@ -446,7 +448,7 @@ function run() {
 
   // 18. v2.3.0 Google Maps MLIT Geography & City vs Prefecture Highlight
   assert.strictEqual(Object.keys(ctx.JAPAN_PREF_PATHS || {}).length, 47, "MLIT geometry must include all 47 prefectures");
-  assert.strictEqual(Object.keys(ctx.JAPAN_CITY_PATHS || {}).length, 95, "MLIT geometry must include 95 city/region boundaries");
+  assert(Object.keys(ctx.JAPAN_CITY_PATHS || {}).length >= 820, "MLIT geometry must include all 792 shi + curated tourist areas");
   ctx.loadTripPreset("goldenRoute", { skipUndo: true, force: true });
   ctx.selectMapLocationPin("kyoto", "PREF:kyoto");
   const kyotoHighlightHtml = ctx.buildInteractiveJapanMapHtml();
@@ -551,6 +553,90 @@ function run() {
   assert(ctx._dirtyTabs && ctx._dirtyTabs.has("budget"), "renderActiveViews() on Schedule tab must defer hidden Budget tab in _dirtyTabs");
   ctx.switchTab("budget", null);
   assert(!ctx._dirtyTabs.has("budget"), "switchTab('budget') must flush deferred dirty Budget tab immediately");
+
+  // 22. v2.0.0 12 Wizard Cities, Search, Map Picker & Smart Place Icons
+  assert.strictEqual(
+    ctx.WIZARD_CITIES.map(c => c.key).join(","),
+    "Tokyo,Kyoto,Osaka,Hiroshima,Hakone,Kanazawa,Takayama,Aomori,Fukuoka,Sapporo,Okinawa,Sendai",
+    "WIZARD_CITIES must match exact 12 city keys & order"
+  );
+  assert.strictEqual(ctx.getJapanPlaceIcon("achi_village"), "🌌", "Achi Village icon must be stargazing 🌌 instead of Nagano snow");
+  assert.strictEqual(ctx.getJapanPlaceIcon("hokkaido"), "❄️");
+  assert.strictEqual(ctx.getJapanPlaceIcon("niigata"), "❄️");
+  assert.strictEqual(ctx.getJapanPlaceIcon("nagano"), "❄️");
+  const achiSearchHits = ctx.searchAllJapanPlaces("Achi", 10);
+  assert(achiSearchHits.some(x => x.id === "achi_village" && x.icon === "🌌"), "Searching 'Achi' must return Achi Village with 🌌 icon");
+  const fuchuSearchHits = ctx.searchAllJapanPlaces("Fuchu", 10);
+  assert(fuchuSearchHits.filter(x => /Fuchu/i.test(x.nameEn)).length >= 2, "Searching 'Fuchu' must list both Tokyo and Hiroshima options");
+  const customWizPayload = ctx.buildBlankTripPayload({
+    titleEn: "Alps Stars & Hokkaido",
+    startDate: "2027-07-01",
+    daysCount: 6,
+    cities: ["Tokyo", "Achi Village", "Date (Hokkaido)"],
+    costMode: "estimate"
+  });
+  assert(customWizPayload.dataEn.days.some(d => d.region === "Achi Village"), "buildBlankTripPayload must preserve custom searched/map cities");
+
+  // 23. v2.0.0 All 792 Japanese Shi MLIT Geometry Coverage & Zero False Prose Positives
+  const shiEntries = Object.values(ctx.JAPAN_CITY_PATHS || {}).filter(x => x && x.isShi);
+  assert.strictEqual(shiEntries.length, 792, "JAPAN_CITY_PATHS must include all 792 Japanese shi");
+  assert(shiEntries.every(x => typeof x.d === "string" && x.d.length > 5 && Array.isArray(x.bbox) && x.bbox.length === 4), "Every shi must have valid SVG path and bbox");
+  assert(ctx.resolveLocationInputStops("Muko").some(x => x.prefId === "kyoto"), "Smallest city Muko-shi must resolve cleanly");
+  assert(ctx.resolveLocationInputStops("Nakagawa").some(x => x.prefId === "fukuoka"), "Newest city Nakagawa-shi must resolve cleanly");
+  ctx.loadTripPreset("tohoku22", { skipUndo: true, force: true });
+  const tohokuStopIds = ctx.getMatchedJapanLocations().map(s => s.id);
+  assert(!tohokuStopIds.includes("shi_date_fukushima") && !tohokuStopIds.includes("shi_date_hokkaido"), "Prose mentioning 'Date Masamune' must never trigger false Date City pin");
+
+  // 24. v2.0.0 Ambiguous City Auto-Disambiguation & Bracket Prefecture Override
+  ctx.state.dataEn.days = [
+    { day: 1, date: "2027-06-01", dow: "Tue", region: "Tokyo", routeJp: "Tokyo Arrival", routeEn: "", hotel: "Mitsui Garden Tokyo", stay: 15000, travelBase: 1000, fun: 4000, legs: [], timeSlots: [] },
+    { day: 2, date: "2027-06-02", dow: "Wed", region: "Tokyo", routeJp: "Custom Day 2", routeEn: "", hotel: "Tokyo Hotel", stay: 12000, travelBase: 1000, fun: 3000, legs: [], timeSlots: [] }
+  ];
+  ctx.state.dataJa.days = JSON.parse(JSON.stringify(ctx.state.dataEn.days));
+  ctx.state.mapScopeMode = "schedule";
+  ctx.state.customMapLocations = [];
+  ctx.updateDayRegionAndMap(1, "Fuchu");
+  assert.strictEqual(ctx.state.dataEn.days[1].region, "Fuchu (Tokyo)", "Bare 'Fuchu' must auto-correct to Fuchu (Tokyo)");
+  assert.strictEqual(ctx.getPrimaryPrefectureForDay(ctx.state.dataEn.days[1]).id, "tokyo");
+  ctx.updateDayRegionAndMap(1, "Fuchu (Hiroshima)");
+  assert.strictEqual(ctx.getPrimaryPrefectureForDay(ctx.state.dataEn.days[1]).id, "hiroshima", "Changing brackets to Hiroshima must resolve Hiroshima Prefecture");
+  const fuchuHiroStops = ctx.getMatchedJapanLocations().map(s => s.id);
+  assert(fuchuHiroStops.includes("shi_fuchu_hiroshima"), "Fuchu (Hiroshima) must render shi_fuchu_hiroshima pin");
+  assert(!fuchuHiroStops.includes("hiroshima"), "Fuchu (Hiroshima) must NOT leak Hiroshima City pin");
+
+  getEl("mapLocationInput").value = "Date";
+  ctx.addCustomMapLocation();
+  const dateLast = ctx.state.dataEn.days[ctx.state.dataEn.days.length - 1];
+  assert.strictEqual(dateLast.region, "Date (Hokkaido)", "Bare 'Date' via map add must auto-correct to Date (Hokkaido)");
+  assert.strictEqual(ctx.getPrimaryPrefectureForDay(dateLast).id, "hokkaido");
+  ctx.updateDayRegionAndMap(ctx.state.dataEn.days.length - 1, "Date (Fukushima)");
+  assert.strictEqual(ctx.getPrimaryPrefectureForDay(ctx.state.dataEn.days[ctx.state.dataEn.days.length - 1]).id, "fukushima");
+
+  // 25. v2.0.0 Interactive Map Quirks (Unplanned Pref Zoom, Keep Zoom on Popup Close, Zoom LOD Cities)
+  ctx.loadTripPreset("goldenRoute", { skipUndo: true, force: true });
+  ctx.focusMapPrefecture("shimane");
+  const unplannedShimaneHtml = ctx.buildInteractiveJapanMapHtml();
+  assert.strictEqual(ctx.state.focusedPrefId, "shimane", "Clicking unplanned prefecture must focus it without zooming out");
+  assert(unplannedShimaneHtml.includes('data-highlight-scope="prefecture" data-pref-id="shimane"'), "Unplanned prefecture must highlight its whole MLIT boundary");
+  assert(unplannedShimaneHtml.includes('id="gmapsPlaceCard"') && unplannedShimaneHtml.includes("Shimane Prefecture"), "Unplanned prefecture must display top-left Place Card");
+  assert(!unplannedShimaneHtml.includes('viewBox="26 28 895 922"'), "Focusing unplanned prefecture must zoom viewBox to prefecture bbox");
+
+  ctx.dismissMapPlaceCard();
+  assert.strictEqual(ctx.state.mapPopupDismissed, true);
+  assert.strictEqual(ctx.state.focusedPrefId, "shimane", "Closing Place Card popup must preserve current prefecture focus & zoom");
+
+  // Zoomed Miyagi LOD must show individual municipalities inside Miyagi (e.g. Sendai, Matsushima)
+  const miyagiLod = ctx.buildDynamicCityLayerContent({ vx: 615, vy: 345, vw: 58, vh: 60 }, true);
+  assert(miyagiLod.html.includes("gmaps-muni-poly") && miyagiLod.html.includes('data-pref-id="miyagi"'), "Further zoom inside Miyagi must render city boundaries");
+  assert(miyagiLod.html.includes("gmaps-muni-label"), "Further zoom inside Miyagi must reveal city labels");
+
+  // 26. v2.0.0 Bug #4 Regression: Akiu in Schedule Must Point Map to Akiu (Miyagi), NOT Kawaguchiko
+  ctx.loadTripPreset("userpreset_feb2027_16d", { skipUndo: true, force: true });
+  ctx.updateDayRegionAndMap(1, "Akiu");
+  assert.strictEqual(ctx.getPrimaryPrefectureForDay(ctx.state.dataEn.days[1]).id, "miyagi", "Akiu must register in Miyagi Prefecture");
+  const febStopsAfterAkiu = ctx.getMatchedJapanLocations().map(s => s.id);
+  assert(febStopsAfterAkiu.includes("akiu"), "Map must include Akiu pin in Miyagi");
+  assert(!febStopsAfterAkiu.includes("kawaguchiko"), "Map must NOT falsely show Kawaguchiko after Day 2 region changed to Akiu");
 
   console.log("ALL_UNIT_AND_AUDIT_TESTS_PASSED");
 }

@@ -17,6 +17,7 @@
   function applyViewBox(svgEl, vb) {
     if (!svgEl || !vb) return;
     _pendingVb = vb;
+    window._liveMapViewBox = vb;
     if (_rafPending) return;
     _rafPending = true;
     const exec = () => {
@@ -26,6 +27,9 @@
           "viewBox",
           `${_pendingVb.vx.toFixed(1)} ${_pendingVb.vy.toFixed(1)} ${_pendingVb.vw.toFixed(1)} ${_pendingVb.vh.toFixed(1)}`
         );
+        if (typeof window.updateDynamicCityLayerForViewBox === "function") {
+          window.updateDynamicCityLayerForViewBox(svgEl);
+        }
       }
     };
     if (typeof requestAnimationFrame === "function") requestAnimationFrame(exec);
@@ -36,7 +40,7 @@
     const svg = document.getElementById("dynamicJapanMapSvg");
     if (!svg) return;
     const cur = parseViewBox(svg);
-    const nextW = Math.max(18, Math.min(1050, cur.vw * factor));
+    const nextW = Math.max(12, Math.min(1050, cur.vw * factor));
     const scale = nextW / cur.vw;
     const nextH = cur.vh * scale;
     const cx = cur.vx + cur.vw / 2;
@@ -50,6 +54,9 @@
   };
 
   window.resetInteractiveMapView = function() {
+    window._preserveLiveViewBox = false;
+    window._liveMapViewBox = null;
+    state.mapPopupDismissed = false;
     state.selectedMapStopId = null;
     state.focusedPrefId = null;
     state.manualMapZoom = null;
@@ -141,9 +148,16 @@
     if (!val) return;
     inp.value = "";
 
-    const matchedStops = typeof window.findMatchingGazetteerStops === "function"
-      ? window.findMatchingGazetteerStops(val)
-      : [];
+    window._preserveLiveViewBox = false;
+    window._liveMapViewBox = null;
+    state.mapPopupDismissed = false;
+
+    const disambig = typeof window.disambiguateLocationInput === "function" ? window.disambiguateLocationInput(val, !en) : null;
+    const matchedStops = (disambig && disambig.stop)
+      ? [disambig.stop]
+      : (typeof window.resolveLocationInputStops === "function"
+        ? window.resolveLocationInputStops(val)
+        : (typeof window.findMatchingGazetteerStops === "function" ? window.findMatchingGazetteerStops(val) : []));
     const primaryStop = matchedStops[0] || null;
 
     if (typeof window.appendDayFromMapStop === "function") {
@@ -157,14 +171,21 @@
       window.saveState();
       window.renderActiveViews();
       const hName = addedInfo && addedInfo.hotelName ? ` • 🏨 ${addedInfo.hotelName}` : "";
-      window.showToast(primaryStop
-        ? (en ? `📍 Added "${val}" as Day ${addedInfo.day}${hName}` : `📍 Day ${addedInfo.day}に「${val}」を追加しました${hName}`)
-        : (en ? `❗ Added Day ${addedInfo.day} ("${val}" unrecognised in Japan — defaulted to Tokyo on map)` : `❗ Day ${addedInfo.day}に「${val}」を追加（未認識のため地図は東京に設定）`));
+      if (addedInfo && addedInfo.corrected) {
+        const regDisp = en ? addedInfo.regionEn : addedInfo.regionJa;
+        window.showToast(en
+          ? `📍 Auto-set to "${regDisp}" as Day ${addedInfo.day} (change brackets to switch pref)${hName}`
+          : `📍 Day ${addedInfo.day}に「${regDisp}」を自動設定しました（括弧内で県切替可）${hName}`);
+      } else {
+        window.showToast(primaryStop
+          ? (en ? `📍 Added "${val}" as Day ${addedInfo.day}${hName}` : `📍 Day ${addedInfo.day}に「${val}」を追加しました${hName}`)
+          : (en ? `❗ Added Day ${addedInfo.day} ("${val}" unrecognised in Japan — defaulted to Tokyo on map)` : `❗ Day ${addedInfo.day}に「${val}」を追加（未認識のため地図は東京に設定）`));
+      }
       return;
     }
 
     if (!Array.isArray(state.customMapLocations)) state.customMapLocations = [];
-    state.customMapLocations.push(val);
+    state.customMapLocations.push(disambig && disambig.corrected ? disambig.text : val);
     state.manualMapZoom = null;
     state.focusedPrefId = null;
     state.selectedMapStopId = primaryStop ? primaryStop.id : null;
@@ -178,12 +199,16 @@
     state.manualMapZoom = null;
     state.focusedPrefId = null;
     state.selectedMapStopId = null;
+    state.mapPopupDismissed = false;
     window.saveState();
     window.renderActiveViews();
   };
 
   window.setMapQuickScope = function(scope) {
     const en = window.isEn();
+    window._preserveLiveViewBox = false;
+    window._liveMapViewBox = null;
+    state.mapPopupDismissed = false;
     state.focusedPrefId = null;
     state.selectedMapStopId = null;
     if (scope === "tokyoOnly") {

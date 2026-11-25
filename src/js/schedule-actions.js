@@ -120,15 +120,19 @@
     const cleanBlank = isCleanBlankTrip(enDays);
     const newNum = enDays.length + 1;
 
-    const matched = typeof window.findMatchingGazetteerStops === "function"
-      ? window.findMatchingGazetteerStops(label)
-      : [];
-    const primaryStop = matched[0] || null;
-    const regionEn = primaryStop ? primaryStop.nameEn : label;
-    const regionJa = primaryStop ? primaryStop.nameJa : label;
+    const disEn = typeof window.disambiguateLocationInput === "function" ? window.disambiguateLocationInput(label, false) : null;
+    const disJa = typeof window.disambiguateLocationInput === "function" ? window.disambiguateLocationInput(label, true) : null;
+    const resolved = (disEn && disEn.stop)
+      ? [disEn.stop]
+      : (typeof window.resolveLocationInputStops === "function"
+        ? window.resolveLocationInputStops(label)
+        : (typeof window.findMatchingGazetteerStops === "function" ? window.findMatchingGazetteerStops(label) : []));
+    const primaryStop = resolved[0] || null;
+    const regionEn = (disEn && disEn.corrected) ? disEn.text : (primaryStop ? primaryStop.nameEn : label);
+    const regionJa = (disJa && disJa.corrected) ? disJa.text : (primaryStop ? primaryStop.nameJa : label);
 
     const defH = typeof window.resolveDefaultHotelForLocation === "function"
-      ? window.resolveDefaultHotelForLocation(label)
+      ? window.resolveDefaultHotelForLocation(regionEn)
       : null;
     const hotelEn = (defH && defH.nameEn) || `${regionEn} Hotel`;
     const hotelJa = (defH && defH.nameJa) || `${regionJa} ホテル`;
@@ -140,6 +144,7 @@
     enDays.push({
       day: newNum, dow: "Mon", date: state.endDate || state.startDate,
       region: regionEn,
+      _regionOverridden: true,
       routeJp: `Day ${newNum}: ${regionEn} Sightseeing & Stay`,
       routeEn: defH ? `${defH.stars || 4}★ Hotel: ${hotelEn} (${defH.accessEn})` : "Explore local attractions & dining",
       stay: stayRate,
@@ -162,6 +167,7 @@
     jaDays.push({
       day: newNum, dow: "月", date: state.endDate || state.startDate,
       region: regionJa,
+      _regionOverridden: true,
       routeJp: `Day ${newNum}：${regionJa} 観光＆宿泊`,
       routeEn: defH ? `${defH.stars || 4}★ホテル目安：${hotelJa}（${defH.accessJa}）` : "ご当地グルメ＆観光散策",
       stay: stayRate,
@@ -190,6 +196,8 @@
       day: newNum,
       regionEn,
       regionJa,
+      corrected: !!(disEn && disEn.corrected),
+      stop: primaryStop,
       hotelName: window.isEn() ? hotelEn : hotelJa
     };
   };
@@ -396,17 +404,29 @@
     const enDay = state.dataEn && state.dataEn.days && state.dataEn.days[idx];
     const jaDay = state.dataJa && state.dataJa.days && state.dataJa.days[idx];
     const curDay = window.curData().days[idx];
-    if (curDay) curDay.region = val;
+
+    const disCur = typeof window.disambiguateLocationInput === "function" ? window.disambiguateLocationInput(val, !en) : null;
+    const disEn = typeof window.disambiguateLocationInput === "function" ? window.disambiguateLocationInput(val, false) : null;
+    const disJa = typeof window.disambiguateLocationInput === "function" ? window.disambiguateLocationInput(val, true) : null;
+    const finalCur = disCur ? disCur.text : val;
+
+    if (curDay) curDay.region = finalCur;
     const mirror = typeof window.shouldMirrorCustomText === "function" && window.shouldMirrorCustomText();
     if (mirror) {
-      const otherDays = en ? state.dataJa.days : state.dataEn.days;
-      if (otherDays && otherDays[idx]) otherDays[idx].region = val;
+      if (en && jaDay) jaDay.region = (disJa && (disJa.corrected || (disJa.stop && disJa.stop.isAmbiguous))) ? disJa.text : finalCur;
+      else if (!en && enDay) enDay.region = (disEn && (disEn.corrected || (disEn.stop && disEn.stop.isAmbiguous))) ? disEn.text : finalCur;
+    } else if (disCur && disCur.corrected) {
+      if (en && jaDay && disJa) jaDay.region = disJa.text;
+      if (!en && enDay && disEn) enDay.region = disEn.text;
     }
+
+    if (enDay) enDay._regionOverridden = true;
+    if (jaDay) jaDay._regionOverridden = true;
 
     // Default 3-4 star city (or prefectural) hotel automatically when user enters a recognised location
     let hotelMsg = "";
     if (typeof window.resolveDefaultHotelForLocation === "function") {
-      const defH = window.resolveDefaultHotelForLocation(val);
+      const defH = window.resolveDefaultHotelForLocation(finalCur);
       if (defH && defH.matchLevel !== "fallback") {
         if (enDay) {
           enDay.hotel = defH.nameEn;
@@ -425,12 +445,22 @@
     state.manualMapZoom = null;
     window.saveState();
     refreshActiveOrAll();
-    window.showToast(en
-      ? `🗾 Updated Day ${idx + 1} region & refreshed Map${hotelMsg}`
-      : `🗾 Day ${idx + 1} のエリアを更新し地図と連動しました${hotelMsg}`);
+    if (disCur && disCur.corrected) {
+      window.showToast(en
+        ? `📍 Auto-set to "${finalCur}" (change prefecture in brackets to switch cities)${hotelMsg}`
+        : `📍 「${finalCur}」に自動設定しました（括弧内の都道府県名を変えると都市を切替可能）${hotelMsg}`);
+    } else {
+      window.showToast(en
+        ? `🗾 Updated Day ${idx + 1} region & refreshed Map${hotelMsg}`
+        : `🗾 Day ${idx + 1} のエリアを更新し地図と連動しました${hotelMsg}`);
+    }
   };
 
   window.updateDayRouteAndMap = function(idx, val) {
+    const enDay = state.dataEn && state.dataEn.days && state.dataEn.days[idx];
+    const jaDay = state.dataJa && state.dataJa.days && state.dataJa.days[idx];
+    if (enDay) enDay._regionOverridden = false;
+    if (jaDay) jaDay._regionOverridden = false;
     if (window.curData().days[idx]) window.curData().days[idx].routeJp = val;
     if (typeof window.shouldMirrorCustomText === "function" && window.shouldMirrorCustomText()) {
       const otherDays = window.isEn() ? state.dataJa.days : state.dataEn.days;

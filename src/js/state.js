@@ -28,6 +28,7 @@ window.state = {
   manualMapZoom: null,
   focusedPrefId: null,
   selectedMapStopId: null,
+  mapPopupDismissed: false,
   _rev: 1,
   startDate: "2026-10-21",
   endDate: "2026-11-11",

@@ -66,8 +66,29 @@
         </div>
       </div>
       <div>
-        <span id="lblNewTripCities" style="display:block;font-size:12px;font-weight:800;margin-bottom:5px;">Destinations / Cities (select one or more)</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+          <span id="lblNewTripCities" style="font-size:12px;font-weight:800;">Destinations / Cities (select one or more)</span>
+          <div class="wizard-mode-tabs" id="wizardModeTabs">
+            <button type="button" class="pill active" id="btnWizMode_popular" onclick="setWizardPickerMode('popular')">⭐ Popular (12)</button>
+            <button type="button" class="pill" id="btnWizMode_search" onclick="setWizardPickerMode('search')">🔍 Search Any City / Pref</button>
+            <button type="button" class="pill" id="btnWizMode_map" onclick="setWizardPickerMode('map')">🗺️ Pick on Map</button>
+          </div>
+        </div>
+        <div id="wizardSelectedBar" class="wizard-selected-bar"></div>
         <div id="newTripCityChips" class="wizard-city-grid"></div>
+        <div id="wizardSearchPane" class="wizard-search-pane" style="display:none;">
+          <div style="display:flex;gap:6px;margin-bottom:6px;">
+            <input type="text" id="wizardPlaceSearchInput" class="search-input" style="flex:1;min-width:0;"
+              placeholder="Search any of 792 cities, 47 prefectures or villages (e.g. Achi Village, Fuchu, Date)..."
+              oninput="wizardOnSearchInput(this.value)"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();wizardSearchQuickAdd();}">
+            <button type="button" class="btn btn-primary" id="btnWizardQuickAdd" onclick="wizardSearchQuickAdd()" style="font-size:11.5px;padding:5px 10px;">+ Add</button>
+          </div>
+          <div id="wizardSearchResults" class="wizard-search-results"></div>
+        </div>
+        <div id="wizardMapPane" class="wizard-map-pane" style="display:none;">
+          <div id="wizardMapPickerWrap"></div>
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;">
         <div>
@@ -499,6 +520,7 @@
 <script src="data/romanization.js"></script>
 <script src="data/japan-geo.js"></script>
 <script src="data/gazetteer.js"></script>
+<script src="data/japan-places-index.js"></script>
 <script src="data/prefectures-catalog.js"></script>
 <script src="data/cities-catalog.js"></script>
 <script src="data/hotels-catalog.js"></script>
@@ -510,6 +532,7 @@
 <script src="js/themes.js"></script>
 <script src="js/state.js"></script>
 <script src="js/preset-manager.js"></script>
+<script src="js/wizard-picker.js"></script>
 <script src="js/map.js"></script>
 <script src="js/map-interact.js"></script>
 <script src="js/render-rail.js"></script>

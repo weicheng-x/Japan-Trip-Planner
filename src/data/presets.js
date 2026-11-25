@@ -136,15 +136,27 @@ window.PRESET_CATALOG_META = [
         c.regJa === q
       );
       if (found) return found;
+
+      const resolvedStops = typeof window.resolveLocationInputStops === "function"
+        ? window.resolveLocationInputStops(q)
+        : [];
+      const stop = resolvedStops[0] || null;
+      const defH = typeof window.resolveDefaultHotelForLocation === "function"
+        ? window.resolveDefaultHotelForLocation(q)
+        : null;
+      const packKey = (stop && !stop.isPrefFallback && stop.cityKey && window.CITY_CATALOGS && window.CITY_CATALOGS[stop.cityKey])
+        ? stop.cityKey
+        : ((stop && stop.prefId && window.PREFECTURE_CATALOGS && window.PREFECTURE_CATALOGS[stop.prefId]) ? stop.prefId : "Tokyo");
+
       return {
         key: q || "Tokyo",
-        regEn: q || "Tokyo",
-        regJa: q || "東京",
-        hotelEn: `${q || "Custom"} Hotel`,
-        hotelJa: `${q || "カスタム"} ホテル`,
-        foodKeys: ["Tokyo"],
-        accessKeys: ["Tokyo"],
-        guideKeys: ["Tokyo"]
+        regEn: stop ? stop.nameEn : (q || "Tokyo"),
+        regJa: stop ? stop.nameJa : (q || "東京"),
+        hotelEn: (defH && defH.nameEn) || `${q || "Custom"} Hotel`,
+        hotelJa: (defH && defH.nameJa) || `${q || "カスタム"} ホテル`,
+        foodKeys: [packKey],
+        accessKeys: [packKey],
+        guideKeys: [packKey]
       };
     };
 

@@ -1,12 +1,16 @@
-// Fetches open MLIT administrative GeoJSONs (prefectures & municipalities),
+// Fetches open MLIT administrative GeoJSONs (prefectures & municipalities) and municipality Romanization,
 // projects coordinates into conformal Web Mercator inside 0..920 x 0..980,
-// simplifies rings with Ramer-Douglas-Peucker, and emits src/data/japan-geo.js.
+// simplifies rings with Ramer-Douglas-Peucker, and emits src/data/japan-geo.js with:
+//   - All 47 Prefectures (JAPAN_PREF_PATHS)
+//   - All 792 Japan Cities (市) + Curated Tourist Composite/Town/Village Areas (JAPAN_CITY_PATHS)
 
 const fs = require("fs");
 const path = require("path");
 
 const PREF_URL = "https://raw.githubusercontent.com/smartnews-smri/japan-topography/main/data/municipality/geojson/s0001/prefectures.json";
 const MUNI_URL = "https://raw.githubusercontent.com/smartnews-smri/japan-topography/main/data/municipality/geojson/s0001/N03-21_210101_designated_city.json";
+const MUNI_FALLBACK_URL = "https://raw.githubusercontent.com/smartnews-smri/japan-topography/main/data/municipality/geojson/s0010/N03-21_210101_designated_city.json";
+const ROM_URL = "https://raw.githubusercontent.com/piuccio/open-data-jp-municipalities/master/municipalities.json";
 
 function mercDeg(lat) {
   const rad = (Math.max(-85, Math.min(85, lat)) * Math.PI) / 180;
@@ -62,7 +66,7 @@ function polyArea(ring) {
 }
 
 function buildFeaturePaths(features, eps, minRingArea, alwaysKeepLargestPerFeature, ringCenterFilter) {
-  let pathParts = [];
+  const pathParts = [];
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   let sumArea = 0, sumCx = 0, sumCy = 0;
 
@@ -93,11 +97,16 @@ function buildFeaturePaths(features, eps, minRingArea, alwaysKeepLargestPerFeatu
       if (area < minRingArea && !(alwaysKeepLargestPerFeature && area === maxFeatArea)) return;
       const open = ring.slice(0, -1);
       if (open.length < 3) return;
-      // Split at antipodal/midpoint for closed ring RDP stability
       const mid = Math.floor(open.length / 2);
       const s1 = rdp(open.slice(0, mid + 1), eps);
       const s2 = rdp(open.slice(mid).concat([open[0]]), eps);
-      const simplified = s1.slice(0, -1).concat(s2.slice(0, -1));
+      let simplified = s1.slice(0, -1).concat(s2.slice(0, -1));
+      if (simplified.length < 3) {
+        const fine1 = rdp(open.slice(0, mid + 1), 0.02);
+        const fine2 = rdp(open.slice(mid).concat([open[0]]), 0.02);
+        simplified = fine1.slice(0, -1).concat(fine2.slice(0, -1));
+        if (simplified.length < 3) simplified = open;
+      }
       if (simplified.length < 3) return;
 
       let dStr = "";
@@ -152,129 +161,155 @@ const PREF_JA_TO_ID = {
   "鹿児島県": "kagoshima", "沖縄県": "okinawa"
 };
 
-// Common sightseeing city/municipality boundaries mapped explicitly to stop IDs.
-// Stops omitted here (koga, omiya, narita, kushiro, plus all pref_* stops) highlight their whole prefecture instead!
-const CITY_MUNI_SPEC = {
-  rebun_island: { pref: "北海道", munis: ["礼文町"] },
-  rishiri_island: { pref: "北海道", munis: ["利尻町", "利尻富士町"] },
-  sapporo: { pref: "北海道", munis: ["札幌市"] },
-  chitose: { pref: "北海道", munis: ["千歳市"] },
-  otaru: { pref: "北海道", munis: ["小樽市"] },
-  asahikawa: { pref: "北海道", munis: ["旭川市"] },
-  furano: { pref: "北海道", munis: ["富良野市", "美瑛町", "中富良野町"] },
-  niseko: { pref: "北海道", munis: ["ニセコ町", "倶知安町"] },
-  noboribetsu: { pref: "北海道", munis: ["登別市", "洞爺湖町", "壮瞥町"] },
-  hakodate: { pref: "北海道", munis: ["函館市"] },
-
-  mutsu_bay: { pref: "青森県", munis: ["むつ市", "大間町", "平内町"] },
-  shin_aomori: { pref: "青森県", munis: ["青森市"] },
-  aomori_city: { pref: "青森県", munis: ["青森市"] },
-  hirosaki: { pref: "青森県", munis: ["弘前市"] },
-  hachinohe: { pref: "青森県", munis: ["八戸市"] },
-  oirase: { pref: "青森県", munis: ["十和田市"] },
-  misawa: { pref: "青森県", munis: ["三沢市"] },
-
-  morioka: { pref: "岩手県", munis: ["盛岡市"] },
-  nyuto_onsen: { pref: "秋田県", munis: ["仙北市"] },
-  kakunodate: { pref: "秋田県", munis: ["仙北市", "秋田市"] },
-  matsushima: { pref: "宮城県", munis: ["松島町", "塩竈市"] },
-  sendai: { pref: "宮城県", munis: ["仙台市"] },
-  naruko: { pref: "宮城県", munis: ["大崎市"] },
-  tsuruoka: { pref: "山形県", munis: ["鶴岡市"] },
-  ginzan_onsen: { pref: "山形県", munis: ["尾花沢市"] },
-  zao: { pref: "山形県", munis: ["山形市", "上山市"] },
-  kaminoyama_onsen: { pref: "山形県", munis: ["上山市"] },
-  yamagata_city: { pref: "山形県", munis: ["山形市", "天童市"] },
-  aizuwakamatsu: { pref: "福島県", munis: ["会津若松市", "喜多方市", "下郷町"] },
-
-  kinugawa_onsen: { pref: "栃木県", munis: ["日光市"] },
-  nikko: { pref: "栃木県", munis: ["日光市"] },
-  kusatsu_onsen: { pref: "群馬県", munis: ["草津町"] },
-  takasaki: { pref: "群馬県", munis: ["高崎市"] },
-
-  tokyo: { pref: "東京都", munis: ["千代田区", "中央区", "港区", "文京区", "渋谷区", "新宿区", "台東区", "墨田区", "品川区", "大田区", "江東区"] },
-  shinjuku: { pref: "東京都", munis: ["新宿区", "渋谷区", "豊島区"] },
-  asakusa: { pref: "東京都", munis: ["台東区", "墨田区", "文京区"] },
-  haneda: { pref: "東京都", munis: ["大田区", "品川区", "江東区", "港区"] },
-  yokohama: { pref: "神奈川県", munis: ["横浜市"] },
-  kamakura: { pref: "神奈川県", munis: ["鎌倉市", "藤沢市"] },
-  hakone: { pref: "神奈川県", munis: ["箱根町"] },
-
-  sado_island: { pref: "新潟県", munis: ["佐渡市"] },
-  kawaguchiko: { pref: "山梨県", munis: ["富士河口湖町", "富士吉田市"] },
-  hakuba: { pref: "長野県", munis: ["白馬村"] },
-  azumino: { pref: "長野県", munis: ["安曇野市"] },
-  matsumoto: { pref: "長野県", munis: ["松本市"] },
-  karuizawa: { pref: "長野県", munis: ["軽井沢町"] },
-  nagano_city: { pref: "長野県", munis: ["長野市", "山ノ内町"] },
-  atami: { pref: "静岡県", munis: ["熱海市"] },
-  izu: { pref: "静岡県", munis: ["伊豆市", "河津町", "下田市", "伊東市", "東伊豆町"] },
-  shizuoka: { pref: "静岡県", munis: ["静岡市", "富士市"] },
-  hamamatsu: { pref: "静岡県", munis: ["浜松市"] },
-  nagoya: { pref: "愛知県", munis: ["名古屋市"] },
-  kanazawa: { pref: "石川県", munis: ["金沢市"] },
-  kaga_onsen: { pref: "石川県", munis: ["加賀市"] },
-  gokayama: { pref: "富山県", munis: ["南砺市"] },
-  shirakawago: { pref: "岐阜県", munis: ["白川村"] },
-  takayama: { pref: "岐阜県", munis: ["高山市"] },
-  ise: { pref: "三重県", munis: ["伊勢市", "鳥羽市", "志摩市"] },
-
-  kyoto: { pref: "京都府", munis: ["京都市", "宇治市"] },
-  nara: { pref: "奈良県", munis: ["奈良市"] },
-  koyasan: { pref: "和歌山県", munis: ["高野町"] },
-  osaka: { pref: "大阪府", munis: ["大阪市"] },
-  kobe: { pref: "兵庫県", munis: ["神戸市"] },
-  arima_onsen: { pref: "兵庫県", munis: ["神戸市"] },
-  himeji: { pref: "兵庫県", munis: ["姫路市"] },
-  kinosaki_onsen: { pref: "兵庫県", munis: ["豊岡市"] },
-  awaji_island: { pref: "兵庫県", munis: ["淡路市", "洲本市", "南あわじ市"] },
-
-  tottori_city: { pref: "鳥取県", munis: ["鳥取市"] },
-  matsue: { pref: "島根県", munis: ["松江市"] },
-  izumo: { pref: "島根県", munis: ["出雲市"] },
-  okayama_city: { pref: "岡山県", munis: ["岡山市"] },
-  kurashiki: { pref: "岡山県", munis: ["倉敷市"] },
-  onomichi: { pref: "広島県", munis: ["尾道市"] },
-  hiroshima: { pref: "広島県", munis: ["広島市"] },
-  miyajima: { pref: "広島県", munis: ["廿日市市"] },
-  shimonoseki: { pref: "山口県", munis: ["下関市"] },
-  naoshima: { pref: "香川県", munis: ["直島町"] },
-  takamatsu: { pref: "香川県", munis: ["高松市"] },
-  matsuyama: { pref: "愛媛県", munis: ["松山市"] },
-
-  fukuoka: { pref: "福岡県", munis: ["福岡市"] },
-  dazaifu: { pref: "福岡県", munis: ["太宰府市"] },
-  beppu: { pref: "大分県", munis: ["別府市"] },
-  yufuin: { pref: "大分県", munis: ["由布市"] },
-  kurokawa: { pref: "熊本県", munis: ["南小国町"] },
-  nagasaki: { pref: "長崎県", munis: ["長崎市"] },
-  kumamoto: { pref: "熊本県", munis: ["熊本市", "阿蘇市"] },
-  kagoshima: { pref: "鹿児島県", munis: ["鹿児島市"] },
-  yakushima: { pref: "鹿児島県", munis: ["屋久島町"] },
-
-  onna_son: { pref: "沖縄県", munis: ["恩納村", "本部町", "名護市"] },
-  chatan: { pref: "沖縄県", munis: ["北谷町", "読谷村"] },
-  naha: { pref: "沖縄県", munis: ["那覇市"] },
-  kerama: { pref: "沖縄県", munis: ["座間味村", "渡嘉敷村"] },
-  miyakojima: { pref: "沖縄県", munis: ["宮古島市"] },
-  ishigaki: { pref: "沖縄県", munis: ["石垣市"] },
-  taketomi: { pref: "沖縄県", munis: ["竹富町"] }
+// Direct 1:1 canonical gazetteer stopId -> [prefJa, shiJa] mapping so canonical IDs carry isShi: true
+const SHI_CANONICAL_ID_MAP = {
+  "北海道|札幌市": "sapporo",
+  "北海道|千歳市": "chitose",
+  "北海道|小樽市": "otaru",
+  "北海道|旭川市": "asahikawa",
+  "北海道|函館市": "hakodate",
+  "青森県|青森市": "aomori_city",
+  "青森県|弘前市": "hirosaki",
+  "青森県|八戸市": "hachinohe",
+  "青森県|十和田市": "oirase",
+  "青森県|三沢市": "misawa",
+  "岩手県|盛岡市": "morioka",
+  "秋田県|仙北市": "nyuto_onsen",
+  "宮城県|仙台市": "sendai",
+  "宮城県|大崎市": "naruko",
+  "山形県|鶴岡市": "tsuruoka",
+  "山形県|尾花沢市": "ginzan_onsen",
+  "山形県|上山市": "kaminoyama_onsen",
+  "栃木県|日光市": "nikko",
+  "群馬県|高崎市": "takasaki",
+  "神奈川県|横浜市": "yokohama",
+  "神奈川県|鎌倉市": "kamakura",
+  "新潟県|佐渡市": "sado_island",
+  "長野県|安曇野市": "azumino",
+  "長野県|松本市": "matsumoto",
+  "静岡県|熱海市": "atami",
+  "静岡県|静岡市": "shizuoka",
+  "静岡県|浜松市": "hamamatsu",
+  "愛知県|名古屋市": "nagoya",
+  "石川県|金沢市": "kanazawa",
+  "石川県|加賀市": "kaga_onsen",
+  "富山県|南砺市": "gokayama",
+  "岐阜県|高山市": "takayama",
+  "京都府|京都市": "kyoto",
+  "奈良県|奈良市": "nara",
+  "大阪府|大阪市": "osaka",
+  "兵庫県|神戸市": "kobe",
+  "兵庫県|姫路市": "himeji",
+  "兵庫県|豊岡市": "kinosaki_onsen",
+  "鳥取県|鳥取市": "tottori_city",
+  "島根県|松江市": "matsue",
+  "島根県|出雲市": "izumo",
+  "岡山県|岡山市": "okayama_city",
+  "岡山県|倉敷市": "kurashiki",
+  "広島県|尾道市": "onomichi",
+  "広島県|広島市": "hiroshima",
+  "広島県|廿日市市": "miyajima",
+  "山口県|下関市": "shimonoseki",
+  "香川県|高松市": "takamatsu",
+  "愛媛県|松山市": "matsuyama",
+  "福岡県|福岡市": "fukuoka",
+  "福岡県|太宰府市": "dazaifu",
+  "大分県|別府市": "beppu",
+  "大分県|由布市": "yufuin",
+  "長崎県|長崎市": "nagasaki",
+  "熊本県|熊本市": "kumamoto",
+  "鹿児島県|鹿児島市": "kagoshima",
+  "沖縄県|那覇市": "naha",
+  "沖縄県|宮古島市": "miyakojima",
+  "沖縄県|石垣市": "ishigaki"
 };
 
+// Curated composite / non-shi town, village, island & sub-city tourist boundaries
+const CURATED_NON_SHI_SPECS = {
+  rebun_island: { pref: "北海道", munis: ["礼文町"], en: "Rebun Island", ja: "礼文島" },
+  rishiri_island: { pref: "北海道", munis: ["利尻町", "利尻富士町"], en: "Rishiri Island", ja: "利尻島" },
+  furano: { pref: "北海道", munis: ["富良野市", "美瑛町", "中富良野町"], en: "Furano / Biei", ja: "富良野・美瑛" },
+  niseko: { pref: "北海道", munis: ["ニセコ町", "倶知安町"], en: "Niseko", ja: "ニセコ" },
+  noboribetsu: { pref: "北海道", munis: ["登別市", "洞爺湖町", "壮瞥町"], en: "Noboribetsu / Lake Toya", ja: "登別・洞爺湖" },
+  mutsu_bay: { pref: "青森県", munis: ["むつ市", "大間町", "平内町"], en: "Mutsu Bay", ja: "陸奥湾" },
+  shin_aomori: { pref: "青森県", munis: ["青森市"], en: "Shin-Aomori", ja: "新青森" },
+  kakunodate: { pref: "秋田県", munis: ["仙北市", "秋田市"], en: "Akita / Kakunodate", ja: "秋田・角館" },
+  matsushima: { pref: "宮城県", munis: ["松島町", "塩竈市"], en: "Matsushima", ja: "松島" },
+  akiu: { pref: "宮城県", munis: ["仙台市"], en: "Akiu Onsen", ja: "秋保温泉" },
+  zao: { pref: "山形県", munis: ["山形市", "上山市"], en: "Zao Onsen", ja: "蔵王温泉" },
+  yamagata_city: { pref: "山形県", munis: ["山形市", "天童市"], en: "Yamagata / Tendo", ja: "山形・天童" },
+  aizuwakamatsu: { pref: "福島県", munis: ["会津若松市", "喜多方市", "下郷町"], en: "Aizuwakamatsu / Kitakata", ja: "会津若松・喜多方" },
+  kinugawa_onsen: { pref: "栃木県", munis: ["日光市"], en: "Kinugawa Onsen", ja: "鬼怒川温泉" },
+  kusatsu_onsen: { pref: "群馬県", munis: ["草津町"], en: "Kusatsu Onsen", ja: "草津温泉" },
+  tokyo: { pref: "東京都", munis: ["千代田区", "中央区", "港区", "文京区", "渋谷区", "新宿区", "台東区", "墨田区", "品川区", "大田区", "江東区"], en: "Tokyo Central", ja: "東京・銀座" },
+  shinjuku: { pref: "東京都", munis: ["新宿区", "渋谷区", "豊島区"], en: "Shinjuku / Shibuya", ja: "新宿・渋谷" },
+  asakusa: { pref: "東京都", munis: ["台東区", "墨田区", "文京区"], en: "Asakusa / Ueno", ja: "浅草・上野" },
+  haneda: { pref: "東京都", munis: ["大田区", "品川区", "江東区", "港区"], en: "Haneda / Tokyo Bay", ja: "羽田空港・湾岸" },
+  hakone: { pref: "神奈川県", munis: ["箱根町"], en: "Hakone", ja: "箱根" },
+  kawaguchiko: { pref: "山梨県", munis: ["富士河口湖町", "富士吉田市"], en: "Mt. Fuji / Kawaguchiko", ja: "富士山・河口湖" },
+  hakuba: { pref: "長野県", munis: ["白馬村"], en: "Hakuba", ja: "白馬" },
+  karuizawa: { pref: "長野県", munis: ["軽井沢町"], en: "Karuizawa", ja: "軽井沢" },
+  nagano_city: { pref: "長野県", munis: ["長野市", "山ノ内町"], en: "Nagano", ja: "長野" },
+  achi_village: { pref: "長野県", munis: ["阿智村"], en: "Achi Village", ja: "阿智村" },
+  izu: { pref: "静岡県", munis: ["伊豆市", "河津町", "下田市", "伊東市", "東伊豆町"], en: "Izu / Kawazu", ja: "伊豆・河津" },
+  shirakawago: { pref: "岐阜県", munis: ["白川村"], en: "Shirakawa-go", ja: "白川郷" },
+  ise: { pref: "三重県", munis: ["伊勢市", "鳥羽市", "志摩市"], en: "Ise / Toba", ja: "伊勢・鳥羽" },
+  koyasan: { pref: "和歌山県", munis: ["高野町"], en: "Koyasan", ja: "高野山" },
+  arima_onsen: { pref: "兵庫県", munis: ["神戸市"], en: "Arima Onsen", ja: "有馬温泉" },
+  awaji_island: { pref: "兵庫県", munis: ["淡路市", "洲本市", "南あわじ市"], en: "Awaji Island", ja: "淡路島" },
+  naoshima: { pref: "香川県", munis: ["直島町"], en: "Naoshima", ja: "直島" },
+  kurokawa: { pref: "熊本県", munis: ["南小国町"], en: "Kurokawa Onsen", ja: "黒川温泉" },
+  yakushima: { pref: "鹿児島県", munis: ["屋久島町"], en: "Yakushima", ja: "屋久島" },
+  onna_son: { pref: "沖縄県", munis: ["恩納村", "本部町", "名護市"], en: "Onna-son / Churaumi", ja: "恩納村・美ら海" },
+  chatan: { pref: "沖縄県", munis: ["北谷町", "読谷村"], en: "Chatan / Cape Maeda", ja: "北谷・真栄田岬" },
+  kerama: { pref: "沖縄県", munis: ["座間味村", "渡嘉敷村"], en: "Kerama Islands", ja: "慶良間諸島" },
+  taketomi: { pref: "沖縄県", munis: ["竹富町"], en: "Taketomi / Iriomote", ja: "竹富島・西表島" }
+};
+
+function cleanRomajiCityName(rawRom) {
+  if (!rawRom) return "";
+  return String(rawRom)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+(Shi|Ku|Cho|Machi|Son|Mura)$/i, "")
+    .trim();
+}
+
+function makeShiSlug(nameEn) {
+  return String(nameEn || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
 async function main() {
-  console.log("Fetching MLIT Prefectures & Municipalities GeoJSONs...");
-  const [prefRes, muniRes] = await Promise.all([fetch(PREF_URL), fetch(MUNI_URL)]);
+  console.log("Fetching MLIT Prefectures, Municipalities & Romanization datasets...");
+  const [prefRes, muniRes, romRes] = await Promise.all([
+    fetch(PREF_URL),
+    fetch(MUNI_URL),
+    fetch(ROM_URL)
+  ]);
   if (!prefRes.ok) throw new Error("Failed pref fetch: " + prefRes.status);
   if (!muniRes.ok) throw new Error("Failed muni fetch: " + muniRes.status);
+  if (!romRes.ok) throw new Error("Failed rom fetch: " + romRes.status);
+
   const prefGeo = await prefRes.json();
   const muniGeo = await muniRes.json();
+  const romList = await romRes.json();
+
+  const romByCode5 = new Map();
+  const romByPrefKanji = new Map();
+  for (const r of romList) {
+    const c5 = String(r.code || "").slice(0, 5);
+    if (c5) romByCode5.set(c5, r);
+    romByPrefKanji.set(`${r.prefecture_kanji}|${r.name_kanji}`, r);
+  }
 
   const prefPaths = {};
   (prefGeo.features || []).forEach(f => {
     const pJa = f.properties && f.properties.N03_001;
     const pId = PREF_JA_TO_ID[pJa];
     if (!pId) return;
-    // Exclude distant remote Pacific Ogasawara/Izu volcanic islands under Tokyo (y > 530) and distant Daito east of Okinawa (x > 250) so bounds stay tight on mainland/tourist islands
     let ringFilter = null;
     if (pId === "tokyo") ringFilter = (_cx, cy) => cy <= 530;
     else if (pId === "okinawa") ringFilter = (cx) => cx <= 250;
@@ -285,36 +320,120 @@ async function main() {
   const missingPrefs = Object.values(PREF_JA_TO_ID).filter(id => !prefPaths[id]);
   if (missingPrefs.length > 0) throw new Error("Missing pref paths: " + missingPrefs.join(", "));
 
-  const cityPaths = {};
-  const missingCities = [];
-  Object.entries(CITY_MUNI_SPEC).forEach(([stopId, spec]) => {
-    const targetMunis = new Set(spec.munis);
-    const matchedFeats = (muniGeo.features || []).filter(f => {
-      const pr = f.properties || {};
-      if (pr.N03_001 !== spec.pref) return false;
-      const mName = pr.N03_004 || pr.N03_003 || "";
-      return targetMunis.has(mName);
-    });
-    const built = buildFeaturePaths(matchedFeats, 0.14, 0.08, true);
-    if (!built) {
-      missingCities.push(`${stopId}(${spec.pref}:${spec.munis.join(",")})`);
-    } else {
-      cityPaths[stopId] = {
-        d: built.d,
-        bbox: built.bbox,
-        muniJa: spec.munis.join("・")
-      };
+  // Index municipality GeoJSON features by "prefJa|muniJa" for O(1) lookup
+  const featsByPrefMuni = new Map();
+  const shiGroups = new Map();
+  (muniGeo.features || []).forEach(f => {
+    const pr = f.properties || {};
+    const prefJa = pr.N03_001 || "";
+    const muniJa = pr.N03_004 || pr.N03_003 || "";
+    if (!prefJa || !muniJa) return;
+    const mk = `${prefJa}|${muniJa}`;
+    if (!featsByPrefMuni.has(mk)) featsByPrefMuni.set(mk, []);
+    featsByPrefMuni.get(mk).push(f);
+
+    if (muniJa.endsWith("市") && !shiGroups.has(mk)) {
+      shiGroups.set(mk, { prefJa, nameJa: muniJa, code: String(pr.N03_007 || "") });
     }
   });
 
-  if (missingCities.length > 0) {
-    console.warn("MISSING CITIES:", missingCities);
+  const cityPaths = {};
+  const missingEntries = [];
+
+  // 1) Emit all 792 Cities (市) with uniform tolerance; fallback to s0010 for any tiny city whose s0001 geometry was null (e.g. Muko-shi)
+  let fallbackMuniByPrefMuni = null;
+  async function getFallbackFeats(mk) {
+    if (!fallbackMuniByPrefMuni) {
+      const fbRes = await fetch(MUNI_FALLBACK_URL);
+      if (fbRes.ok) {
+        const fbGeo = await fbRes.json();
+        fallbackMuniByPrefMuni = new Map();
+        (fbGeo.features || []).forEach(f => {
+          const pr = f.properties || {};
+          const k = `${pr.N03_001 || ""}|${pr.N03_004 || pr.N03_003 || ""}`;
+          if (!fallbackMuniByPrefMuni.has(k)) fallbackMuniByPrefMuni.set(k, []);
+          fallbackMuniByPrefMuni.get(k).push(f);
+        });
+      } else {
+        fallbackMuniByPrefMuni = new Map();
+      }
+    }
+    return fallbackMuniByPrefMuni.get(mk) || [];
+  }
+
+  let shiEmitted = 0;
+  for (const [mk, info] of shiGroups.entries()) {
+    const prefId = PREF_JA_TO_ID[info.prefJa];
+    if (!prefId) continue;
+    const rec = romByCode5.get(info.code) || romByPrefKanji.get(mk);
+    let rawRom = rec ? rec.name_romaji : "";
+    if (!rawRom && info.nameJa === "那珂川市") rawRom = "Nakagawa Shi";
+    const nameEn = cleanRomajiCityName(rawRom) || info.nameJa;
+    const kana = rec && rec.name_kana ? String(rec.name_kana).replace(/し$/, "") : "";
+
+    const canonId = SHI_CANONICAL_ID_MAP[mk];
+    const id = canonId || `shi_${makeShiSlug(nameEn)}_${prefId}`;
+    const feats = featsByPrefMuni.get(mk) || [];
+    let ringFilter = null;
+    if (prefId === "tokyo") ringFilter = (_cx, cy) => cy <= 530;
+    else if (prefId === "okinawa") ringFilter = (cx) => cx <= 250;
+
+    let built = buildFeaturePaths(feats, 0.22, 0.08, true, ringFilter);
+    if (!built) {
+      const fbFeats = await getFallbackFeats(mk);
+      built = buildFeaturePaths(fbFeats, 0.06, 0.01, true, ringFilter);
+    }
+    if (!built) {
+      missingEntries.push(`shi:${mk}`);
+      continue;
+    }
+    cityPaths[id] = {
+      d: built.d,
+      bbox: built.bbox,
+      cx: built.cx,
+      cy: built.cy,
+      prefId,
+      nameEn,
+      nameJa: info.nameJa,
+      kana,
+      isShi: true
+    };
+    shiEmitted++;
+  }
+
+  // 2) Emit curated non-shi / composite tourist regions (villages, towns, bays, wards)
+  Object.entries(CURATED_NON_SHI_SPECS).forEach(([stopId, spec]) => {
+    const prefId = PREF_JA_TO_ID[spec.pref];
+    const feats = [];
+    spec.munis.forEach(mJa => {
+      const list = featsByPrefMuni.get(`${spec.pref}|${mJa}`) || [];
+      list.forEach(f => feats.push(f));
+    });
+    const built = buildFeaturePaths(feats, 0.16, 0.08, true);
+    if (!built) {
+      missingEntries.push(`curated:${stopId}(${spec.pref}:${spec.munis.join(",")})`);
+      return;
+    }
+    cityPaths[stopId] = {
+      d: built.d,
+      bbox: built.bbox,
+      cx: built.cx,
+      cy: built.cy,
+      prefId,
+      nameEn: spec.en,
+      nameJa: spec.ja,
+      isShi: false
+    };
+  });
+
+  if (missingEntries.length > 0 || shiEmitted < 792) {
+    console.warn("MISSING ENTRIES:", missingEntries, "shiEmitted:", shiEmitted);
     process.exitCode = 1;
   }
 
   const outPath = path.resolve(__dirname, "..", "src", "data", "japan-geo.js");
-  const outContent = `// Auto-generated Conformal Web Mercator MLIT Japan Prefectures (47) & Common City Boundaries (${Object.keys(cityPaths).length})
-// Source: MLIT National Land Numerical Information via smartnews-smri/japan-topography (s0001 simplified)
+  const outContent = `// Auto-generated Conformal Web Mercator MLIT Japan Prefectures (47), All ${shiEmitted} Cities (市) & Curated Sightseeing Boundaries (${Object.keys(cityPaths).length} total)
+// Source: MLIT National Land Numerical Information via smartnews-smri/japan-topography & open-data-jp-municipalities
 
 window.projectJapanLatLng = function(lat, lng) {
   const rad = (Math.max(-85, Math.min(85, Number(lat) || 35.68)) * Math.PI) / 180;
@@ -332,7 +451,7 @@ window.JAPAN_CITY_PATHS = ${JSON.stringify(cityPaths)};
 
   fs.writeFileSync(outPath, outContent, "utf8");
   const kb = (fs.statSync(outPath).size / 1024).toFixed(1);
-  console.log(`Generated ${outPath} (${kb} KB) | Prefectures: ${Object.keys(prefPaths).length} | Cities: ${Object.keys(cityPaths).length} | Missing: ${missingCities.length}`);
+  console.log(`Generated ${outPath} (${kb} KB) | Prefectures: ${Object.keys(prefPaths).length} | All Shi: ${shiEmitted} | Total City/Area Polygons: ${Object.keys(cityPaths).length} | Missing: ${missingEntries.length}`);
 }
 
 main().catch(err => {

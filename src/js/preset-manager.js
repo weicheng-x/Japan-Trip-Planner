@@ -298,118 +298,6 @@ window.confirmSaveAsNewPreset = function() {
   return created;
 };
 
-window.openNewTripModal = function() {
-  const en = window.isEn();
-  const nameEl = document.getElementById("newTripTitleInput");
-  const startEl = document.getElementById("newTripStartInput");
-  const daysEl = document.getElementById("newTripDaysInput");
-  const costSel = document.getElementById("newTripCostMode");
-  const emptyChk = document.getElementById("newTripEmptySlots");
-
-  if (nameEl) nameEl.value = en ? "My Custom Japan Itinerary" : "マイカスタム日本旅行";
-  if (startEl) startEl.value = state.startDate || "2027-04-01";
-  if (daysEl) daysEl.value = "7";
-  if (costSel) costSel.value = "blank";
-  if (emptyChk) emptyChk.checked = true;
-
-  if (typeof window.renderNewTripWizardChips === "function") {
-    window.renderNewTripWizardChips(["Tokyo"]);
-  }
-
-  const modal = document.getElementById("newTripModalBackdrop");
-  if (modal && modal.classList) modal.classList.add("open");
-};
-
-window.toggleWizardCityChip = function(btn) {
-  if (!btn || !btn.classList) return;
-  btn.classList.toggle("active");
-};
-
-window.renderNewTripWizardChips = function(defaultCities) {
-  const wrap = document.getElementById("newTripCityChips");
-  if (!wrap || !Array.isArray(window.WIZARD_CITIES)) return;
-  const en = window.isEn();
-  const activeSet = new Set(Array.isArray(defaultCities) ? defaultCities : []);
-  wrap.innerHTML = window.WIZARD_CITIES.map(c => {
-    const isActive = activeSet.has(c.key);
-    return `<button type="button" class="pill wizard-city-chip ${isActive ? "active" : ""}" data-city="${window.escapeAttr(c.key)}" onclick="toggleWizardCityChip(this)">${window.escapeHtml(en ? c.labelEn : c.labelJa)}</button>`;
-  }).join("");
-};
-
-window.submitNewBlankTrip = function() {
-  const en = window.isEn();
-  const nameEl = document.getElementById("newTripTitleInput");
-  const startEl = document.getElementById("newTripStartInput");
-  const daysEl = document.getElementById("newTripDaysInput");
-  const costSel = document.getElementById("newTripCostMode");
-  const emptyChk = document.getElementById("newTripEmptySlots");
-  const chipWrap = document.getElementById("newTripCityChips");
-
-  const cleanDesc = window.sanitizeTripDescriptor(nameEl ? nameEl.value : "") || (en ? "Custom Japan Itinerary" : "カスタム日本旅行プラン");
-  const startDate = (startEl && startEl.value) ? startEl.value : "2027-04-01";
-  const daysCount = Math.max(1, Math.min(60, parseInt(daysEl ? daysEl.value : "7", 10) || 7));
-  const costMode = costSel ? costSel.value : "blank";
-  const emptySlots = emptyChk ? !!emptyChk.checked : true;
-
-  let cities = [];
-  if (chipWrap && typeof chipWrap.querySelectorAll === "function") {
-    const selectedBtns = chipWrap.querySelectorAll(".wizard-city-chip.active");
-    selectedBtns.forEach(b => {
-      if (b && b.dataset && b.dataset.city) cities.push(b.dataset.city);
-    });
-  }
-  if (cities.length === 0) cities = ["Tokyo"];
-
-  window.pushUndoSnapshot("Create new blank trip");
-  const payload = window.buildBlankTripPayload({
-    titleEn: cleanDesc,
-    titleJa: cleanDesc,
-    startDate,
-    daysCount,
-    cities,
-    costMode,
-    emptySlots
-  });
-
-  state.activePreset = "__draft__";
-  state.activeRegionKey = "ALL";
-  state.activeFoodKey = "ALL";
-  state.activeAccessKey = "ALL";
-  state.activeGuideKey = "ALL";
-  state.customMapLocations = [];
-  state.manualMapZoom = null;
-  state.focusedPrefId = null;
-  state.selectedMapStopId = null;
-  state.mapScopeMode = "schedule";
-  state.syncedLocalTransit = false;
-  state.customPassPrice = null;
-  state.prepDone = {};
-  state.expandedDays = { 1: true };
-  state.startDate = payload.startDate;
-  state.endDate = payload.endDate;
-  state.customTitleEn = payload.titleEn;
-  state.customTitleJa = payload.titleJa;
-  state.customSubtitleEn = payload.subtitleEn;
-  state.customSubtitleJa = payload.subtitleJa;
-  state.selectedPassId = "none";
-  state.passStartDay = 1;
-  state.dataEn = payload.dataEn;
-  state.dataJa = payload.dataJa;
-  state.shoppingList = [];
-
-  if (!emptySlots && typeof window.ensureAllDaysHaveTimeSlots === "function") {
-    window.ensureAllDaysHaveTimeSlots();
-  }
-  window.closeAllModals();
-  window.applySeasonThemeFromStartDate();
-  window.switchTab("itinerary", null);
-  window.saveState();
-  window.renderAll();
-  window.showToast(en
-    ? `➕ Created ${daysCount}-day plan (${cities.join(" → ")}) — edit any card & click Save when ready`
-    : `➕ 新規${daysCount}日間プランを作成しました（各カード編集後に保存できます）`);
-};
-
 window.openShareExportModal = function() {
   const modal = document.getElementById("shareExportModalBackdrop");
   if (modal && modal.classList) modal.classList.add("open");
@@ -467,6 +355,7 @@ window.loadTripPreset = function(presetKey, opts) {
   state.manualMapZoom = null;
   state.focusedPrefId = null;
   state.selectedMapStopId = null;
+  state.mapPopupDismissed = false;
   state.mapScopeMode = "schedule";
   state.syncedLocalTransit = false;
   state.customPassPrice = null;
@@ -564,7 +453,7 @@ window.buildPresetExportPayload = function() {
   const envelope = {
     schema: "jp-trip-planner-preset-v2",
     exportedAt: new Date().toISOString(),
-    appVersion: "2.3.0",
+    appVersion: "2.0.0",
     preset: snap
   };
   const cleanName = window.sanitizeTripDescriptor(en ? snap.customTitleEn : snap.customTitleJa) || "Japan_Trip_Preset";

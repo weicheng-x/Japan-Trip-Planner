@@ -15,7 +15,11 @@ Interactive **Japan Master Trip & Budget Planner** available as a live **Web App
 - **Interactive Japan Route Map & Schedule Builder:** SVG route map synced with daily/hourly time-slot editing and city stops.
 - **Hotels, Multi-Currency Budget & Rail Pass Optimizer:** Track nightly stays, reconcile transport/accommodation/dining/shopping budgets across currencies, and compare Pay-As-You-Go vs. JR Pass options.
 - **Curated Tabelog Gourmet Guide, Transit & Shopping Tabs:** Built-in dining highlights, local transit references, and shopping checklist.
-- **Google Maps Aesthetics, Real MLIT Geography & Fast Workflow (`v2.3.0`):**
+- **All-Japan 792-City MLIT Map, Smart Wizard & Precision Resolver (`v2.0.0`):**
+  - **All 792 Japanese Cities (`市`) + 47 Prefectures + Iconic Villages:** Expanded [`japan-geo.js`](src/data/japan-geo.js) with survey-grade MLIT coastlines & boundaries for all 792 `市` plus curated destinations like **Achi Village** (`阿智村` `🌌`) and **Akiu Onsen** (`秋保温泉` `♨️`). Zooming further into any prefecture progressively reveals its individual cities (`市`) with clickable boundaries.
+  - **12 Quick Cards + Search + Interactive Map Picker in New Trip Wizard:** Choose from the 12 core hubs (`Tokyo`, `Kyoto`, `Osaka`, `Hiroshima`, `Hakone`, `Kanazawa`, `Takayama`, `Aomori`, `Fukuoka`, `Sapporo`, `Okinawa`, `Sendai`), search across all 792 cities & 47 prefectures with curated place icons, or click any prefecture & city directly on the mini-map.
+  - **Ambiguous City Auto-Disambiguation & Map UX Fixes:** Bare ambiguous city inputs automatically resolve cleanly (`Fuchu` → `Fuchu (Tokyo)`, `Date` → `Date (Hokkaido)`) and switch prefectures immediately when the bracketed prefecture is edited (`Fuchu (Hiroshima)`, `Date (Fukushima)`). Unplanned prefectures zoom & highlight on click, dismissing the Place Card (`×`) keeps current zoom, and explicit Day Region edits (`Akiu`) never leak stale route stops (`Kawaguchiko`).
+- **Google Maps Aesthetics, 3–4★ Hotels & Drag-and-Drop Days (`v1.3.0` / prior `v2.3.0`):**
   - **Survey-Grade Japan Map & City vs. Prefecture Highlights:** Real 47-prefecture + 95-city coastlines and borders (`src/data/japan-geo.js`) styled in Google Maps Light/Night palettes with smooth drag-pan, cursor-centered wheel zoom, and a floating Place Card. Clicking a common city highlights its exact municipality boundary; clicking an uncommon city or prefectural stop highlights the full prefecture boundary.
   - **One-Click Map Stop → Schedule Day + 3–4★ Hotel Defaults:** Adding any stop on Tab 1 appends a new latest Day in Tab 2 and automatically assigns a curated 3–4★ hotel (covering all 80 priority cities and all 47 prefectures in `src/data/hotels-catalog.js`, preserving `¥0` rates in Clean Blank mode).
   - **Drag-and-Drop Day Rearrangement:** Drag any day card (`⠿` handle) or quick-jump strip pill (`D15 → D2`) or use the direct `Move → D#` selector in Tab 2 to reorder days instantaneously with automatic date re-indexing and single-step Undo.
@@ -36,7 +40,7 @@ Open **https://weicheng-x.github.io/Japan-Trip-Planner/** directly — no instal
 
 ### 2. Portable Windows Desktop App or Offline Single-File HTML
 Download the latest assets from **[GitHub Releases](https://github.com/weicheng-x/Japan-Trip-Planner/releases/latest)**:
-- **`JP Trip Planner 2.3.0.exe`** — Portable Windows Electron desktop app (run directly with no installer required; supports native file dialogs and local desktop persistence).
+- **`JP Trip Planner 2.0.0.exe`** — Portable Windows Electron desktop app (run directly with no installer required; supports native file dialogs and local desktop persistence).
 - **`JP_Trip_Planner.html`** — Standalone single-file offline HTML bundle with embedded styles, scripts, and seasonal hero images.
 
 ### 3. Run or Build from Source

@@ -910,6 +910,36 @@ body.dark-mode .gmaps-pref.is-focused {
   vector-effect: non-scaling-stroke;
 }
 
+.gmaps-muni-poly {
+  fill: rgba(255, 255, 255, 0.14);
+  stroke: #94A3B8;
+  cursor: pointer;
+  transition: fill 0.12s ease;
+}
+.gmaps-muni-poly:hover {
+  fill: rgba(26, 115, 232, 0.22);
+  stroke: #1A73E8;
+}
+body.dark-mode .gmaps-muni-poly {
+  fill: rgba(255, 255, 255, 0.03);
+  stroke: #475569;
+}
+body.dark-mode .gmaps-muni-poly:hover {
+  fill: rgba(96, 165, 250, 0.24);
+  stroke: #60A5FA;
+}
+.gmaps-muni-label {
+  fill: #475569;
+  stroke: rgba(255, 255, 255, 0.92);
+  paint-order: stroke fill;
+  font-weight: 700;
+  pointer-events: none;
+}
+body.dark-mode .gmaps-muni-label {
+  fill: #CBD5E1;
+  stroke: rgba(15, 23, 42, 0.92);
+}
+
 .gmaps-route-casing {
   stroke: #FFFFFF;
   pointer-events: none;
@@ -1593,6 +1623,85 @@ table.data-table tr:hover td { background: var(--surface-alt); }
 /* Fresh-Itinerary Wizard & Inline Schedule Helpers */
 .wizard-city-grid { display: flex; flex-wrap: wrap; gap: 6px; }
 .wizard-city-chip { padding: 5px 10px; font-size: 11.5px; }
+.wizard-mode-tabs { display: flex; flex-wrap: wrap; gap: 5px; }
+.wizard-mode-tabs .pill { padding: 4px 9px; font-size: 11px; }
+.wizard-selected-bar {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 7px 10px;
+  margin-bottom: 8px;
+}
+.wizard-search-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 5px;
+  max-height: 205px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg);
+}
+.wizard-search-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 11.5px;
+  cursor: pointer;
+  text-align: left;
+}
+.wizard-search-item:hover { border-color: var(--accent); background: var(--surface-alt); }
+.wizard-search-item.active {
+  background: var(--indigo-soft);
+  border-color: var(--indigo);
+  color: var(--indigo);
+}
+.wizard-mini-map-box {
+  background: #9CC0F9;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+body.dark-mode .wizard-mini-map-box { background: #17263C; }
+.wiz-map-pref {
+  fill: #EBECE8;
+  stroke: #94A3B8;
+  cursor: pointer;
+  transition: fill 0.12s ease;
+}
+.wiz-map-pref:hover { fill: #DCE6F2; }
+.wiz-map-pref.selected { fill: #E8F0FE; stroke: #1A73E8; }
+.wiz-map-pref.focused { fill: #FFF8E1; stroke: #EA4335; }
+body.dark-mode .wiz-map-pref { fill: #242F3E; stroke: #475569; }
+body.dark-mode .wiz-map-pref.selected { fill: #1E3A5F; stroke: #60A5FA; }
+body.dark-mode .wiz-map-pref.focused { fill: #334155; stroke: #F87171; }
+.wiz-map-city {
+  fill: rgba(255, 255, 255, 0.35);
+  stroke: #64748B;
+  cursor: pointer;
+}
+.wiz-map-city:hover { fill: rgba(26, 115, 232, 0.28); stroke: #1A73E8; }
+.wiz-map-city.selected { fill: rgba(234, 67, 53, 0.28); stroke: #EA4335; }
+.wizard-map-city-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  max-height: 92px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.wizard-map-city-btn { padding: 3px 8px !important; font-size: 11px !important; }
 #btnSaveCustomPreset.has-unsaved { box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.55); }
 .day-meta-num { width: 78px !important; padding: 2px 6px !important; font-size: 12px !important; }
 .day-meta-hotel-input {
