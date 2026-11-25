@@ -15,6 +15,9 @@ Interactive **Japan Master Trip & Budget Planner** available as a live **Web App
 - **Interactive Japan Route Map & Schedule Builder:** SVG route map synced with daily/hourly time-slot editing and city stops.
 - **Hotels, Multi-Currency Budget & Rail Pass Optimizer:** Track nightly stays, reconcile transport/accommodation/dining/shopping budgets across currencies, and compare Pay-As-You-Go vs. JR Pass options.
 - **Curated Tabelog Gourmet Guide, Transit & Shopping Tabs:** Built-in dining highlights, local transit references, and shopping checklist.
+- **All-Japan 1,747-Municipality Map, Drag-Reorder Wizard & Full Map Picker (`v2.1.0`):**
+  - **100% Gap-Free Coverage of Japan (All 1,747 `市` / `特別区` / `町` / `村`):** Upgraded [`japan-geo.js`](src/data/japan-geo.js) with MLIT boundaries for every single city (`792`), Tokyo special ward (`23`), town (`743`), and village (`189`) across all 47 prefectures (`Missing: 0`), with 4-tier progressive LOD labels revealing towns & villages when zoomed in and accurate Town/Village Place Cards.
+  - **Wizard Drag-and-Drop Route Ordering & Enlarged Zoomable Map Picker:** Drag selected destination chips (`⋮⋮`) to rearrange visit order before generating a trip, and pick stops on an enlarged interactive All-Japan map with free wheel zoom, drag-to-pan, and clickable towns & villages.
 - **All-Japan 792-City MLIT Map, Smart Wizard & Precision Resolver (`v2.0.0`):**
   - **All 792 Japanese Cities (`市`) + 47 Prefectures + Iconic Villages:** Expanded [`japan-geo.js`](src/data/japan-geo.js) with survey-grade MLIT coastlines & boundaries for all 792 `市` plus curated destinations like **Achi Village** (`阿智村` `🌌`) and **Akiu Onsen** (`秋保温泉` `♨️`). Zooming further into any prefecture progressively reveals its individual cities (`市`) with clickable boundaries.
   - **12 Quick Cards + Search + Interactive Map Picker in New Trip Wizard:** Choose from the 12 core hubs (`Tokyo`, `Kyoto`, `Osaka`, `Hiroshima`, `Hakone`, `Kanazawa`, `Takayama`, `Aomori`, `Fukuoka`, `Sapporo`, `Okinawa`, `Sendai`), search across all 792 cities & 47 prefectures with curated place icons, or click any prefecture & city directly on the mini-map.
@@ -40,7 +43,7 @@ Open **https://weicheng-x.github.io/Japan-Trip-Planner/** directly — no instal
 
 ### 2. Portable Windows Desktop App or Offline Single-File HTML
 Download the latest assets from **[GitHub Releases](https://github.com/weicheng-x/Japan-Trip-Planner/releases/latest)**:
-- **`JP Trip Planner 2.0.0.exe`** — Portable Windows Electron desktop app (run directly with no installer required; supports native file dialogs and local desktop persistence).
+- **`JP Trip Planner 2.1.0.exe`** — Portable Windows Electron desktop app (run directly with no installer required; supports native file dialogs and local desktop persistence).
 - **`JP_Trip_Planner.html`** — Standalone single-file offline HTML bundle with embedded styles, scripts, and seasonal hero images.
 
 ### 3. Run or Build from Source

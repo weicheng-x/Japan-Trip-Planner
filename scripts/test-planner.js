@@ -179,6 +179,7 @@ function run() {
     { classList: { contains: () => true }, dataset: { city: "Kyoto" } }
   ];
   ctx.submitNewBlankTrip();
+  delete getEl("newTripCityChips").querySelectorAll;
 
   assert.strictEqual(ctx.state.activePreset, "__draft__");
   assert.strictEqual(ctx.state.activeTab, "itinerary", "Wizard must switch user to Schedule tab");
@@ -494,6 +495,7 @@ function run() {
     { classList: { contains: () => true }, dataset: { city: "Tokyo" } }
   ];
   ctx.submitNewBlankTrip();
+  delete getEl("newTripCityChips").querySelectorAll;
   getEl("mapLocationInput").value = "Matsuyama";
   ctx.addCustomMapLocation();
   assert.strictEqual(ctx.state.dataEn.days.length, 4);
@@ -637,6 +639,72 @@ function run() {
   const febStopsAfterAkiu = ctx.getMatchedJapanLocations().map(s => s.id);
   assert(febStopsAfterAkiu.includes("akiu"), "Map must include Akiu pin in Miyagi");
   assert(!febStopsAfterAkiu.includes("kawaguchiko"), "Map must NOT falsely show Kawaguchiko after Day 2 region changed to Akiu");
+
+  // 27. v2.1.0 Complete All-1,747 Municipalities (792 市 + 23 区 + 743 町 + 189 村) Zero-Gap Map Coverage
+  const allMunisGeo = Object.values(ctx.JAPAN_CITY_PATHS || {}).filter(x => x && x.isMuni);
+  assert.strictEqual(allMunisGeo.length, 1747, "JAPAN_CITY_PATHS must contain all 1,747 Japanese municipalities");
+  assert.strictEqual(allMunisGeo.filter(x => x.muniType === "city").length, 792);
+  assert.strictEqual(allMunisGeo.filter(x => x.muniType === "ward").length, 23);
+  assert.strictEqual(allMunisGeo.filter(x => x.muniType === "town").length, 743);
+  assert.strictEqual(allMunisGeo.filter(x => x.muniType === "village").length, 189);
+  assert(allMunisGeo.every(x => typeof x.d === "string" && x.d.length > 5 && Array.isArray(x.bbox) && x.bbox.length === 4), "Every municipality must have valid SVG path & bbox");
+
+  const yamagataMunis = ctx.getMunisForPrefecture("yamagata");
+  assert.strictEqual(yamagataMunis.length, 35, "Yamagata Prefecture must have all 35 cities, towns & villages");
+  assert(yamagataMunis.some(m => m.rawNameEn === "Mogami" && m.muniType === "town"), "Yamagata must include Mogami Town");
+  assert(yamagataMunis.some(m => m.rawNameEn === "Oishida" && m.muniType === "town"), "Yamagata must include Oishida Town");
+  assert(yamagataMunis.some(m => m.rawNameEn === "Okura" && m.muniType === "village"), "Yamagata must include Okura Village");
+
+  // Deep zoom inside Yamagata (north + south viewports) must reveal towns & villages with labels
+  const yamagataBbox = ctx.JAPAN_PREF_PATHS.yamagata.bbox;
+  const ymNorth = { vx: yamagataBbox[0] - 2, vy: yamagataBbox[1] - 2, vw: 42, vh: 42 };
+  const ymSouth = { vx: yamagataBbox[0] - 2, vy: yamagataBbox[1] + 22, vw: 42, vh: 42 };
+  const ymLodN = ctx.buildDynamicCityLayerContent(ymNorth, true, "yamagata");
+  const ymLodS = ctx.buildDynamicCityLayerContent(ymSouth, true, "yamagata");
+  assert(ymLodN.html.includes("cho_mogami_yamagata") && ymLodN.html.includes("Mogami"), "Deep zoom in north Yamagata must render Mogami Town polygon & label");
+  assert(ymLodS.html.includes("cho_takahata_yamagata") && ymLodS.html.includes("Takahata"), "Deep zoom in south Yamagata must render Takahata Town polygon & label");
+
+  // Entering towns/villages in Schedule & Map must resolve prefecture, hotel & catalogs accurately
+  ctx.state.dataEn.days = [
+    { day: 1, date: "2027-06-01", dow: "Tue", region: "Tokyo", routeJp: "Arrival", routeEn: "", hotel: "Tokyo Hotel", stay: 12000, travelBase: 500, fun: 3000, legs: [], timeSlots: [] }
+  ];
+  ctx.state.dataJa.days = JSON.parse(JSON.stringify(ctx.state.dataEn.days));
+  ctx.updateDayRegionAndMap(0, "Mogami");
+  assert.strictEqual(ctx.getPrimaryPrefectureForDay(ctx.state.dataEn.days[0]).id, "yamagata", "Mogami Town must resolve to Yamagata Prefecture");
+  assert.strictEqual(ctx.state.dataEn.days[0].hotel, ctx.PREFECTURE_HOTELS.yamagata.nameEn, "Town entry must default to Yamagata 3-4 star prefectural hotel");
+  const syncResMogami = ctx.syncRegionalCatalogsFromSchedule();
+  assert(syncResMogami.detected.allMatchedPrefs.includes("yamagata"), "Catalog sync must detect Yamagata for town-level stop");
+
+  // Cross-prefecture colliding towns (e.g. Asahi) must auto-disambiguate cleanly without false prose matches
+  const asahiDis = ctx.disambiguateLocationInput("Asahi", false);
+  assert(asahiDis.corrected && /\(/.test(asahiDis.text) && asahiDis.alternatives.length >= 2, "Bare colliding town Asahi must auto-disambiguate with alternatives");
+  assert.strictEqual(ctx.resolveLocationInputStops("Mogami (Yamagata)")[0].prefId, "yamagata");
+
+  // 28. v2.1.0 Wizard Drag-and-Drop Route Reordering & Set-Based DOM Reconciliation
+  ctx.openNewTripModal();
+  ctx.renderNewTripWizardChips(["Tokyo", "Kyoto", "Osaka"]);
+  assert.strictEqual(ctx.reorderWizardSelection(2, 0), true, "Dragging item 2 -> index 0 must succeed");
+  const selBarAfterReorder = getEl("wizardSelectedBar").innerHTML;
+  assert(selBarAfterReorder.includes('draggable="true"') && selBarAfterReorder.indexOf("Osaka") < selBarAfterReorder.indexOf("Tokyo"), "Wizard selected bar must show Osaka reordered before Tokyo");
+  getEl("newTripDaysInput").value = "7";
+  ctx.submitNewBlankTrip();
+  assert(ctx.state.dataEn.days[0].region.includes("Osaka"), "New blank trip Day 1 must start at dragged-first stop Osaka");
+  assert(ctx.state.dataEn.days[ctx.state.dataEn.days.length - 1].region.includes("Kyoto"), "New blank trip final day must end at Kyoto");
+
+  // 29. v2.1.0 Wizard Enlarged Interactive Pan/Zoom Pick-by-Map
+  ctx.openNewTripModal();
+  ctx.setWizardPickerMode("map");
+  const wizMapWrapHtml = getEl("wizardMapPickerWrap").innerHTML;
+  assert(wizMapWrapHtml.includes('id="wizardJapanMapSvg"'), "Wizard Pick on Map must render full #wizardJapanMapSvg");
+  assert(wizMapWrapHtml.includes("gmaps-zoom-controls"), "Wizard Pick on Map must render floating zoom controls");
+  ctx.wizardSelectMapPref("yamagata");
+  const ymWizHtml = getEl("wizardMapPickerWrap").innerHTML;
+  assert(ymWizHtml.includes("cho_mogami_yamagata") && ymWizHtml.includes("cho_oishida_yamagata"), "Wizard map focused on Yamagata must show all towns & villages");
+  ctx.wizardZoomMap(0.6);
+  ctx.wizardTogglePlaceId("cho_mogami_yamagata");
+  assert(getEl("wizardSelectedBar").innerHTML.includes("Mogami"), "Clicking town on wizard map must add Mogami to route");
+  assert(getEl("wizardMapPickerWrap").innerHTML.includes("cho_mogami_yamagata"), "Selecting town must keep wizard zoomed view intact");
+  ctx.wizardResetMapView();
 
   console.log("ALL_UNIT_AND_AUDIT_TESTS_PASSED");
 }

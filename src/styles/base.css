@@ -92,6 +92,9 @@ body.dark-mode a {
 .modal-card.wide {
   max-width: 660px;
 }
+.modal-card.wide.wizard-map-expanded {
+  max-width: min(1040px, 94vw);
+}
 .modal-card h3 {
   font-size: 17px;
   font-weight: 800;
@@ -1664,13 +1667,43 @@ table.data-table tr:hover td { background: var(--surface-alt); }
   color: var(--indigo);
 }
 .wizard-mini-map-box {
+  position: relative;
+  height: 430px;
   background: #9CC0F9;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   margin-bottom: 6px;
 }
+@media (max-width: 720px) {
+  .wizard-mini-map-box { height: 320px; }
+}
 body.dark-mode .wizard-mini-map-box { background: #17263C; }
+.wizard-mini-map-box svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.wizard-route-chip[draggable="true"] {
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.12s ease, opacity 0.12s ease, border-color 0.12s ease;
+}
+.wizard-route-chip[draggable="true"]:active { cursor: grabbing; }
+.wizard-route-chip.is-dragging { opacity: 0.45; }
+.wizard-route-chip.drag-over-wiz {
+  outline: 2px solid #1A73E8;
+  border-color: #1A73E8;
+  background: var(--indigo-soft);
+  transform: translateY(-1px);
+}
+.wiz-drag-grip {
+  font-size: 11px;
+  line-height: 1;
+  color: var(--ink-muted);
+  letter-spacing: -1px;
+  margin-right: 1px;
+}
 .wiz-map-pref {
   fill: #EBECE8;
   stroke: #94A3B8;

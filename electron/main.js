@@ -83,10 +83,13 @@ function createWindow() {
             prefGeoCount: Object.keys(window.JAPAN_PREF_PATHS || {}).length,
             cityGeoCount: Object.keys(window.JAPAN_CITY_PATHS || {}).length,
             shiCount: Object.values(window.JAPAN_CITY_PATHS || {}).filter(x => x && x.isShi).length,
+            muniCount: Object.values(window.JAPAN_CITY_PATHS || {}).filter(x => x && x.isMuni).length,
             cityHotelsCount: Object.keys(window.CITY_HOTELS || {}).length,
             prefHotelsCount: Object.keys(window.PREFECTURE_HOTELS || {}).length,
             wizardCityCount: (window.WIZARD_CITIES || []).length,
             hasReorderDay: typeof window.reorderItineraryDay === "function",
+            hasReorderWizard: typeof window.reorderWizardSelection === "function",
+            hasWizardZoom: typeof window.wizardZoomMap === "function",
             hasDisambiguate: typeof window.disambiguateLocationInput === "function",
             hasDismissPlaceCard: typeof window.dismissMapPlaceCard === "function",
             hasRomanization: typeof window.normalizeJapanRomaji === "function"
@@ -98,7 +101,7 @@ function createWindow() {
           app.exit(1);
           return;
         }
-        if (!probe.heroImgComplete || probe.presetCount !== 7 || probe.hasCustomBlankInCatalog || !probe.hasFeb2027 || !probe.hasDesktopAPI || !probe.hasAutoPopulateGuides || !probe.hasTransitLegEditor || probe.prefectureCount !== 47 || probe.prefCatalogCount !== 47 || probe.cityCatalogCount < 75 || probe.prefGeoCount !== 47 || probe.cityGeoCount < 820 || probe.shiCount !== 792 || probe.cityHotelsCount !== 80 || probe.prefHotelsCount !== 47 || probe.wizardCityCount !== 12 || !probe.hasReorderDay || !probe.hasDisambiguate || !probe.hasDismissPlaceCard || !probe.hasRomanization) {
+        if (!probe.heroImgComplete || probe.presetCount !== 7 || probe.hasCustomBlankInCatalog || !probe.hasFeb2027 || !probe.hasDesktopAPI || !probe.hasAutoPopulateGuides || !probe.hasTransitLegEditor || probe.prefectureCount !== 47 || probe.prefCatalogCount !== 47 || probe.cityCatalogCount < 75 || probe.prefGeoCount !== 47 || probe.cityGeoCount < 1765 || probe.shiCount !== 792 || probe.muniCount < 1740 || probe.cityHotelsCount !== 80 || probe.prefHotelsCount !== 47 || probe.wizardCityCount !== 12 || !probe.hasReorderDay || !probe.hasReorderWizard || !probe.hasWizardZoom || !probe.hasDisambiguate || !probe.hasDismissPlaceCard || !probe.hasRomanization) {
           console.error("SMOKE_FAILED_ASSERTIONS", probe);
           app.exit(1);
           return;

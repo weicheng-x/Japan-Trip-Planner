@@ -70,7 +70,7 @@
           <span id="lblNewTripCities" style="font-size:12px;font-weight:800;">Destinations / Cities (select one or more)</span>
           <div class="wizard-mode-tabs" id="wizardModeTabs">
             <button type="button" class="pill active" id="btnWizMode_popular" onclick="setWizardPickerMode('popular')">⭐ Popular (12)</button>
-            <button type="button" class="pill" id="btnWizMode_search" onclick="setWizardPickerMode('search')">🔍 Search Any City / Pref</button>
+            <button type="button" class="pill" id="btnWizMode_search" onclick="setWizardPickerMode('search')">🔍 Search All Japan</button>
             <button type="button" class="pill" id="btnWizMode_map" onclick="setWizardPickerMode('map')">🗺️ Pick on Map</button>
           </div>
         </div>
@@ -79,7 +79,7 @@
         <div id="wizardSearchPane" class="wizard-search-pane" style="display:none;">
           <div style="display:flex;gap:6px;margin-bottom:6px;">
             <input type="text" id="wizardPlaceSearchInput" class="search-input" style="flex:1;min-width:0;"
-              placeholder="Search any of 792 cities, 47 prefectures or villages (e.g. Achi Village, Fuchu, Date)..."
+              placeholder="Search all 1,747 municipalities &amp; 47 prefs (e.g. Mogami, Achi Village, Fuchu, Date)..."
               oninput="wizardOnSearchInput(this.value)"
               onkeydown="if(event.key==='Enter'){event.preventDefault();wizardSearchQuickAdd();}">
             <button type="button" class="btn btn-primary" id="btnWizardQuickAdd" onclick="wizardSearchQuickAdd()" style="font-size:11.5px;padding:5px 10px;">+ Add</button>

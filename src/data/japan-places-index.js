@@ -1,5 +1,5 @@
-// Comprehensive All-Japan (47 Prefectures + 792 Cities 市 + Curated Towns) Place Index,
-// Representative Place Icons, High-Precision Destination Resolver & Ambiguous City Auto-Disambiguation
+// Comprehensive All-Japan (47 Prefectures + All 1,747 Municipalities: 792 市 / 23 区 / 743 町 / 189 村 + Curated Areas) Place Index,
+// Representative Place Icons, High-Precision Destination Resolver & Ambiguous Municipality Auto-Disambiguation
 
 (function() {
   window.PREFECTURE_ICONS = {
@@ -103,10 +103,12 @@
     const prefById = new Map();
     const prefByLookup = new Map();
     const citiesByPref = {};
+    const munisByPref = {};
 
     prefs.forEach(p => {
       prefById.set(p.id, p);
       citiesByPref[p.id] = [];
+      munisByPref[p.id] = [];
       const addPrefKey = (k) => {
         const nk = normStr(k);
         if (nk) prefByLookup.set(nk, p);
@@ -140,29 +142,52 @@
     const allSearchEntries = [];
 
     const cityPaths = window.JAPAN_CITY_PATHS || {};
-    const asciiFreq = new Map();
+    const asciiPrefSets = new Map();
     Object.values(cityPaths).forEach(geo => {
-      if (geo && geo.isShi && geo.nameEn) {
-        const key = String(geo.nameEn).toLowerCase().trim();
-        asciiFreq.set(key, (asciiFreq.get(key) || 0) + 1);
+      if (geo && geo.isMuni && geo.nameEn && geo.prefId) {
+        const key = normStr(geo.nameEn);
+        if (key) {
+          if (!asciiPrefSets.has(key)) asciiPrefSets.set(key, new Set());
+          asciiPrefSets.get(key).add(geo.prefId);
+        }
       }
     });
 
+    const seenSearchKey = new Set();
+    const cityKeySeenByPref = new Set();
+    const muniIdSeenByPref = new Set();
+    const jaMuniEntries = [];
     const registerSearchEntry = (stop) => {
-      const dupSearch = allSearchEntries.some(ex =>
-        ex.prefId === stop.prefId && normStr(ex.rawNameEn || ex.nameEn) === normStr(stop.rawNameEn || stop.nameEn)
-      );
-      if (!dupSearch) allSearchEntries.push(stop);
+      const k = `${stop.prefId}|${normStr(stop.rawNameEn || stop.nameEn)}|${stop.rawNameJa || stop.nameJa}`;
+      if (!seenSearchKey.has(k)) {
+        seenSearchKey.add(k);
+        allSearchEntries.push(stop);
+      }
     };
 
     const registerStop = (stop) => {
       if (!stop || !stop.id) return;
       stopById.set(stop.id, stop);
       if (stop.prefId && citiesByPref[stop.prefId]) {
-        const dupName = citiesByPref[stop.prefId].some(existing =>
-          normStr(existing.rawNameEn || existing.nameEn) === normStr(stop.rawNameEn || stop.nameEn)
-        );
-        if (!dupName) citiesByPref[stop.prefId].push(stop);
+        const cKey = `${stop.prefId}|${stop.rawNameJa || ""}|${normStr(stop.nameEn)}`;
+        if (!cityKeySeenByPref.has(stop.id) && !cityKeySeenByPref.has(cKey)) {
+          cityKeySeenByPref.add(stop.id);
+          if (stop.rawNameJa) cityKeySeenByPref.add(cKey);
+          citiesByPref[stop.prefId].push(stop);
+        }
+      }
+      if (stop.isMuni && stop.prefId && munisByPref[stop.prefId]) {
+        const mKey = `${stop.prefId}|${stop.id}`;
+        if (!muniIdSeenByPref.has(mKey)) {
+          muniIdSeenByPref.add(mKey);
+          munisByPref[stop.prefId].push(stop);
+        }
+      }
+      if (!stop.isPrefFallback) {
+        const jaTarget = stop.rawMuniJa || stop.rawNameJa;
+        if (jaTarget && jaTarget.length >= 3 && /[市区町村]$/.test(jaTarget)) {
+          jaMuniEntries.push({ stop, jaTarget });
+        }
       }
       const addLookup = (rawK) => {
         const k = String(rawK || "").trim();
@@ -194,14 +219,19 @@
       addLookup(stop.rawNameEn);
       addLookup(stop.nameJa);
       addLookup(stop.rawNameJa);
-      if (stop.rawNameJa && stop.rawNameJa.endsWith("市")) {
-        addLookup(stop.rawNameJa.slice(0, -1));
+      if (stop.rawMuniJa) {
+        addLookup(stop.rawMuniJa);
+        const jaStem = stop.rawMuniJa.replace(/[市区町村]$/, "");
+        if (jaStem.length >= 2) addLookup(jaStem);
+      } else if (stop.rawNameJa && /[市区町村]$/.test(stop.rawNameJa)) {
+        const jaStem = stop.rawNameJa.replace(/[市区町村]$/, "");
+        if (jaStem.length >= 2) addLookup(jaStem);
       }
       if (stop.kana) addLookup(stop.kana);
       if (Array.isArray(stop.keys)) stop.keys.forEach(addLookup);
     };
 
-    // First register curated gazetteer stops so they get priority display/names
+    // 1) Curated gazetteer stops first (priority names, tourism metadata & city packs)
     (window.JAPAN_GAZETTEER || []).forEach(g => {
       if (g.isPrefFallback) return;
       let matchedGeoId = g.geoId || g.id;
@@ -222,7 +252,8 @@
         }
       }
       const pref = prefById.get(g.prefId);
-      const isAmb = !!(geo && geo.isShi && asciiFreq.get(String(geo.nameEn || "").toLowerCase()) > 1 && window.AMBIGUOUS_CITY_DEFAULTS[normStr(geo.nameEn)]);
+      const geoNorm = geo ? normStr(geo.nameEn) : "";
+      const isAmb = !!(geo && geo.isShi && asciiPrefSets.get(geoNorm) && asciiPrefSets.get(geoNorm).size > 1 && window.AMBIGUOUS_CITY_DEFAULTS[geoNorm]);
       const dispEn = isAmb && pref ? `${geo.nameEn} (${pref.nameEn})` : g.nameEn;
       const dispJa = isAmb && pref ? `${geo.nameJa}（${pref.nameJa}）` : g.nameJa;
       const stop = Object.assign({}, g, {
@@ -231,8 +262,11 @@
         y: geo ? geo.cy : g.y,
         hasCityBoundary: !!geo,
         isShi: !!(geo && geo.isShi),
+        isMuni: !!(geo && geo.isMuni),
+        muniType: (geo && geo.muniType) || (geo && geo.isShi ? "city" : "area"),
         rawNameEn: geo ? geo.nameEn : g.nameEn,
-        rawNameJa: geo ? geo.nameJa : g.nameJa,
+        rawNameJa: geo ? (geo.rawMuniJa || geo.nameJa) : g.nameJa,
+        rawMuniJa: geo && geo.rawMuniJa ? geo.rawMuniJa : "",
         nameEn: dispEn,
         nameJa: dispJa,
         icon: window.getJapanPlaceIcon(g),
@@ -242,17 +276,33 @@
       registerSearchEntry(stop);
     });
 
-    // Then register every single remaining Shi & Curated Polygon from JAPAN_CITY_PATHS
-    Object.keys(cityPaths).forEach(geoId => {
+    // 2) Remaining atomic municipalities in deterministic order: 市 (city) -> 区 (ward) -> 町 (town) -> 村 (village)
+    const muniTypeOrder = { city: 0, ward: 1, town: 2, village: 3, area: 4, other: 5 };
+    const remainingGeoIds = Object.keys(cityPaths)
+      .filter(geoId => {
+        const geo = cityPaths[geoId];
+        return geo && !stopById.has(geoId) && !gazByGeoId.has(geoId);
+      })
+      .sort((a, b) => {
+        const ga = cityPaths[a];
+        const gb = cityPaths[b];
+        const ta = muniTypeOrder[ga.muniType] !== undefined ? muniTypeOrder[ga.muniType] : 5;
+        const tb = muniTypeOrder[gb.muniType] !== undefined ? muniTypeOrder[gb.muniType] : 5;
+        if (ta !== tb) return ta - tb;
+        return String(ga.nameEn || a).localeCompare(String(gb.nameEn || b));
+      });
+
+    remainingGeoIds.forEach(geoId => {
       const geo = cityPaths[geoId];
-      if (!geo || stopById.has(geoId) || gazByGeoId.has(geoId)) return;
       const pref = prefById.get(geo.prefId);
       const prefNameEn = pref ? pref.nameEn : "";
       const prefNameJa = pref ? pref.nameJa : "";
       const normName = normStr(geo.nameEn);
-      const isAmb = !!(geo.isShi && (asciiFreq.get(String(geo.nameEn || "").toLowerCase()) > 1) && (window.AMBIGUOUS_CITY_DEFAULTS[normName] || asciiFreq.get(normName) > 1));
+      const prefSpread = asciiPrefSets.get(normName) ? asciiPrefSets.get(normName).size : 0;
+      const isAmb = !!(prefSpread > 1 || (geo.isShi && window.AMBIGUOUS_CITY_DEFAULTS[normName]));
       const dispEn = isAmb && prefNameEn ? `${geo.nameEn} (${prefNameEn})` : geo.nameEn;
-      const dispJa = isAmb && prefNameJa ? `${geo.nameJa}（${prefNameJa}）` : geo.nameJa;
+      const baseJa = geo.rawMuniJa || geo.nameJa;
+      const dispJa = isAmb && prefNameJa ? `${baseJa}（${prefNameJa}）` : geo.nameJa;
       const stop = {
         id: geoId,
         geoId,
@@ -261,13 +311,16 @@
         isPrefFallback: false,
         hasCityBoundary: true,
         isShi: !!geo.isShi,
+        isMuni: !!geo.isMuni,
+        muniType: geo.muniType || (geo.isShi ? "city" : "area"),
         rawNameEn: geo.nameEn,
-        rawNameJa: geo.nameJa,
+        rawNameJa: baseJa,
+        rawMuniJa: geo.rawMuniJa || "",
         nameEn: dispEn,
         nameJa: dispJa,
         kana: geo.kana || "",
         regionKey: pref ? pref.regionKey : "Japan",
-        keys: [geo.nameEn, geo.nameJa, geo.kana].filter(Boolean),
+        keys: [geo.nameEn, geo.nameJa, geo.rawMuniJa, geo.kana].filter(Boolean),
         x: geo.cx,
         y: geo.cy,
         icon: window.getJapanPlaceIcon({ id: geoId, prefId: geo.prefId }),
@@ -277,13 +330,25 @@
       registerSearchEntry(stop);
     });
 
-    // Sort cities within each prefecture: curated/iconic first, then Shi alphabetically
+    // Sort stops within each prefecture: curated first, then 市 -> 区 -> 町 -> 村 alphabetically
     Object.keys(citiesByPref).forEach(pId => {
       citiesByPref[pId].sort((a, b) => {
         const aCur = gazById.has(a.id) ? 0 : 1;
         const bCur = gazById.has(b.id) ? 0 : 1;
         if (aCur !== bCur) return aCur - bCur;
+        const ta = muniTypeOrder[a.muniType] !== undefined ? muniTypeOrder[a.muniType] : 5;
+        const tb = muniTypeOrder[b.muniType] !== undefined ? muniTypeOrder[b.muniType] : 5;
+        if (ta !== tb) return ta - tb;
         return String(a.nameEn).localeCompare(String(b.nameEn));
+      });
+    });
+
+    Object.keys(munisByPref).forEach(pId => {
+      munisByPref[pId].sort((a, b) => {
+        const ta = muniTypeOrder[a.muniType] !== undefined ? muniTypeOrder[a.muniType] : 5;
+        const tb = muniTypeOrder[b.muniType] !== undefined ? muniTypeOrder[b.muniType] : 5;
+        if (ta !== tb) return ta - tb;
+        return String(a.rawNameEn || a.nameEn).localeCompare(String(b.rawNameEn || b.nameEn));
       });
     });
 
@@ -297,6 +362,8 @@
         isPrefFallback: true,
         hasCityBoundary: false,
         isShi: false,
+        isMuni: false,
+        muniType: "prefecture",
         nameEn: `${p.nameEn} Pref.`,
         nameJa: p.nameJa,
         regionKey: p.regionKey,
@@ -308,7 +375,8 @@
     });
 
     window.JAPAN_CITIES_BY_PREF = citiesByPref;
-    _built = { prefById, prefByLookup, citiesByPref, stopById, stopsByPrefNorm, stopsByAsciiBase, allSearchEntries };
+    window.JAPAN_MUNIS_BY_PREF = munisByPref;
+    _built = { prefById, prefByLookup, citiesByPref, munisByPref, stopById, stopsByPrefNorm, stopsByAsciiBase, allSearchEntries, jaMuniEntries };
     return _built;
   }
 
@@ -329,17 +397,36 @@
     return idx.citiesByPref[prefId] || [];
   };
 
+  window.getMunisForPrefecture = function(prefId) {
+    const idx = ensureIndex();
+    return idx.munisByPref[prefId] || [];
+  };
+
   window.getAmbiguousAlternativesForStop = function(stop) {
     if (!stop) return [];
     const idx = ensureIndex();
     const nk = normStr(stop.rawNameEn || stop.nameEn || "");
     const rule = window.AMBIGUOUS_CITY_DEFAULTS[nk];
-    if (!rule) return [];
-    const allPrefs = [rule.defaultPref].concat(rule.altPrefs || []);
-    return allPrefs
-      .filter(pid => pid !== stop.prefId)
-      .map(pid => idx.stopsByPrefNorm.get(`${pid}|${nk}`) || idx.prefById.get(pid))
-      .filter(Boolean);
+    if (rule) {
+      const allPrefs = [rule.defaultPref].concat(rule.altPrefs || []);
+      return allPrefs
+        .filter(pid => pid !== stop.prefId)
+        .map(pid => idx.stopsByPrefNorm.get(`${pid}|${nk}`) || idx.prefById.get(pid))
+        .filter(Boolean);
+    }
+    const candidates = (idx.stopsByAsciiBase.get(nk) || []).filter(c =>
+      c && c.prefId && c.prefId !== stop.prefId && normStr(c.rawNameEn || c.nameEn) === nk
+    );
+    const seenPref = new Set();
+    const alts = [];
+    for (const c of candidates) {
+      if (!seenPref.has(c.prefId)) {
+        seenPref.add(c.prefId);
+        alts.push(c);
+        if (alts.length >= 6) break;
+      }
+    }
+    return alts;
   };
 
   window.disambiguateLocationInput = function(rawText, isJa) {
@@ -347,21 +434,23 @@
     const trimmed = String(rawText || "").trim();
     if (!trimmed) return { text: "", corrected: false, stop: null, prefId: null, alternatives: [] };
 
-    // Case 1: Explicit parenthetical qualifier: "Fuchu (Tokyo)", "Fuchu (Hiroshima)", "府中市（広島県）"
+    // Case 1: Explicit parenthetical qualifier: "Fuchu (Tokyo)", "Fuchu (Hiroshima)", "Asahi (Yamagata)", "府中市（広島県）"
     const m = trimmed.match(/^(.+?)\s*[(\（]([^)\）]+)[)\）]\s*$/);
     if (m) {
       const cityPart = m[1].trim();
       const prefPart = m[2].trim();
       const prefObj = resolvePrefectureToken(prefPart);
       if (prefObj) {
-        const nkCity = normStr(cityPart);
-        const cleanJaCity = cityPart.replace(/市$/, "");
+        const strippedEn = cityPart.replace(/\s+(city|shi|ward|ku|town|cho|machi|village|son|mura)$/i, "").trim();
+        const nkCity = normStr(strippedEn);
+        const cleanJaCity = cityPart.replace(/[市区町村]$/, "");
         const matched =
           idx.stopsByPrefNorm.get(`${prefObj.id}|${cityPart.toLowerCase()}`) ||
+          idx.stopsByPrefNorm.get(`${prefObj.id}|${strippedEn.toLowerCase()}`) ||
           idx.stopsByPrefNorm.get(`${prefObj.id}|${nkCity}`) ||
-          idx.stopsByPrefNorm.get(`${prefObj.id}|${cleanJaCity}`) ||
+          (cleanJaCity.length >= 2 ? idx.stopsByPrefNorm.get(`${prefObj.id}|${cleanJaCity}`) : null) ||
           (idx.citiesByPref[prefObj.id] || []).find(s =>
-            normStr(s.rawNameEn || s.nameEn) === nkCity || s.rawNameJa === cityPart || (s.nameJa && s.nameJa.includes(cleanJaCity))
+            normStr(s.rawNameEn || s.nameEn) === nkCity || s.rawNameJa === cityPart || (cleanJaCity.length >= 2 && s.nameJa && s.nameJa.includes(cleanJaCity))
           ) || null;
         if (matched) {
           const outText = isJa ? matched.nameJa : matched.nameEn;
@@ -376,10 +465,10 @@
       }
     }
 
-    // Case 2: Bare ambiguous Shi input ("Fuchu", "Date", "府中", "府中市", "伊達", "伊達市", "Sakura", "Kashima", ...)
-    const stripped = trimmed.replace(/\s+(city|shi)$/i, "").trim();
+    // Case 2: Bare ambiguous Shi OR Town/Village input ("Fuchu", "Date", "Asahi", "Ikeda", "府中", "伊達", ...)
+    const stripped = trimmed.replace(/\s+(city|shi|ward|ku|town|cho|machi|village|son|mura)$/i, "").trim();
     const nk = normStr(stripped);
-    const bareJa = stripped.replace(/市$/, "");
+    const bareJa = stripped.replace(/[市区町村]$/, "");
     let ambRule = window.AMBIGUOUS_CITY_DEFAULTS[nk];
     let matchedPrefCandidates = null;
     if (!ambRule && (bareJa === "府中" || bareJa === "伊達")) {
@@ -408,6 +497,27 @@
       }
     }
 
+    // Dynamic ambiguity check for bare colliding towns/villages (e.g. "Asahi", "Ikeda", "Shimizu", "Mihama")
+    const bareHits = idx.stopsByAsciiBase.get(nk) || [];
+    const exactMuniHits = bareHits.filter(s => s && s.isMuni && normStr(s.rawNameEn || s.nameEn) === nk);
+    const distinctPrefIds = new Set(exactMuniHits.map(s => s.prefId).filter(Boolean));
+    const hasCuratedSingle = bareHits.some(s => !s.isMuni && !s.isAmbiguous);
+    if (distinctPrefIds.size > 1 && !hasCuratedSingle && exactMuniHits[0]) {
+      const defStop = exactMuniHits[0];
+      const prefObj = idx.prefById.get(defStop.prefId);
+      if (prefObj) {
+        const canonicalEn = defStop.nameEn.includes("(") ? defStop.nameEn : `${defStop.rawNameEn || defStop.nameEn} (${prefObj.nameEn})`;
+        const canonicalJa = defStop.nameJa.includes("（") ? defStop.nameJa : `${defStop.rawNameJa || defStop.nameJa}（${prefObj.nameJa}）`;
+        return {
+          text: isJa ? canonicalJa : canonicalEn,
+          corrected: true,
+          stop: defStop,
+          prefId: prefObj.id,
+          alternatives: window.getAmbiguousAlternativesForStop(defStop)
+        };
+      }
+    }
+
     // Case 3: Unambiguous lookup via full index
     const resolved = window.resolveLocationInputStops(trimmed);
     const first = resolved[0] || null;
@@ -416,7 +526,7 @@
       corrected: false,
       stop: first,
       prefId: first ? first.prefId : null,
-      alternatives: []
+      alternatives: first ? window.getAmbiguousAlternativesForStop(first) : []
     };
   };
 
@@ -425,40 +535,43 @@
     const trimmed = String(rawText || "").trim();
     if (!trimmed) return [];
 
-    // 1) Explicit "City (Prefecture)" syntax resolves strictly to that prefecture's city!
+    // 1) Explicit "Name (Prefecture)" syntax resolves strictly to that prefecture's municipality!
     const m = trimmed.match(/^(.+?)\s*[(\（]([^)\）]+)[)\）]\s*$/);
     if (m) {
       const prefObj = resolvePrefectureToken(m[2]);
       if (prefObj) {
         const cityPart = m[1].trim();
-        const nkCity = normStr(cityPart.replace(/\s+(city|shi)$/i, ""));
+        const strippedEn = cityPart.replace(/\s+(city|shi|ward|ku|town|cho|machi|village|son|mura)$/i, "").trim();
+        const nkCity = normStr(strippedEn);
+        const jaStem = cityPart.replace(/[市区町村]$/, "");
         const hit =
           idx.stopsByPrefNorm.get(`${prefObj.id}|${cityPart.toLowerCase()}`) ||
+          idx.stopsByPrefNorm.get(`${prefObj.id}|${strippedEn.toLowerCase()}`) ||
           idx.stopsByPrefNorm.get(`${prefObj.id}|${nkCity}`) ||
-          idx.stopsByPrefNorm.get(`${prefObj.id}|${cityPart.replace(/市$/, "")}`) ||
-          (idx.citiesByPref[prefObj.id] || []).find(s => normStr(s.rawNameEn || s.nameEn) === nkCity) ||
+          (jaStem.length >= 2 ? idx.stopsByPrefNorm.get(`${prefObj.id}|${jaStem}`) : null) ||
+          (idx.citiesByPref[prefObj.id] || []).find(s => normStr(s.rawNameEn || s.nameEn) === nkCity || s.rawNameJa === cityPart) ||
           null;
         if (hit) return [hit];
       }
     }
 
-    // 2) Exact full-field match against any of 792 Shi + curated stops (e.g. "Achi Village", "Akiu", "Nakagawa", "Muko")
-    const stripped = trimmed.replace(/\s+(city|shi)$/i, "").trim();
+    // 2) Exact full-field match against any of 1,747 municipalities + curated stops
+    const stripped = trimmed.replace(/\s+(city|shi|ward|ku|town|cho|machi|village|son|mura)$/i, "").trim();
     const nk = normStr(stripped);
-    const jaNoShi = stripped.replace(/市$/, "");
+    const jaFull = trimmed;
+    const jaStem = stripped.replace(/[市区町村]$/, "");
 
-    // Check ambiguous defaults first if bare input hits one of the 13 ambiguous names
     if (window.AMBIGUOUS_CITY_DEFAULTS[nk]) {
       const rule = window.AMBIGUOUS_CITY_DEFAULTS[nk];
       const defStop = idx.stopsByPrefNorm.get(`${rule.defaultPref}|${nk}`);
       if (defStop) return [defStop];
     }
-    if (jaNoShi === "府中" || jaNoShi === "伊達") {
-      const defId = jaNoShi === "府中" ? "tokyo" : "hokkaido";
-      const defStop = idx.stopsByPrefNorm.get(`${defId}|${jaNoShi}`);
+    if (jaStem === "府中" || jaStem === "伊達") {
+      const defId = jaStem === "府中" ? "tokyo" : "hokkaido";
+      const defStop = idx.stopsByPrefNorm.get(`${defId}|${jaStem}`);
       if (defStop) return [defStop];
     }
-    if (nk === "mt huzi" || nk === "mount huzi" || nk === "huzi" || jaNoShi === "富士山") {
+    if (nk === "mt huzi" || nk === "mount huzi" || nk === "huzi" || jaStem === "富士山") {
       const kawa = idx.stopById.get("kawaguchiko");
       if (kawa) return [kawa];
     }
@@ -466,10 +579,16 @@
     const directCandidates =
       idx.stopsByAsciiBase.get(nk) ||
       idx.stopsByAsciiBase.get(trimmed.toLowerCase()) ||
-      idx.stopsByAsciiBase.get(jaNoShi) ||
+      idx.stopsByAsciiBase.get(jaFull) ||
+      (jaStem.length >= 2 ? idx.stopsByAsciiBase.get(jaStem) : null) ||
       null;
     if (directCandidates && directCandidates.length > 0) {
-      return [directCandidates[0]];
+      const exactMuni = directCandidates.find(s =>
+        normStr(s.rawNameEn || s.nameEn) === nk ||
+        s.rawMuniJa === trimmed ||
+        (s.rawNameJa && s.rawNameJa === trimmed)
+      );
+      return [exactMuni || directCandidates[0]];
     }
 
     // 3) Fall back to curated gazetteer substring matching (e.g. "Tokyo & Kawaguchiko", "Tsuwano & Shimane")
@@ -478,11 +597,12 @@
       if (gazHits.length > 0) return gazHits;
     }
 
-    // 4) Last check: single-token or multi-token scan across all 792 Shi when wrapped in short region phrase
-    for (const s of idx.allSearchEntries) {
-      if (s.isPrefFallback) continue;
-      if (s.rawNameJa && s.rawNameJa.endsWith("市") && trimmed.includes(s.rawNameJa)) {
-        return [s];
+    // 4) Last check: explicit Japanese municipality suffix name (>= 3 chars ending in 市/区/町/村) inside short phrase
+    if (/[市区町村]/.test(trimmed)) {
+      for (let i = 0; i < idx.jaMuniEntries.length; i++) {
+        if (trimmed.includes(idx.jaMuniEntries[i].jaTarget)) {
+          return [idx.jaMuniEntries[i].stop];
+        }
       }
     }
     return [];
@@ -493,12 +613,11 @@
     const maxItems = Math.max(1, limit || 24);
     const qRaw = String(query || "").trim();
     if (!qRaw) {
-      // Return popular cities + major prefectures preview
       return idx.allSearchEntries.slice(0, maxItems);
     }
 
     const qLower = qRaw.toLowerCase();
-    const qNorm = normStr(qRaw.replace(/\s+(city|shi|pref|prefecture)$/i, ""));
+    const qNorm = normStr(qRaw.replace(/\s+(city|shi|ward|ku|town|cho|machi|village|son|mura|pref|prefecture)$/i, ""));
     const scored = [];
 
     for (let i = 0; i < idx.allSearchEntries.length; i++) {

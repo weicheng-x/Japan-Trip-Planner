@@ -1,4 +1,4 @@
-// Google-Maps-Styled Interactive Japan Route Map, Full All-792-Shi MLIT Boundaries, LOD Progressive Zoom & Place Card
+// Google-Maps-Styled Interactive Japan Route Map, Full All-1,747 Municipality MLIT Boundaries, LOD Progressive Zoom & Place Card
 
 (function() {
   let _locCache = { sig: "", result: null };
@@ -326,30 +326,34 @@
     });
   }
 
-  // Progressive Level-of-Detail (LOD) Cities Layer: zooms into a prefecture or deeper viewBox reveals all MLIT cities (市) cleanly!
-  window.buildDynamicCityLayerContent = function(box, en) {
-    if (!box || box.vw >= 260) return { html: "", sig: "none" };
+  // Progressive Level-of-Detail (LOD) Municipalities Layer: zooming in reveals all 1,747 MLIT cities (市), wards (区), towns (町) & villages (村) with zero gaps
+  window.buildDynamicCityLayerContent = function(box, en, focusedPrefId) {
+    if (!box || (box.vw >= 295 && !focusedPrefId)) return { html: "", sig: "none" };
     const prefPaths = window.JAPAN_PREF_PATHS || {};
-    const citiesByPref = window.JAPAN_CITIES_BY_PREF || {};
-    const xMin = box.vx - box.vw * 0.1;
-    const xMax = box.vx + box.vw * 1.1;
-    const yMin = box.vy - box.vh * 0.1;
-    const yMax = box.vy + box.vh * 1.1;
+    const munisByPref = window.JAPAN_MUNIS_BY_PREF || window.JAPAN_CITIES_BY_PREF || {};
+    const xMin = box.vx - box.vw * 0.12;
+    const xMax = box.vx + box.vw * 1.12;
+    const yMin = box.vy - box.vh * 0.12;
+    const yMax = box.vy + box.vh * 1.12;
 
     const visPrefs = [];
-    Object.keys(prefPaths).forEach(pId => {
-      const b = prefPaths[pId].bbox;
-      if (b && b[2] >= xMin && b[0] <= xMax && b[3] >= yMin && b[1] <= yMax) {
-        visPrefs.push(pId);
-      }
-    });
+    if (box.vw >= 295 && focusedPrefId && prefPaths[focusedPrefId]) {
+      visPrefs.push(focusedPrefId);
+    } else {
+      Object.keys(prefPaths).forEach(pId => {
+        const b = prefPaths[pId].bbox;
+        if (b && b[2] >= xMin && b[0] <= xMax && b[3] >= yMin && b[1] <= yMax) {
+          visPrefs.push(pId);
+        }
+      });
+    }
     if (visPrefs.length === 0) return { html: "", sig: "empty" };
 
-    const lodTier = box.vw < 72 ? 3 : (box.vw < 135 ? 2 : 1);
-    const sig = `${visPrefs.sort().join(",")}|${lodTier}|${en ? "en" : "ja"}`;
+    const lodTier = box.vw < 45 ? 4 : (box.vw < 85 ? 3 : (box.vw < 145 ? 2 : 1));
+    const sig = `${visPrefs.sort().join(",")}|${lodTier}|${Math.round(box.vx / 20)},${Math.round(box.vy / 20)}|${en ? "en" : "ja"}`;
 
-    const polyStroke = Math.max(0.18, Math.min(0.65, box.vw / 240)).toFixed(2);
-    const lblSizeNum = Math.max(1.15, Math.min(4.2, box.vw / 42));
+    const polyStroke = Math.max(0.14, Math.min(0.62, box.vw / 250)).toFixed(2);
+    const lblSizeNum = Math.max(0.95, Math.min(4.0, box.vw / 46));
     const lblSize = lblSizeNum.toFixed(2);
     const lblStroke = (lblSizeNum * 0.30).toFixed(2);
 
@@ -358,9 +362,11 @@
     const seenIds = new Set();
 
     visPrefs.forEach(pId => {
-      const list = citiesByPref[pId] || [];
-      list.forEach((city, idx) => {
-        const gId = city.geoId || city.id;
+      const list = munisByPref[pId] || [];
+      const prefObj = window.getPrefectureById ? window.getPrefectureById(pId) : null;
+      const prefTitle = prefObj ? (en ? prefObj.nameEn : prefObj.nameJa) : pId;
+      list.forEach((muni, idx) => {
+        const gId = muni.geoId || muni.id;
         if (!gId || seenIds.has(gId)) return;
         const geo = window.JAPAN_CITY_PATHS && window.JAPAN_CITY_PATHS[gId];
         if (!geo || !geo.d || !geo.bbox) return;
@@ -370,32 +376,34 @@
 
         const safeGeoId = window.escapeAttr(gId);
         const safePrefId = window.escapeAttr(pId);
-        polys.push(`<path class="gmaps-muni-poly" data-geo-id="${safeGeoId}" data-pref-id="${safePrefId}" d="${geo.d}" stroke-width="${polyStroke}" stroke-linejoin="round" onclick="selectMapCityGeo(this.dataset.geoId)"/>`);
+        const dispLabel = en ? (muni.rawNameEn || muni.nameEn) : (muni.rawNameJa || muni.nameJa);
+        polys.push(`<path class="gmaps-muni-poly" data-geo-id="${safeGeoId}" data-pref-id="${safePrefId}" d="${geo.d}" stroke-width="${polyStroke}" stroke-linejoin="round" onclick="selectMapCityGeo(this.dataset.geoId)"><title>${window.escapeHtml(`${dispLabel} (${prefTitle})`)}</title></path>`);
 
         const cx = geo.cx;
         const cy = geo.cy;
-        if (cx >= box.vx && cx <= box.vx + box.vw && cy >= box.vy && cy <= box.vy + box.vh) {
+        if (cx >= box.vx - box.vw * 0.05 && cx <= box.vx + box.vw * 1.05 && cy >= box.vy - box.vh * 0.05 && cy <= box.vy + box.vh * 1.05) {
           const areaEst = Math.max(0.1, (b[2] - b[0]) * (b[3] - b[1]));
-          const isCurated = !city.isShi;
-          const isCapitalOrMajor = idx < 5;
-          if (lodTier >= 2 || isCurated || isCapitalOrMajor || areaEst > (box.vw * box.vw) / 280) {
+          const isCityOrWard = muni.isShi || muni.muniType === "ward";
+          const isCapitalOrMajor = idx < 4;
+          const areaCutoff = lodTier === 4 ? 0 : (lodTier === 3 ? (box.vw * box.vw) / 1400 : (box.vw * box.vw) / 340);
+          if (lodTier >= 4 || (lodTier >= 3 && (isCityOrWard || areaEst > areaCutoff)) || isCapitalOrMajor || (lodTier >= 2 && isCityOrWard) || areaEst > areaCutoff) {
             labelCandidates.push({
               gId,
-              name: en ? (city.rawNameEn || city.nameEn) : (city.rawNameJa || city.nameJa),
+              name: dispLabel,
               cx,
               cy,
-              prio: (isCurated ? 1000 : 0) + (isCapitalOrMajor ? 200 : 0) + areaEst
+              prio: (isCapitalOrMajor ? 400 : 0) + (isCityOrWard ? 160 : 0) + areaEst
             });
           }
         }
       });
     });
 
-    // Greedy collision cull for crisp readable labels at any zoom depth
+    // Greedy collision cull for crisp readable labels at any zoom depth (reveals all towns & villages on deep zoom)
     labelCandidates.sort((a, b) => b.prio - a.prio);
-    const maxLabels = lodTier === 3 ? 65 : (lodTier === 2 ? 36 : 16);
-    const minDistX = lblSizeNum * (lodTier === 3 ? 5.2 : 6.8);
-    const minDistY = lblSizeNum * 1.45;
+    const maxLabels = lodTier === 4 ? 180 : (lodTier === 3 ? 95 : (lodTier === 2 ? 45 : 18));
+    const minDistX = lblSizeNum * (lodTier === 4 ? 3.2 : (lodTier === 3 ? 4.4 : 6.0));
+    const minDistY = lblSizeNum * (lodTier === 4 ? 1.15 : 1.40);
     const accepted = [];
     const labelsHtml = [];
 
@@ -422,7 +430,7 @@
     if (parts.length !== 4 || parts.some(n => isNaN(n))) return;
     const box = { vx: parts[0], vy: parts[1], vw: parts[2], vh: parts[3] };
     const en = window.isEn();
-    const res = window.buildDynamicCityLayerContent(box, en);
+    const res = window.buildDynamicCityLayerContent(box, en, state.focusedPrefId || null);
     if (res.sig !== _lastDynamicMuniSig) {
       _lastDynamicMuniSig = res.sig;
       layer.innerHTML = res.html;
@@ -570,7 +578,7 @@
         : null;
       const pIcon = getIcon(activePrefId);
       const hasPlanned = prefStops.length > 0;
-      const cityCount = ((window.JAPAN_CITIES_BY_PREF && window.JAPAN_CITIES_BY_PREF[activePrefId]) || []).length;
+      const cityCount = (((window.JAPAN_MUNIS_BY_PREF && window.JAPAN_MUNIS_BY_PREF[activePrefId]) || (window.JAPAN_CITIES_BY_PREF && window.JAPAN_CITIES_BY_PREF[activePrefId])) || []).length;
 
       return `
         <div class="gmaps-place-card" id="gmapsPlaceCard">
@@ -586,7 +594,7 @@
           <div class="gmaps-place-meta">${hasPlanned
             ? `${en ? `${prefStops.length} planned stop(s): ` : `予定スポット（${prefStops.length}件）：`}${window.escapeHtml(prefStops.map(s => en ? s.nameEn : s.nameJa).join(" • "))}`
             : (en
-              ? `No stops planned yet (${cityCount} cities/areas inside — click + zoom or any city boundary)`
+              ? `No stops planned yet (${cityCount} cities, towns & villages inside — click or zoom to pick)`
               : `まだ日程にありません（${cityCount}市区町村をズームで表示・選択可能）`)}</div>
           ${defH ? `<div class="gmaps-place-hotel">🏨 ${en ? "3–4★ Default:" : "標準3〜4★ホテル:"} ${window.escapeHtml(en ? defH.nameEn : defH.nameJa)}</div>` : ""}
           <div class="gmaps-place-actions">
@@ -622,10 +630,20 @@
       </div>
     ` : "";
 
+    const cityGeoMeta = isCityScope ? window.JAPAN_CITY_PATHS[gId] : null;
+    const mType = selectedStop.muniType || (cityGeoMeta && cityGeoMeta.muniType) || ((selectedStop.isShi || (cityGeoMeta && cityGeoMeta.isShi)) ? "city" : "area");
+    const typeLabelEn = mType === "city" ? "City Boundary Highlight"
+      : (mType === "ward" ? "Special Ward Highlight"
+      : (mType === "town" ? "Town Boundary Highlight"
+      : (mType === "village" ? "Village Boundary Highlight" : "Area Boundary Highlight")));
+    const typeLabelJa = mType === "city" ? "市域ハイライト"
+      : (mType === "ward" ? "特別区ハイライト"
+      : (mType === "town" ? "町域ハイライト"
+      : (mType === "village" ? "村域ハイライト" : "観光エリア境界ハイライト")));
     const scopeLabel = selectedStop.unrecognized
       ? (en ? "❗ Unrecognised Location (Defaulted to Tokyo)" : "❗ 未認識地名（東京に設定）")
       : (isCityScope
-        ? (en ? `📍 City Boundary Highlight (${pref ? pref.nameEn : ""})` : `📍 市区町村境界ハイライト（${pref ? pref.nameJa : ""}）`)
+        ? (en ? `📍 ${typeLabelEn} (${pref ? pref.nameEn : ""})` : `📍 ${typeLabelJa}（${pref ? pref.nameJa : ""}）`)
         : (en ? `🗾 Prefecture Fallback Highlight (${pref ? pref.nameEn : ""})` : `🗾 都道府県全体ハイライト（${pref ? pref.nameJa : ""}）`));
 
     return `
@@ -693,7 +711,7 @@
     }).join("");
 
     // Dynamic progressive City (市) LOD layer (rendered right above prefectures when zoomed in!)
-    const muniLod = window.buildDynamicCityLayerContent(box, en);
+    const muniLod = window.buildDynamicCityLayerContent(box, en, activePrefId);
     _lastDynamicMuniSig = muniLod.sig;
 
     const highlightSvg = buildBoundaryHighlightSvg(activePrefId, selectedStop, scale);
@@ -808,13 +826,13 @@
       </h2>
       <p class="lead" style="margin-bottom:10px;">
         ${en
-          ? "Click any prefecture or pin to zoom & highlight its real boundary (zoom further in to reveal all 792 Japanese cities); drag to pan & scroll to zoom."
-          : "都道府県・ピンをクリックすると境界をハイライトして拡大（さらに拡大すると全792市が表示されます）。ドラッグ移動・ホイール拡大縮小・都市追加に対応。"}
+          ? "Click any prefecture or pin to zoom & highlight its real boundary (zoom further in to reveal all 1,747 cities, wards, towns & villages); drag to pan & scroll to zoom."
+          : "都道府県・ピンをクリックすると境界をハイライトして拡大（さらに拡大すると全1,747市区町村が表示されます）。ドラッグ移動・ホイール拡大縮小・都市追加に対応。"}
       </p>
 
       <div class="map-control-bar">
         <input type="text" id="mapLocationInput" class="search-input" style="min-width:180px;flex:1;padding:6px 10px;font-size:12px;"
-          placeholder="${window.escapeAttr(en ? "Add city/prefecture (e.g. Akiu, Fuchu, Achi Village, Shimane)..." : "日程に都市・県を追加（例：秋保、府中、阿智村、島根）...")}"
+          placeholder="${window.escapeAttr(en ? "Add any city, town, village or pref (e.g. Akiu, Mogami, Achi Village, Fuchu)..." : "日程に市区町村・県を追加（例：秋保、最上町、阿智村、府中、島根）...")}"
           onkeydown="if(event.key==='Enter'){addCustomMapLocation();}">
         <button type="button" class="btn btn-primary" style="padding:6px 10px;font-size:11.5px;" onclick="addCustomMapLocation()">
           ${en ? "+ Add Stop & Day" : "+ 地点＆日程追加"}

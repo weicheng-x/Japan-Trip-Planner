@@ -201,6 +201,13 @@ function resolvePrefSlugFromMeta(prefId, areaText) {
     const re = new RegExp(`(?:^|[^a-z])${key}(?:$|[^a-z])`);
     if (re.test(low) || re.test(norm)) return AREA_TO_TABELOG_SLUG[key];
   }
+  if (typeof window.resolveLocationInputStops === "function") {
+    const resolved = window.resolveLocationInputStops(raw);
+    if (resolved[0] && resolved[0].prefId) {
+      const p = window.getPrefectureById ? window.getPrefectureById(resolved[0].prefId) : null;
+      return (p && p.tabelogSlug) || resolved[0].prefId;
+    }
+  }
   return "";
 }
 
@@ -451,12 +458,19 @@ window.detectCatalogPacksFromSchedule = function() {
     ].filter(Boolean).join(" | ");
     if (!rawText || typeof window.findMatchingGazetteerStops !== "function") continue;
 
-    const regExplicit = (de && de.region && typeof window.resolveLocationInputStops === "function")
-      ? window.resolveLocationInputStops(de.region)
+    const regRaw = (de && de.region) || (dj && dj.region) || "";
+    const regExplicit = (regRaw && typeof window.resolveLocationInputStops === "function")
+      ? window.resolveLocationInputStops(regRaw)
       : [];
-    const matchedStops = (regExplicit && regExplicit.length > 0 && de && de._regionOverridden)
-      ? regExplicit
-      : (window.findMatchingGazetteerStops(rawText).length > 0 ? window.findMatchingGazetteerStops(rawText) : regExplicit);
+    const gazMatches = window.findMatchingGazetteerStops(rawText);
+    let matchedStops = gazMatches;
+    if (regExplicit && regExplicit.length > 0) {
+      const regPrefs = new Set(regExplicit.map(s => s.prefId).filter(Boolean));
+      const gazSharesPref = gazMatches.some(s => s.prefId && regPrefs.has(s.prefId));
+      if ((de && de._regionOverridden) || !gazSharesPref) {
+        matchedStops = regExplicit;
+      }
+    }
     matchedStops.forEach(stop => {
       if (stop.prefId && !prefSeen.has(stop.prefId)) {
         prefSeen.add(stop.prefId);
