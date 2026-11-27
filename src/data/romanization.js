@@ -83,11 +83,39 @@
     return rx;
   }
 
+  window.compileGazetteerEntryMatcher = function(keys) {
+    const cjkSet = new Set();
+    const asciiBodySet = new Set();
+    (keys || []).forEach(keyRaw => {
+      const keyStr = String(keyRaw || "").trim();
+      if (!keyStr) return;
+      if (/[^\x00-\x7F]/.test(keyStr)) {
+        cjkSet.add(keyStr.toLowerCase());
+        return;
+      }
+      const normKey = window.normalizeJapanRomaji(keyStr);
+      if (!normKey) return;
+      const body = normKey.split(" ").filter(Boolean).map(p => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s*");
+      if (body) asciiBodySet.add(body);
+    });
+    const asciiBodies = Array.from(asciiBodySet).sort((a, b) => b.length - a.length);
+    return {
+      cjkKeys: Array.from(cjkSet),
+      asciiRx: asciiBodies.length > 0
+        ? new RegExp("(?:^|[^a-z0-9])(?:" + asciiBodies.join("|") + ")(?=$|[^a-z0-9])")
+        : null
+    };
+  };
+
   window.prepareGazetteerText = function(rawText) {
     const cleaned = window.stripFalsePositivePlaces(rawText);
+    const rawLower = cleaned.toLowerCase();
+    const normText = window.normalizeJapanRomaji(cleaned);
     return {
-      rawLower: cleaned.toLowerCase(),
-      normText: window.normalizeJapanRomaji(cleaned)
+      rawLower,
+      normText,
+      hasNonAscii: /[^\x00-\x7F]/.test(rawLower),
+      hasAscii: /[a-z0-9]/.test(normText)
     };
   };
 

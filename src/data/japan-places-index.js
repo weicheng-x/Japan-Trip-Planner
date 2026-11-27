@@ -374,9 +374,32 @@
       });
     });
 
+    // Precompute lowercase & normalized fields once for fast instant search across all 1,800+ places
+    const searchMeta = allSearchEntries.map(item => {
+      const prefObj = prefById.get(item.prefId);
+      const rawEn = item.rawNameEn || item.nameEn || "";
+      const keys = Array.isArray(item.keys) ? item.keys : [];
+      const enN = normStr(rawEn);
+      const ambRule = item.isAmbiguous ? window.AMBIGUOUS_CITY_DEFAULTS[enN] : null;
+      return {
+        item,
+        enL: String(item.nameEn || "").toLowerCase(),
+        rawEnL: String(item.rawNameEn || "").toLowerCase(),
+        enN,
+        jaS: String(item.nameJa || ""),
+        kana: String(item.kana || ""),
+        prefNameEn: prefObj ? prefObj.nameEn : "",
+        prefNameJa: prefObj ? prefObj.nameJa : "",
+        prefEnL: prefObj ? prefObj.nameEn.toLowerCase() : "",
+        keysL: keys.map(k => String(k).toLowerCase()),
+        keysN: keys.map(k => normStr(k)),
+        ambDefaultPref: ambRule ? ambRule.defaultPref : null
+      };
+    });
+
     window.JAPAN_CITIES_BY_PREF = citiesByPref;
     window.JAPAN_MUNIS_BY_PREF = munisByPref;
-    _built = { prefById, prefByLookup, citiesByPref, munisByPref, stopById, stopsByPrefNorm, stopsByAsciiBase, allSearchEntries, jaMuniEntries };
+    _built = { prefById, prefByLookup, citiesByPref, munisByPref, stopById, stopsByPrefNorm, stopsByAsciiBase, allSearchEntries, searchMeta, jaMuniEntries };
     return _built;
   }
 
@@ -619,37 +642,28 @@
     const qLower = qRaw.toLowerCase();
     const qNorm = normStr(qRaw.replace(/\s+(city|shi|ward|ku|town|cho|machi|village|son|mura|pref|prefecture)$/i, ""));
     const scored = [];
+    const metaList = idx.searchMeta;
 
-    for (let i = 0; i < idx.allSearchEntries.length; i++) {
-      const item = idx.allSearchEntries[i];
-      const enL = String(item.nameEn || "").toLowerCase();
-      const rawEnL = String(item.rawNameEn || "").toLowerCase();
-      const jaS = String(item.nameJa || "");
-      const enN = normStr(item.rawNameEn || item.nameEn || "");
-      const prefObj = idx.prefById.get(item.prefId);
-      const prefEnL = prefObj ? prefObj.nameEn.toLowerCase() : "";
-      const kana = String(item.kana || "");
-
+    for (let i = 0; i < metaList.length; i++) {
+      const m = metaList[i];
+      const item = m.item;
       let score = 0;
-      if (enL === qLower || rawEnL === qLower || jaS === qRaw || enN === qNorm) score = 100;
-      else if (rawEnL.startsWith(qLower) || enL.startsWith(qLower) || enN.startsWith(qNorm) || jaS.startsWith(qRaw) || (kana && kana.startsWith(qRaw))) score = 70;
-      else if (enL.includes(qLower) || enN.includes(qNorm) || jaS.includes(qRaw) || prefEnL.startsWith(qLower)) score = 40;
-      else if (Array.isArray(item.keys) && item.keys.some(k => String(k).toLowerCase().includes(qLower) || normStr(k).includes(qNorm))) score = 25;
+      if (m.enL === qLower || m.rawEnL === qLower || m.jaS === qRaw || m.enN === qNorm) score = 100;
+      else if (m.rawEnL.startsWith(qLower) || m.enL.startsWith(qLower) || m.enN.startsWith(qNorm) || m.jaS.startsWith(qRaw) || (m.kana && m.kana.startsWith(qRaw))) score = 70;
+      else if (m.enL.includes(qLower) || m.enN.includes(qNorm) || m.jaS.includes(qRaw) || m.prefEnL.startsWith(qLower)) score = 40;
+      else if (m.keysL.some((kl, ki) => kl.includes(qLower) || m.keysN[ki].includes(qNorm))) score = 25;
 
       if (score > 0) {
         if (!item.isPrefFallback && item.isShi === false) score += 8; // Boost curated tourist towns slightly
-        if (item.isAmbiguous) {
-          const rule = window.AMBIGUOUS_CITY_DEFAULTS[normStr(item.rawNameEn || item.nameEn)];
-          if (rule && rule.defaultPref === item.prefId) score += 5;
-        }
-        scored.push({ item, score });
+        if (m.ambDefaultPref && m.ambDefaultPref === item.prefId) score += 5;
+        scored.push({ m, score });
       }
     }
 
-    scored.sort((a, b) => b.score - a.score || String(a.item.nameEn).localeCompare(String(b.item.nameEn)));
-    return scored.slice(0, maxItems).map(x => Object.assign({}, x.item, {
-      prefNameEn: (idx.prefById.get(x.item.prefId) || {}).nameEn || "",
-      prefNameJa: (idx.prefById.get(x.item.prefId) || {}).nameJa || ""
+    scored.sort((a, b) => b.score - a.score || String(a.m.item.nameEn).localeCompare(String(b.m.item.nameEn)));
+    return scored.slice(0, maxItems).map(x => Object.assign({}, x.m.item, {
+      prefNameEn: x.m.prefNameEn,
+      prefNameJa: x.m.prefNameJa
     }));
   };
 })();

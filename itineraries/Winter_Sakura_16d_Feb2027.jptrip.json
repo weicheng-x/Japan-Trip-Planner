@@ -1,9 +1,9 @@
 {
   "schema": "jp-trip-planner-preset-v2",
-  "exportedAt": "2026-11-25T19:25:44.228Z",
-  "appVersion": "2.0.0",
+  "exportedAt": "2026-11-27T18:38:21.159Z",
+  "appVersion": "2.2.0",
   "preset": {
-    "id": "userpreset_1795634744227_726",
+    "id": "userpreset_1795804701158_1",
     "labelEn": "[Winter] Tokyo, Kawazu Sakura, Fujikawa SA, Kyoto, Kanazawa, Takayama & Kusatsu (16 days)",
     "labelJa": "[冬] 東京・河津桜・富士川SA・京都・金沢・飛騨高山＆草津温泉 (16日間)",
     "startDate": "2027-02-21",
@@ -3807,7 +3807,7 @@
       "weather": {}
     },
     "shoppingList": [],
-    "updatedAt": "2026-11-25T19:25:44.228Z",
+    "updatedAt": "2026-11-27T18:38:21.159Z",
     "_activeLangHint": "en"
   }
 }

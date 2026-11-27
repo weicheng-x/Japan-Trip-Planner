@@ -15,6 +15,10 @@ Interactive **Japan Master Trip & Budget Planner** available as a live **Web App
 - **Interactive Japan Route Map & Schedule Builder:** SVG route map synced with daily/hourly time-slot editing and city stops.
 - **Hotels, Multi-Currency Budget & Rail Pass Optimizer:** Track nightly stays, reconcile transport/accommodation/dining/shopping budgets across currencies, and compare Pay-As-You-Go vs. JR Pass options.
 - **Curated Tabelog Gourmet Guide, Transit & Shopping Tabs:** Built-in dining highlights, local transit references, and shopping checklist.
+- **Audit Hardening, 50×+ Gazetteer/Rail Optimization & Precision Fixes (`v2.2.0`):**
+  - **50×+ Performance Boost:** Replaced $O(P \times D^2)$ rail pass + gazetteer nested loops with compiled multi-key RegExp matching, `WeakMap`/bounded match caching, precomputed place-search metadata, and $O(P \times D)$ precomputed rail evaluation.
+  - **Rail, Schedule & Filter Accuracy:** `getDayRegions` respects explicit `_regionOverridden` stops and resolves all 1,747 municipalities; `syncRailFaresToBudget` clears `passCovered` badges when `"none"` is selected; Tabs 6–8 auto-reset stale localized region filters on `EN ⇄ JP` switches and support string gourmet IDs safely.
+  - **Complete Undo, Precision & Deduplication:** Captures `budgetMode`, `shareHotelRoom`, `budgetTargetJpy`, and `taxFreeEnabled` in Undo snapshots; remaps `expandedDays` and clamps `passStartDay` on day insert/delete; rounds JPY inputs to integers and converts FX via minor units (`convertJpyToCurrency`); unifies Main Map & Wizard Map LOD rendering into shared `renderMunicipalityLodLayer`.
 - **All-Japan 1,747-Municipality Map, Drag-Reorder Wizard & Full Map Picker (`v2.1.0`):**
   - **100% Gap-Free Coverage of Japan (All 1,747 `市` / `特別区` / `町` / `村`):** Upgraded [`japan-geo.js`](src/data/japan-geo.js) with MLIT boundaries for every single city (`792`), Tokyo special ward (`23`), town (`743`), and village (`189`) across all 47 prefectures (`Missing: 0`), with 4-tier progressive LOD labels revealing towns & villages when zoomed in and accurate Town/Village Place Cards.
   - **Wizard Drag-and-Drop Route Ordering & Enlarged Zoomable Map Picker:** Drag selected destination chips (`⋮⋮`) to rearrange visit order before generating a trip, and pick stops on an enlarged interactive All-Japan map with free wheel zoom, drag-to-pan, and clickable towns & villages.
@@ -43,7 +47,7 @@ Open **https://weicheng-x.github.io/Japan-Trip-Planner/** directly — no instal
 
 ### 2. Portable Windows Desktop App or Offline Single-File HTML
 Download the latest assets from **[GitHub Releases](https://github.com/weicheng-x/Japan-Trip-Planner/releases/latest)**:
-- **`JP Trip Planner 2.1.0.exe`** — Portable Windows Electron desktop app (run directly with no installer required; supports native file dialogs and local desktop persistence).
+- **`JP Trip Planner 2.2.0.exe`** — Portable Windows Electron desktop app (run directly with no installer required; supports native file dialogs and local desktop persistence).
 - **`JP_Trip_Planner.html`** — Standalone single-file offline HTML bundle with embedded styles, scripts, and seasonal hero images.
 
 ### 3. Run or Build from Source

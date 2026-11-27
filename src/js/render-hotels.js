@@ -9,12 +9,14 @@ function shiftHotelYmd(ymd, deltaDays) {
 
 window.addCustomHotel = function() {
   const en = window.isEn();
-  const name = (document.getElementById("newHotelName")?.value || "").trim();
+  const nameInp = document.getElementById("newHotelName");
+  const urlInp = document.getElementById("newHotelUrl");
+  const name = (nameInp?.value || "").trim();
   const region = (document.getElementById("newHotelRegion")?.value || "").trim() || (en ? "Tokyo" : "東京");
   const nights = Math.max(1, Math.round(parseFloat(document.getElementById("newHotelNights")?.value || "2") || 2));
-  const rate = Math.max(0, parseFloat(document.getElementById("newHotelRate")?.value || "15000") || 0);
+  const rate = Math.round(Math.max(0, parseFloat(document.getElementById("newHotelRate")?.value || "15000") || 0));
   const access = (document.getElementById("newHotelAccess")?.value || "").trim() || (en ? "Near JR / Metro Station" : "最寄り駅徒歩圏内");
-  const url = (document.getElementById("newHotelUrl")?.value || "").trim();
+  const url = (urlInp?.value || "").trim();
 
   if (!name) {
     window.showToast(en ? "Please enter a hotel name" : "ホテル名を入力してください");
@@ -49,6 +51,8 @@ window.addCustomHotel = function() {
   };
   state.dataEn.hotels.push(Object.assign({}, hObj));
   state.dataJa.hotels.push(Object.assign({}, hObj));
+  if (nameInp) nameInp.value = "";
+  if (urlInp) urlInp.value = "";
   window.saveState();
   window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(en ? `🏨 Added "${name}" (${nights}N: ${checkIn} → ${checkOut})` : `🏨 「${name}」（${nights}泊：${checkIn} → ${checkOut}）を追加しました`);
@@ -96,7 +100,7 @@ window.updateHotelField = function(idx, field, val) {
       }
     });
   } else if (field === "perNightJpy") {
-    const rateVal = Math.max(0, Number(val) || 0);
+    const rateVal = Math.round(Math.max(0, Number(val) || 0));
     [state.dataEn.hotels, state.dataJa.hotels].forEach(arr => {
       if (!arr[idx]) return;
       arr[idx].perNightJpy = rateVal;
@@ -165,8 +169,8 @@ window.syncHotelsToDailyBudget = function() {
         dayIdx++;
       }
     });
-    if (dayIdx === days.length - 1 && days[dayIdx]) {
-      days[dayIdx].stay = 0;
+    if (days.length > 0 && dayIdx <= days.length - 1) {
+      days[days.length - 1].stay = 0;
     }
   };
 

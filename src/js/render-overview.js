@@ -76,7 +76,7 @@
           </div>
           <div class="logic-step-box">
             <strong>2. Smart Map & ❗ Fallback</strong>
-            Scans daily routes and custom stops across 85+ Japanese destinations and auto-frames the SVG map. Unrecognised places default to <strong>Tokyo</strong> with <strong>❗</strong>.
+            Scans daily routes and custom stops across all 47 prefectures &amp; 1,747 municipalities and auto-frames the SVG map. Unrecognised places default to <strong>Tokyo</strong> with <strong>❗</strong>.
           </div>
           <div class="logic-step-box">
             <strong>3. Pass Optimizer & Hotels</strong>
@@ -101,7 +101,7 @@
           </div>
           <div class="logic-step-box">
             <strong>② 全国マップ＆❗未認識警告</strong>
-            日本各地85以上の観光地を自動認識してズーム表示します。日本の地名として認識できない文字列は <strong>❗ マーク付きで東京</strong> に設定されます。
+            全47都道府県・1,747市区町村を自動認識してズーム表示します。日本の地名として認識できない文字列は <strong>❗ マーク付きで東京</strong> に設定されます。
           </div>
           <div class="logic-step-box">
             <strong>③ 鉄道パス最適化＆ホテル連動</strong>
@@ -191,7 +191,8 @@
     }
 
     _prepLastErrorKey = null;
-    const newId = "prep_" + Date.now();
+    window.pushUndoSnapshot("Add checklist item");
+    const newId = typeof window.makeUid === "function" ? window.makeUid("prep") : ("prep_" + Date.now());
     state.dataEn.prep.push({ id: newId, title: titleVal, sub: detailsVal });
     state.dataJa.prep.push({ id: newId, title: titleVal, sub: detailsVal });
 
@@ -204,6 +205,7 @@
 
   window.deletePrepTask = function(taskId, evt) {
     if (evt && evt.stopPropagation) evt.stopPropagation();
+    window.pushUndoSnapshot("Delete checklist item");
     state.dataEn.prep = (state.dataEn.prep || []).filter(t => t.id !== taskId);
     state.dataJa.prep = (state.dataJa.prep || []).filter(t => t.id !== taskId);
     if (state.prepDone && state.prepDone[taskId]) delete state.prepDone[taskId];

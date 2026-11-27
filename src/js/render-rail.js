@@ -12,14 +12,43 @@
     ["tokyo", "Tokyo"], ["shinjuku", "Tokyo"], ["asakusa", "Tokyo"], ["haneda", "Tokyo"], ["narita", "Tokyo"], ["東京", "Tokyo"], ["新宿", "Tokyo"], ["成田", "Tokyo"], ["羽田", "Tokyo"]
   ];
 
+  function addStopsRegions(stops, out) {
+    (stops || []).forEach(g => {
+      if (g.regionKey) {
+        out.add(g.regionKey);
+      } else if (g.prefId && typeof window.getPrefectureById === "function") {
+        const p = window.getPrefectureById(g.prefId);
+        if (p && p.regionKey) out.add(p.regionKey);
+      }
+    });
+  }
+
   function getDayRegions(d) {
     const out = new Set();
-    const raw = `${d.region || ""} ${d.routeJp || ""} ${d.hotel || ""}`.replace(/\bhotel\s+nikko\b/gi, "").toLowerCase();
-    if (typeof window.findMatchingGazetteerStops === "function") {
-      window.findMatchingGazetteerStops(raw).forEach(g => {
-        if (g.regionKey) out.add(g.regionKey);
+    if (!d) return out;
+    const regText = String(d.region || "").trim();
+    const regStops = (regText && typeof window.resolveLocationInputStops === "function")
+      ? window.resolveLocationInputStops(regText)
+      : [];
+    addStopsRegions(regStops, out);
+
+    // When the user explicitly overrode the day's region (e.g., Kawaguchiko -> Akiu), do not leak stale routeJp regions
+    if (d._regionOverridden && regStops.length > 0) {
+      const regLower = regText.toLowerCase();
+      REGION_TEXT_MAP.forEach(([kw, reg]) => {
+        if (regLower.includes(kw)) out.add(reg);
       });
+      return out;
     }
+
+    const rawBase = `${d.region || ""} ${d.routeJp || ""} ${d.hotel || ""}`;
+    const cleaned = typeof window.stripFalsePositivePlaces === "function"
+      ? window.stripFalsePositivePlaces(rawBase)
+      : rawBase.replace(/\bhotel\s+nikko\b/gi, " ");
+    if (typeof window.findMatchingGazetteerStops === "function") {
+      addStopsRegions(window.findMatchingGazetteerStops(cleaned), out);
+    }
+    const raw = cleaned.toLowerCase();
     REGION_TEXT_MAP.forEach(([kw, reg]) => {
       if (raw.includes(kw)) out.add(reg);
     });
@@ -47,13 +76,13 @@
     return true;
   }
 
-  function evaluateRailDay(d, passObj, startDay, endDay) {
+  function evaluateRailDay(d, passObj, startDay, endDay, precomputedRegs) {
     const passDays = (passObj && passObj.days) || 0;
     const jr = Math.max(0, Number(d.jrOnly) || 0);
     const all = Math.max(jr, Number(d.totalAllLegs) || 0);
     const nonJr = Math.max(0, all - jr);
     const inWindow = passDays > 0 && d.day >= startDay && d.day <= endDay;
-    const dayRegs = getDayRegions(d);
+    const dayRegs = precomputedRegs || getDayRegions(d);
     const scopeOk = inWindow && dayMatchesPassScope(d, dayRegs, passObj);
 
     let coveredJr = 0, coveredNonJr = 0, outOfPocketJr = jr, outOfPocketNonJr = nonJr;
@@ -70,50 +99,58 @@
     return { jr, nonJr, all, inWindow, scopeOk, coveredJr, coveredNonJr, outOfPocketJr, outOfPocketNonJr, youPay };
   }
 
-  function isPassEligibleForTrip(passObj, daysList, noPassEval) {
-    if (!passObj || passObj.id === "none") return true;
+  function buildPrecomputedDays(daysList) {
     const tripRegs = new Set();
-    daysList.forEach(d => {
-      getDayRegions(d).forEach(r => tripRegs.add(r));
+    let jrSum = 0, nonJrSum = 0, allSum = 0;
+    const dayInfos = daysList.map(d => {
+      const jr = Math.max(0, Number(d.jrOnly) || 0);
+      const all = Math.max(jr, Number(d.totalAllLegs) || 0);
+      const nonJr = Math.max(0, all - jr);
+      const regs = getDayRegions(d);
+      regs.forEach(r => tripRegs.add(r));
+      jrSum += jr;
+      nonJrSum += nonJr;
+      allSum += all;
+      return { d, day: d.day, jr, nonJr, all, regs };
     });
-    if (Array.isArray(passObj.requiresRegions) && passObj.requiresRegions.length > 0) {
-      if (!passObj.requiresRegions.some(r => tripRegs.has(r))) return false;
-    }
-    if (passObj.nonJr) {
-      return daysList.some(d => {
-        const dr = getDayRegions(d);
-        const jr = Math.max(0, Number(d.jrOnly) || 0);
-        const all = Math.max(jr, Number(d.totalAllLegs) || 0);
-        return (all - jr) > 0 && dayMatchesPassScope(d, dr, passObj);
-      });
-    }
-    if (!noPassEval || noPassEval.jrSum <= 0) return false;
-    return daysList.some(d => (Number(d.jrOnly) || 0) > 0 && dayMatchesPassScope(d, getDayRegions(d), passObj));
+    return { dayInfos, tripRegs, jrSum, nonJrSum, allSum };
   }
 
-  function evaluatePassAcrossDays(daysList, passObj, passPrice, startDay) {
-    const passDays = passObj.days || 0;
+  function computePassScopeFlags(dayInfos, passObj) {
+    return dayInfos.map(info => dayMatchesPassScope(info.d, info.regs, passObj));
+  }
+
+  function isPassEligibleForTrip(passObj, pre, scopeFlags) {
+    if (!passObj || passObj.id === "none") return true;
+    if (Array.isArray(passObj.requiresRegions) && passObj.requiresRegions.length > 0) {
+      if (!passObj.requiresRegions.some(r => pre.tripRegs.has(r))) return false;
+    }
+    if (passObj.nonJr) {
+      return pre.dayInfos.some((info, i) => info.nonJr > 0 && scopeFlags[i]);
+    }
+    if (pre.jrSum <= 0) return false;
+    return pre.dayInfos.some((info, i) => info.jr > 0 && scopeFlags[i]);
+  }
+
+  function evaluatePassFromDailyCovered(pre, passObj, passPrice, startDay, dailyCovered) {
+    const passDays = (passObj && passObj.days) || 0;
     const endDay = passDays > 0 ? (startDay + passDays - 1) : -1;
-    let jrSum = 0, nonJrSum = 0, allSum = 0, coveredJrSum = 0, coveredNonJrSum = 0, outOfPocketJrSum = 0, outOfPocketNonJrSum = 0;
-
-    daysList.forEach(d => {
-      const ev = evaluateRailDay(d, passObj, startDay, endDay);
-      jrSum += ev.jr;
-      nonJrSum += ev.nonJr;
-      allSum += ev.all;
-      coveredJrSum += ev.coveredJr;
-      coveredNonJrSum += ev.coveredNonJr;
-      outOfPocketJrSum += ev.outOfPocketJr;
-      outOfPocketNonJrSum += ev.outOfPocketNonJr;
-    });
-
-    const coveredTotal = passObj.nonJr ? coveredNonJrSum : coveredJrSum;
+    let coveredTotal = 0;
+    if (passDays > 0) {
+      for (let i = 0; i < pre.dayInfos.length; i++) {
+        const dayNum = pre.dayInfos[i].day;
+        if (dayNum >= startDay && dayNum <= endDay) coveredTotal += dailyCovered[i];
+      }
+    }
+    const isNonJr = !!(passObj && passObj.nonJr);
+    const outOfPocketJrSum = isNonJr ? pre.jrSum : (pre.jrSum - coveredTotal);
+    const outOfPocketNonJrSum = isNonJr ? (pre.nonJrSum - coveredTotal) : pre.nonJrSum;
     const totalWithPass = passPrice + outOfPocketJrSum + outOfPocketNonJrSum;
-    const netSavings = coveredTotal - passPrice; // Positive means selected pass beats paying individual fares
+    const netSavings = coveredTotal - passPrice;
     return {
-      jrSum,
-      nonJrSum,
-      allSum,
+      jrSum: pre.jrSum,
+      nonJrSum: pre.nonJrSum,
+      allSum: pre.allSum,
       coveredJrSum: coveredTotal,
       outOfPocketJrSum,
       outOfPocketNonJrSum,
@@ -124,13 +161,20 @@
     };
   }
 
-  function findBestStartDayForPass(daysList, passObj, passPrice) {
-    if (!passObj || !passObj.days || daysList.length === 0) {
-      return evaluatePassAcrossDays(daysList, passObj || { days: 0, price: 0 }, 0, 1);
+  function findBestStartDayForPass(pre, passObj, passPrice, scopeFlags) {
+    const dailyCovered = pre.dayInfos.map((info, i) => {
+      if (!scopeFlags[i]) return 0;
+      if (passObj && passObj.nonJr) {
+        return info.nonJr > 0 ? Math.min(info.nonJr, passObj.maxDailyCovered || info.nonJr) : 0;
+      }
+      return info.jr;
+    });
+    if (!passObj || !passObj.days || pre.dayInfos.length === 0) {
+      return evaluatePassFromDailyCovered(pre, passObj || { days: 0, price: 0 }, 0, 1, dailyCovered);
     }
     let best = null;
-    for (let s = 1; s <= daysList.length; s++) {
-      const ev = evaluatePassAcrossDays(daysList, passObj, passPrice, s);
+    for (let s = 1; s <= pre.dayInfos.length; s++) {
+      const ev = evaluatePassFromDailyCovered(pre, passObj, passPrice, s, dailyCovered);
       if (!best || ev.netSavings > best.netSavings) best = ev;
     }
     return best;
@@ -141,12 +185,13 @@
   window.computeRailPassMetrics = function() {
     const daysList = (window.curData().days) || [];
     const catalog = window.JR_PASS_CATALOG || [];
-    const daysSig = daysList.map(d => `${d.day}|${d.region || ""}|${Number(d.jrOnly) || 0}|${Number(d.totalAllLegs) || 0}`).join(";");
+    const daysSig = daysList.map(d => `${d.day}|${d._regionOverridden ? 1 : 0}|${d.region || ""}|${d.routeJp || ""}|${Number(d.jrOnly) || 0}|${Number(d.totalAllLegs) || 0}`).join(";");
     const cacheKey = `${(state && state._rev) || 0}|${(state && state.lang) || "en"}|${(state && state.selectedPassId) || "none"}|${(state && state.passStartDay) || 1}|${state && state.customPassPrice !== null && state.customPassPrice !== undefined ? state.customPassPrice : ""}|${daysSig}`;
     if (_railMetricsCache && _railMetricsCache.key === cacheKey) {
       return _railMetricsCache.val;
     }
 
+    const pre = buildPrecomputedDays(daysList);
     const passObj = catalog.find(p => p.id === (state.selectedPassId || "none")) || catalog[0];
     const passPrice = (state.customPassPrice !== null && state.customPassPrice !== undefined && state.customPassPrice !== "")
       ? Math.max(0, Number(state.customPassPrice) || 0)
@@ -154,15 +199,25 @@
 
     const maxDay = Math.max(1, daysList.length);
     const startDay = Math.max(1, Math.min(maxDay, parseInt(state.passStartDay, 10) || 1));
-    const currentEval = evaluatePassAcrossDays(daysList, passObj, passPrice, startDay);
-    const noPassEval = evaluatePassAcrossDays(daysList, catalog[0], 0, 1);
+
+    const curFlags = computePassScopeFlags(pre.dayInfos, passObj);
+    const curDailyCovered = pre.dayInfos.map((info, i) => {
+      if (!curFlags[i]) return 0;
+      if (passObj && passObj.nonJr) {
+        return info.nonJr > 0 ? Math.min(info.nonJr, passObj.maxDailyCovered || info.nonJr) : 0;
+      }
+      return info.jr;
+    });
+    const currentEval = evaluatePassFromDailyCovered(pre, passObj, passPrice, startDay, curDailyCovered);
+    const noPassEval = evaluatePassFromDailyCovered(pre, catalog[0], 0, 1, pre.dayInfos.map(() => 0));
 
     // Find best eligible alternative pass scoped to this trip's regions & transport modes
     let bestAlt = null;
     catalog.forEach(cand => {
       if (cand.id === "none" || cand.id === passObj.id) return;
-      if (!isPassEligibleForTrip(cand, daysList, noPassEval)) return;
-      const ev = findBestStartDayForPass(daysList, cand, cand.price);
+      const flags = computePassScopeFlags(pre.dayInfos, cand);
+      if (!isPassEligibleForTrip(cand, pre, flags)) return;
+      const ev = findBestStartDayForPass(pre, cand, cand.price, flags);
       if (!bestAlt || ev.netSavings > bestAlt.eval.netSavings) {
         bestAlt = { pass: cand, eval: ev };
       }
@@ -258,9 +313,7 @@
         const existingFlightBuffer = (hasFlightNote && curTravel > ev.all) ? (curTravel - ev.all) : 0;
         const passAdd = (hasPass && d.day === startDay) ? passPrice : 0;
         d.travelBase = ev.youPay + existingFlightBuffer + passAdd;
-        if (hasPass) {
-          d.passCovered = ev.inWindow && ev.scopeOk;
-        }
+        d.passCovered = hasPass ? (ev.inWindow && ev.scopeOk) : false;
       });
     });
 

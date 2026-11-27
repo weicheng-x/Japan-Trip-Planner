@@ -1,4 +1,4 @@
-// Automated Regression & Self-Audit Test Suite for JP Trip Planner v2.0.0
+// Automated Regression & Self-Audit Test Suite for JP Trip Planner v2.2.0
 const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
@@ -314,7 +314,8 @@ function run() {
   ctx.loadTripPreset("userpreset_feb2027_16d", { skipUndo: true, force: true });
   const presetExport = ctx.buildPresetExportPayload();
   assert.strictEqual(presetExport.envelope.schema, "jp-trip-planner-preset-v2");
-  assert.strictEqual(presetExport.envelope.appVersion, "2.0.0");
+  assert.strictEqual(presetExport.envelope.appVersion, ctx.APP_VERSION);
+  assert.strictEqual(ctx.APP_VERSION, "2.2.0");
   const xlsx = ctx.buildExcelWorkbookPayload();
   assert(xlsx.bytes.length > 20000);
   assert.strictEqual(xlsx.bytes[0], 0x50);
@@ -705,6 +706,129 @@ function run() {
   assert(getEl("wizardSelectedBar").innerHTML.includes("Mogami"), "Clicking town on wizard map must add Mogami to route");
   assert(getEl("wizardMapPickerWrap").innerHTML.includes("cho_mogami_yamagata"), "Selecting town must keep wizard zoomed view intact");
   ctx.wizardResetMapView();
+
+  // 30. v2.2.0 Rail Pass Performance, Town/Region Override Scope & Badge Clear Fix
+  ctx.loadTripPreset("tohoku22", { skipUndo: true, force: true });
+  ctx.bumpStateRev(); // Force cold cache evaluation
+  const tRailStart = performance.now();
+  const coldRail = ctx.computeRailPassMetrics();
+  const coldRailMs = performance.now() - tRailStart;
+  assert(coldRailMs < 50, `computeRailPassMetrics cold compute must finish < 50ms on 22d trip (got ${coldRailMs.toFixed(2)}ms)`);
+  assert(coldRail && coldRail.noPassEval.jrSum > 0);
+
+  // Town-level Mogami must map to Yamagata -> eligible for jreast5; Akiu with _regionOverridden must not leak Kawaguchiko/Chubu
+  ctx.state.dataEn.days = [
+    { day: 1, date: "2027-06-01", dow: "Tue", region: "Mogami", _regionOverridden: true, routeJp: "Mogami River Boat", routeEn: "", hotel: "Yamagata Hotel", stay: 10000, travelBase: 18000, jrOnly: 18000, totalAllLegs: 18000, passCovered: false, legs: [], timeSlots: [] },
+    { day: 2, date: "2027-06-02", dow: "Wed", region: "Akiu", _regionOverridden: true, routeJp: "Day 2: Old Kawaguchiko Express Bus", routeEn: "", hotel: "Akiu Hotel", stay: 10000, travelBase: 22000, jrOnly: 22000, totalAllLegs: 22000, passCovered: false, legs: [], timeSlots: [] }
+  ];
+  ctx.state.dataJa.days = JSON.parse(JSON.stringify(ctx.state.dataEn.days));
+  ctx.selectJapanPass("jreast5");
+  ctx.updatePassStartDay(1);
+  const ovRail = ctx.computeRailPassMetrics();
+  assert.strictEqual(ovRail.currentEval.coveredJrSum, 40000, "Mogami (Yamagata) & overridden Akiu (Miyagi) must both be covered by JR East Tohoku Pass without stale Kawaguchiko leak");
+  ctx.syncRailFaresToBudget();
+  assert.strictEqual(ctx.state.dataEn.days[0].passCovered, true);
+  assert.strictEqual(ctx.state.dataEn.days[1].passCovered, true);
+
+  // Switching to "none" and clicking Sync must clear passCovered badges
+  ctx.selectJapanPass("none");
+  ctx.syncRailFaresToBudget();
+  assert.strictEqual(ctx.state.dataEn.days[0].passCovered, false, "Sync under No Rail Pass must clear passCovered badge on Day 1");
+  assert.strictEqual(ctx.state.dataEn.days[1].passCovered, false, "Sync under No Rail Pass must clear passCovered badge on Day 2");
+
+  // 31. v2.2.0 String Gourmet IDs, Filter Auto-Reset on Lang Switch, Integer Shopping & Minor-Unit FX
+  ctx.loadTripPreset("tohoku22", { skipUndo: true, force: true });
+  ctx.state.dataEn.food.unshift({
+    id: "custom_food_str_1", region: "Tokyo", dish: "Str Ramen", place: "Menya Test",
+    url: "", tabelogScore: "★ 3.7", tabelogUrl: "https://tabelog.com/tokyo/",
+    transitLevel: "easy", transitText: "🟢 2m", sourceTag: "Custom", note: "Test", tried: false
+  });
+  ctx.state.dataJa.food.unshift(Object.assign({}, ctx.state.dataEn.food[0]));
+  ctx.renderGourmet();
+  assert(getEl("gourmetGrid").innerHTML.includes(`data-id="custom_food_str_1"`), "Gourmet card buttons must bind string IDs via data-id");
+  ctx.toggleFoodTried("custom_food_str_1");
+  assert.strictEqual(ctx.state.dataEn.food[0].tried, true, "toggleFoodTried must work with non-numeric string IDs");
+  ctx.deleteFood("custom_food_str_1");
+  assert(!ctx.state.dataEn.food.some(f => f.id === "custom_food_str_1"), "deleteFood must remove string-ID food item");
+
+  // Filter auto-reset across Tabs 6/7/8 when language switches (EN region filter -> JP)
+  const firstEnFoodReg = ctx.state.dataEn.food[0].region;
+  const firstEnAccArea = ctx.state.dataEn.access[0].area;
+  const firstEnGuideArea = ctx.state.dataEn.guides[0].area;
+  ctx.filterFoodKey(firstEnFoodReg);
+  ctx.filterAccessKey(firstEnAccArea);
+  ctx.filterGuideKey(firstEnGuideArea);
+  ctx.setLanguage("ja");
+  assert.strictEqual(ctx.state.activeFoodKey, "ALL", "Switching EN->JP must reset stale Gourmet filter to ALL instead of showing empty grid");
+  assert.strictEqual(ctx.state.activeAccessKey, "ALL", "Switching EN->JP must reset stale Access filter to ALL");
+  assert.strictEqual(ctx.state.activeGuideKey, "ALL", "Switching EN->JP must reset stale Guides filter to ALL");
+  assert(getEl("gourmetGrid").innerHTML.includes("food-card"), "Gourmet grid must remain populated after language switch");
+  ctx.setLanguage("en");
+
+  // Shopping integer yen rounding & minor-unit FX helper
+  ctx.state.shoppingList = [];
+  getEl("newShopName").value = "Matcha Tin";
+  getEl("newShopPrice").value = "1250.7";
+  getEl("newShopQty").value = "2";
+  ctx.addShoppingItem();
+  assert.strictEqual(ctx.state.shoppingList[0].price, 1251, "Shopping unit price must round to integer JPY");
+  assert.strictEqual(ctx.convertJpyToCurrency(10000, 122), 81.97, "Minor-unit FX conversion must match rounded 2 d.p.");
+  assert.strictEqual(ctx.convertJpyToCurrency(10000, 0), 0, "Zero FX rate must safely return 0");
+  assert.notStrictEqual(ctx.makeUid("x"), ctx.makeUid("x"), "Back-to-back makeUid calls must never collide");
+
+  // 32. v2.2.0 Undo Completeness, Expanded Drawer & Hotel Edge Cases
+  ctx.loadTripPreset("tohoku22", { skipUndo: true, force: true });
+  ctx.state.budgetMode = "per_person";
+  ctx.state.paxCount = 3;
+  ctx.state.shareHotelRoom = false;
+  ctx.state.budgetTargetJpy = 450000;
+  ctx.state.taxFreeEnabled = true;
+  ctx.pushUndoSnapshot("Before reset test");
+  ctx.state.budgetMode = "group";
+  ctx.state.shareHotelRoom = true;
+  ctx.state.budgetTargetJpy = 0;
+  ctx.state.taxFreeEnabled = false;
+  ctx.undoLastChange();
+  assert.strictEqual(ctx.state.budgetMode, "per_person", "Undo must restore budgetMode");
+  assert.strictEqual(ctx.state.shareHotelRoom, false, "Undo must restore shareHotelRoom");
+  assert.strictEqual(ctx.state.budgetTargetJpy, 450000, "Undo must restore budgetTargetJpy");
+  assert.strictEqual(ctx.state.taxFreeEnabled, true, "Undo must restore taxFreeEnabled");
+
+  // deleteSpecificDay remaps expandedDays and clamps passStartDay; updateTripDates keeps hotel split notes
+  ctx.state.expandedDays = { 2: true, 22: true };
+  ctx.state.passStartDay = 22;
+  let capturedConfirm = null;
+  const origShowConfirm = ctx.showConfirmModal;
+  ctx.showConfirmModal = (_t, _m, onConfirm) => { capturedConfirm = onConfirm; };
+  ctx.deleteSpecificDay(0);
+  assert(typeof capturedConfirm === "function");
+  capturedConfirm();
+  ctx.showConfirmModal = origShowConfirm;
+  assert.strictEqual(ctx.state.dataEn.days.length, 21);
+  assert.strictEqual(ctx.state.expandedDays[1], true, "Day 2 expanded drawer must shift down to Day 1 after deleting Day 1");
+  assert.strictEqual(ctx.state.expandedDays[21], true, "Day 22 expanded drawer must shift down to Day 21");
+  assert.strictEqual(ctx.state.expandedDays[22], undefined, "Deleted/stale Day 22 key must be cleaned up");
+  assert.strictEqual(ctx.state.passStartDay, 21, "passStartDay must clamp to new day count after deletion");
+
+  // Hotel checkOut parenthetical note preserved on updateTripDates shift & departure-day stay cleared on partial hotel sync
+  ctx.loadTripPreset("tohoku22", { skipUndo: true, force: true });
+  const splitOutSample = "2026-11-11 (Split: returns Day 20)";
+  ctx.state.dataEn.hotels[0].checkOut = splitOutSample;
+  ctx.updateTripDates("2026-10-22", null);
+  assert(ctx.state.dataEn.hotels[0].checkOut.startsWith("2026-11-12") && ctx.state.dataEn.hotels[0].checkOut.includes("(Split: returns Day 20)"),
+    "Shifting trip start date must preserve parenthetical hotel notes");
+  ctx.state.dataEn.hotels = [ctx.state.dataEn.hotels[0]]; // Fewer nights than 21
+  ctx.state.dataEn.hotels[0].nights = 2;
+  ctx.state.dataEn.days[ctx.state.dataEn.days.length - 1].stay = 9999;
+  ctx.syncHotelsToDailyBudget();
+  assert.strictEqual(ctx.state.dataEn.days[ctx.state.dataEn.days.length - 1].stay, 0, "Partial hotel sync must still zero out departure-day stay");
+
+  // 33. v2.2.0 Shared LOD Layer & Updated Overview Copy
+  ctx.loadTripPreset("goldenRoute", { skipUndo: true, force: true });
+  ctx.renderOverviewTab();
+  assert(getEl("overviewLeftCol").innerHTML.includes("1,747 municipalities"), "Overview How-To copy must reflect 1,747 municipalities");
+  const mainLodOut = ctx.buildDynamicCityLayerContent(ymNorth, true, "yamagata");
+  assert(typeof ctx.renderMunicipalityLodLayer === "function" && mainLodOut.html.includes("cho_mogami_yamagata"), "Shared renderMunicipalityLodLayer must power both maps");
 
   console.log("ALL_UNIT_AND_AUDIT_TESTS_PASSED");
 }

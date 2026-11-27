@@ -1,4 +1,17 @@
-// Shared Utilities: XSS Escaping, Safe URLs, Currency Formatting, Modals, CSV Export
+// Shared Utilities: Versioning, IDs, XSS Escaping, Safe URLs, Currency Formatting, Modals, CSV Export
+
+window.APP_VERSION = "2.2.0";
+
+let _uidSeq = 0;
+window.makeUid = function(prefix) {
+  _uidSeq = (_uidSeq + 1) % 100000;
+  return `${prefix || "id"}_${Date.now()}_${_uidSeq}`;
+};
+
+window.makeNumericUid = function() {
+  _uidSeq = (_uidSeq + 1) % 1000;
+  return Date.now() * 1000 + _uidSeq;
+};
 
 window.escapeHtml = function(str) {
   return String(str == null ? "" : str)
@@ -19,7 +32,9 @@ window.safeUrl = function(url) {
     if (parsed.protocol === "http:" || parsed.protocol === "https:") {
       return parsed.href;
     }
-  } catch (e) {}
+  } catch (e) {
+    if (!(e instanceof TypeError)) console.warn("[JP Trip Planner] safeUrl error:", e);
+  }
   return "";
 };
 
@@ -51,11 +66,18 @@ window.fmtJpy = function(val) {
   return "¥" + Math.round(Number(val) || 0).toLocaleString("en-US");
 };
 
+window.convertJpyToCurrency = function(jpyVal, fxRate) {
+  const r = Number(fxRate);
+  if (!Number.isFinite(r) || r <= 0) return 0;
+  const yen = Math.round(Number(jpyVal) || 0);
+  return Math.round((yen * 100) / r) / 100;
+};
+
 window.fmtSgd = function(jpyVal) {
   const code = state.currencyCode || "SGD";
   const meta = (window.CURRENCY_META && window.CURRENCY_META[code]) || { symbol: "S$", defaultRate: 122 };
   const rate = (state.fxRate !== undefined && state.fxRate !== null) ? Number(state.fxRate) : meta.defaultRate;
-  const converted = rate > 0 ? (Number(jpyVal) || 0) / rate : 0;
+  const converted = window.convertJpyToCurrency(jpyVal, rate);
   return meta.symbol + converted.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
@@ -169,7 +191,7 @@ window.buildCsvPayload = function() {
   const cCode = state.currencyCode || "SGD";
   const meta = (window.CURRENCY_META && window.CURRENCY_META[cCode]) || { defaultRate: 122 };
   const rate = (state.fxRate !== undefined && state.fxRate !== null) ? Number(state.fxRate) : meta.defaultRate;
-  const conv = (jpy) => (rate > 0 ? (jpy / rate).toFixed(2) : "0.00");
+  const conv = (jpy) => window.convertJpyToCurrency(jpy, rate).toFixed(2);
 
   const summary = window.computeBudgetSummary();
   const rows = [

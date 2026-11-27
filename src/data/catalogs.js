@@ -175,6 +175,11 @@ const AREA_TO_TABELOG_SLUG = {
   okinawa: "okinawa", naha: "okinawa", ishigaki: "okinawa", miyako: "okinawa", taketomi: "okinawa", onna: "okinawa"
 };
 
+const AREA_TO_TABELOG_REGEXES = Object.entries(AREA_TO_TABELOG_SLUG).map(([key, slug]) => [
+  new RegExp(`(?:^|[^a-z])${key}(?:$|[^a-z])`),
+  slug
+]);
+
 function resolvePrefSlugFromMeta(prefId, areaText) {
   if (prefId && window.getPrefectureById) {
     const p = window.getPrefectureById(prefId);
@@ -182,24 +187,19 @@ function resolvePrefSlugFromMeta(prefId, areaText) {
   }
   const raw = String(areaText || "");
   if (!raw.trim()) return "";
-  if (typeof window.prepareGazetteerText === "function" && typeof window.gazetteerKeyMatches === "function" && Array.isArray(window.JAPAN_GAZETTEER)) {
-    const prep = window.prepareGazetteerText(raw);
-    const cityStop = window.JAPAN_GAZETTEER.find(g => !g.isPrefFallback && g.keys.some(k => window.gazetteerKeyMatches(prep, k)));
-    if (cityStop && cityStop.prefId) {
-      const p = window.getPrefectureById ? window.getPrefectureById(cityStop.prefId) : null;
-      return (p && p.tabelogSlug) || cityStop.prefId;
-    }
-    const prefStop = window.JAPAN_GAZETTEER.find(g => g.isPrefFallback && g.keys.some(k => window.gazetteerKeyMatches(prep, k)));
-    if (prefStop && prefStop.prefId) {
-      const p = window.getPrefectureById ? window.getPrefectureById(prefStop.prefId) : null;
-      return (p && p.tabelogSlug) || prefStop.prefId;
+  if (typeof window.findMatchingGazetteerStops === "function") {
+    const hits = window.findMatchingGazetteerStops(raw);
+    const bestStop = hits.find(g => !g.isPrefFallback && g.prefId) || hits.find(g => g.prefId);
+    if (bestStop) {
+      const p = window.getPrefectureById ? window.getPrefectureById(bestStop.prefId) : null;
+      return (p && p.tabelogSlug) || bestStop.prefId;
     }
   }
   const low = raw.toLowerCase();
   const norm = typeof window.normalizeJapanRomaji === "function" ? window.normalizeJapanRomaji(low) : low;
-  for (const key of Object.keys(AREA_TO_TABELOG_SLUG)) {
-    const re = new RegExp(`(?:^|[^a-z])${key}(?:$|[^a-z])`);
-    if (re.test(low) || re.test(norm)) return AREA_TO_TABELOG_SLUG[key];
+  for (let i = 0; i < AREA_TO_TABELOG_REGEXES.length; i++) {
+    const [re, slug] = AREA_TO_TABELOG_REGEXES[i];
+    if (re.test(low) || re.test(norm)) return slug;
   }
   if (typeof window.resolveLocationInputStops === "function") {
     const resolved = window.resolveLocationInputStops(raw);

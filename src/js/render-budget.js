@@ -123,12 +123,15 @@ window.renderBudgetTable = function() {
     </tr>
   ` : "";
 
+  const stayPax = Math.round(b.stayGroup / b.pax);
+  const travelPax = Math.round((b.travelGroup + b.unmergedTransitGroup) / b.pax);
+  const funPax = Math.round(b.funGroup / b.pax);
   const paxRowHtml = b.pax > 1 ? `
     <tr id="budgetPerPaxRow" style="background:var(--indigo-soft);color:var(--indigo);font-weight:800;font-size:14px;">
       <td colspan="5">👥 ${en ? `Price / Pax (${b.pax} Travelers)` : `1名あたり金額（${b.pax}名）`}</td>
-      <td class="num-col">${window.fmtJpy(b.stayGroup / b.pax)}<br><small style="font-weight:600;">${window.fmtSgd(b.stayGroup / b.pax)}</small></td>
-      <td class="num-col">${window.fmtJpy((b.travelGroup + b.unmergedTransitGroup) / b.pax)}<br><small style="font-weight:600;">${window.fmtSgd((b.travelGroup + b.unmergedTransitGroup) / b.pax)}</small></td>
-      <td class="num-col">${window.fmtJpy(b.funGroup / b.pax)}<br><small style="font-weight:600;">${window.fmtSgd(b.funGroup / b.pax)}</small></td>
+      <td class="num-col">${window.fmtJpy(stayPax)}<br><small style="font-weight:600;">${window.fmtSgd(stayPax)}</small></td>
+      <td class="num-col">${window.fmtJpy(travelPax)}<br><small style="font-weight:600;">${window.fmtSgd(travelPax)}</small></td>
+      <td class="num-col">${window.fmtJpy(funPax)}<br><small style="font-weight:600;">${window.fmtSgd(funPax)}</small></td>
       <td class="num-col" id="budgetFinalPerPaxJpy">${window.fmtJpy(b.perPaxFinal)} / pax</td>
       <td class="num-col" id="budgetFinalPerPaxSgd">${window.fmtSgd(b.perPaxFinal)} / pax</td>
     </tr>

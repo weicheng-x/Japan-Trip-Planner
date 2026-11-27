@@ -66,6 +66,10 @@ window.pushUndoSnapshot = function(label) {
       currencyCode: state.currencyCode || "SGD",
       fxRate: state.fxRate !== undefined ? state.fxRate : 122,
       paxCount: state.paxCount || 1,
+      budgetMode: state.budgetMode || "group",
+      shareHotelRoom: typeof state.shareHotelRoom === "boolean" ? state.shareHotelRoom : true,
+      budgetTargetJpy: Number(state.budgetTargetJpy) || 0,
+      taxFreeEnabled: !!state.taxFreeEnabled,
       selectedPassId: state.selectedPassId,
       passStartDay: state.passStartDay,
       customPassPrice: state.customPassPrice,
@@ -104,6 +108,10 @@ window.undoLastChange = function() {
     if (snap.currencyCode) state.currencyCode = snap.currencyCode;
     if (snap.fxRate !== undefined) state.fxRate = snap.fxRate;
     if (snap.paxCount !== undefined) state.paxCount = snap.paxCount;
+    if (snap.budgetMode) state.budgetMode = snap.budgetMode;
+    if (typeof snap.shareHotelRoom === "boolean") state.shareHotelRoom = snap.shareHotelRoom;
+    if (snap.budgetTargetJpy !== undefined) state.budgetTargetJpy = snap.budgetTargetJpy;
+    if (typeof snap.taxFreeEnabled === "boolean") state.taxFreeEnabled = snap.taxFreeEnabled;
     state.selectedPassId = snap.selectedPassId;
     state.passStartDay = snap.passStartDay;
     state.customPassPrice = snap.customPassPrice;
@@ -512,10 +520,14 @@ window.updateTripDates = function(newStartStr, newEndStr, opts) {
         hList.forEach(h => {
           const shiftField = (raw) => {
             if (!raw) return raw;
-            const dParsed = window.parseDateLocal(raw.split("(")[0].trim());
+            const str = String(raw);
+            const m = str.match(/^([^\(（]+)([\s\S]*)$/);
+            const datePart = m ? m[1].trim() : str.trim();
+            const suffix = m && m[2] ? (" " + m[2].trim()) : "";
+            const dParsed = window.parseDateLocal(datePart);
             if (!dParsed) return raw;
             const shifted = new Date(dParsed.getFullYear(), dParsed.getMonth(), dParsed.getDate() + deltaDays);
-            return window.formatDateYMD(shifted);
+            return window.formatDateYMD(shifted) + suffix;
           };
           h.checkIn = shiftField(h.checkIn);
           h.checkOut = shiftField(h.checkOut);

@@ -15,6 +15,28 @@
     else if (typeof window.renderAll === "function") window.renderAll();
   }
 
+  function shiftExpandedDaysOnInsert(insertDay1Based) {
+    const next = {};
+    Object.keys(state.expandedDays || {}).forEach(k => {
+      if (!state.expandedDays[k]) return;
+      const num = parseInt(k, 10);
+      if (isNaN(num)) return;
+      next[num >= insertDay1Based ? num + 1 : num] = true;
+    });
+    state.expandedDays = next;
+  }
+
+  function remapExpandedDaysOnDelete(delDay1Based) {
+    const next = {};
+    Object.keys(state.expandedDays || {}).forEach(k => {
+      if (!state.expandedDays[k]) return;
+      const num = parseInt(k, 10);
+      if (isNaN(num) || num === delDay1Based) return;
+      next[num > delDay1Based ? num - 1 : num] = true;
+    });
+    state.expandedDays = next;
+  }
+
   function isCleanBlankTrip(enDays) {
     return state.activePreset === "__draft__" &&
       (enDays || []).length > 0 &&
@@ -257,6 +279,7 @@
         timeSlots: isClean ? [] : undefined
       });
     }
+    shiftExpandedDaysOnInsert(newNum);
     window.reindexDatesKeepingStart();
     window.ensureAllDaysHaveTimeSlots();
     window.saveState();
@@ -269,13 +292,12 @@
     const enSrc = state.dataEn.days && state.dataEn.days[idx];
     if (!enSrc) return;
     window.pushUndoSnapshot("Duplicate day");
-    const stamp = Date.now();
     const cloneDayObj = (src) => {
       if (!src) return null;
       const copy = JSON.parse(JSON.stringify(src));
       copy.legs = Array.isArray(src.legs) ? src.legs.slice() : [];
       copy.timeSlots = Array.isArray(src.timeSlots)
-        ? src.timeSlots.map((sl, si) => Object.assign({}, sl, { id: `slot_dup_${stamp}_${si}` }))
+        ? src.timeSlots.map(sl => Object.assign({}, sl, { id: typeof window.makeUid === "function" ? window.makeUid("slot_dup") : `slot_dup_${Date.now()}_${Math.random()}` }))
         : [];
       return copy;
     };
@@ -283,6 +305,7 @@
     if (state.dataJa.days && state.dataJa.days[idx]) {
       state.dataJa.days.splice(idx + 1, 0, cloneDayObj(state.dataJa.days[idx]));
     }
+    shiftExpandedDaysOnInsert(idx + 2);
     window.reindexDatesKeepingStart();
     if (!state.expandedDays || typeof state.expandedDays !== "object") state.expandedDays = {};
     state.expandedDays[idx + 2] = true;
@@ -344,6 +367,8 @@
         window.pushUndoSnapshot(`Delete Day ${idx + 1}`);
         state.dataEn.days.splice(idx, 1);
         if (state.dataJa.days) state.dataJa.days.splice(idx, 1);
+        remapExpandedDaysOnDelete(idx + 1);
+        state.passStartDay = Math.max(1, Math.min(state.dataEn.days.length, parseInt(state.passStartDay, 10) || 1));
         window.reindexDatesKeepingStart();
         window.saveState();
         refreshActiveOrAll();
@@ -474,7 +499,7 @@
 
   window.updateDayField = function(idx, field, val) {
     if (field === "stay" || field === "travelBase" || field === "fun") {
-      const numVal = Math.max(0, Number(val) || 0);
+      const numVal = Math.round(Math.max(0, Number(val) || 0));
       if (state.dataEn.days[idx]) state.dataEn.days[idx][field] = numVal;
       if (state.dataJa.days[idx]) state.dataJa.days[idx][field] = numVal;
     } else {
@@ -550,8 +575,9 @@
       return;
     }
 
+    window.pushUndoSnapshot(`Add slot to Day ${dayNum}`);
     const newSlot = {
-      id: `slot_${dayNum}_${Date.now()}`,
+      id: typeof window.makeUid === "function" ? window.makeUid(`slot_${dayNum}`) : `slot_${dayNum}_${Date.now()}`,
       timeFrom, timeTo,
       locFrom: locFrom || (d.region || ""),
       locTo: locTo || (d.region || ""),
@@ -576,6 +602,7 @@
   window.deleteDayTimeSlot = function(dayIdx, slotId, evt) {
     if (evt && evt.stopPropagation) evt.stopPropagation();
     window.ensureAllDaysHaveTimeSlots();
+    window.pushUndoSnapshot(`Delete slot on Day ${dayIdx + 1}`);
     [state.dataEn.days[dayIdx], state.dataJa.days[dayIdx]].forEach(target => {
       if (target && Array.isArray(target.timeSlots)) {
         target.timeSlots = target.timeSlots.filter(s => s.id !== slotId);

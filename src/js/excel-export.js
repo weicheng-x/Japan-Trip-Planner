@@ -235,7 +235,9 @@
     const cCode = state.currencyCode || "SGD";
     const meta = (window.CURRENCY_META && window.CURRENCY_META[cCode]) || { defaultRate: 122 };
     const rate = (state.fxRate !== undefined && state.fxRate !== null) ? Number(state.fxRate) : meta.defaultRate;
-    const conv = (jpy) => (rate > 0 ? Math.round(((Number(jpy) || 0) / rate) * 100) / 100 : 0);
+    const conv = (jpy) => typeof window.convertJpyToCurrency === "function"
+      ? window.convertJpyToCurrency(jpy, rate)
+      : (rate > 0 ? Math.round((Math.round(Number(jpy) || 0) * 100) / rate) / 100 : 0);
     const num = (v, style) => ({ v: Math.round(Number(v) || 0), s: style || 4 });
     const fx = (v, style) => ({ v: conv(v), s: style || 5 });
     const intCell = (v) => ({ v: parseInt(v, 10) || 0, s: 9 });

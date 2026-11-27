@@ -56,7 +56,7 @@ function buildSnapshotFromActiveState(descEn, descJa, existingId) {
   const labelEn = window.formatPresetLabel(cleanEn, state.startDate || "", daysLen, false);
   const labelJa = window.formatPresetLabel(cleanJa, state.startDate || "", daysLen, true);
   return {
-    id: existingId || ("userpreset_" + Date.now() + "_" + Math.floor(Math.random() * 1000)),
+    id: existingId || (typeof window.makeUid === "function" ? window.makeUid("userpreset") : ("userpreset_" + Date.now() + "_" + Math.floor(Math.random() * 1000))),
     labelEn,
     labelJa,
     startDate: state.startDate || "",
@@ -453,7 +453,7 @@ window.buildPresetExportPayload = function() {
   const envelope = {
     schema: "jp-trip-planner-preset-v2",
     exportedAt: new Date().toISOString(),
-    appVersion: "2.0.0",
+    appVersion: window.APP_VERSION || "2.2.0",
     preset: snap
   };
   const cleanName = window.sanitizeTripDescriptor(en ? snap.customTitleEn : snap.customTitleJa) || "Japan_Trip_Preset";
@@ -590,7 +590,7 @@ window.applyImportedPresetText = function(text, opts) {
           importedObj.id = targetId;
           state.savedCustomPresets[conflictIdx] = importedObj;
         } else {
-          targetId = "userpreset_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+          targetId = typeof window.makeUid === "function" ? window.makeUid("userpreset") : ("userpreset_" + Date.now() + "_" + Math.floor(Math.random() * 1000));
           importedObj.id = targetId;
           if (conflictIdx >= 0) {
             importedObj.customTitleEn = cleanEn + " (Imported)";

@@ -98,12 +98,14 @@
       });
     });
 
-    document.addEventListener("pointerup", () => {
+    const endDrag = () => {
       if (_dragState && _dragState.moved) {
         setTimeout(() => { _suppressNextClick = false; }, 60);
       }
       _dragState = null;
-    });
+    };
+    document.addEventListener("pointerup", endDrag);
+    document.addEventListener("pointercancel", endDrag);
 
     document.addEventListener("click", evt => {
       if (_suppressNextClick && evt && evt.target && evt.target.closest && evt.target.closest("#dynamicJapanMapSvg")) {

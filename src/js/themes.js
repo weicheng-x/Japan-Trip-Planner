@@ -9,6 +9,39 @@
   let _fireworkRockets = [];
   let _fireworkSparks = [];
   let _salvoCooldown = 90;
+  const MAX_FIREWORK_SPARKS = 900;
+
+  const SAKURA_PALETTES = [
+    { base: "#FFE8F0", mid: "#FFB7CE", tip: "#FF8DB2", edge: "rgba(190, 48, 102, 0.52)", vein: "rgba(219, 39, 119, 0.35)" },
+    { base: "#FFF5F8", mid: "#FFD1DF", tip: "#FFAAC5", edge: "rgba(199, 54, 110, 0.48)", vein: "rgba(236, 72, 153, 0.30)" },
+    { base: "#FFE0EC", mid: "#FFA8C4", tip: "#F472B6", edge: "rgba(175, 34, 92, 0.55)", vein: "rgba(219, 39, 119, 0.35)" }
+  ];
+  const AUTUMN_PALETTES = [
+    { fill: "#D9261C", fillDark: "#8F140E", vein: "#FCA5A5", stem: "#7C2D12", type: "momiji" },
+    { fill: "#E03C1F", fillDark: "#991B1B", vein: "#FDBA74", stem: "#7C2D12", type: "momiji" },
+    { fill: "#EA580C", fillDark: "#9A3412", vein: "#FDE047", stem: "#78350F", type: "momiji" },
+    { fill: "#C83E2B", fillDark: "#7F1D1D", vein: "#FECACA", stem: "#7C2D12", type: "momiji" },
+    { fill: "#EAB308", fillDark: "#B45309", vein: "#FEF9C3", stem: "#854D0E", type: "ginkgo" }
+  ];
+  const SUMMER_EMBER_COLORS = ["#FDE047", "#FB7185", "#38BDF8", "#FBBF24"];
+  const FIREWORK_PALETTES = [
+    { main: "#FDE047", sub: "#FB923C", core: "#FFFFFF", kind: "kiku" },
+    { main: "#FB7185", sub: "#F43F5E", core: "#FFE4E6", kind: "botan" },
+    { main: "#38BDF8", sub: "#818CF8", core: "#E0F2FE", kind: "botan" },
+    { main: "#FBBF24", sub: "#F59E0B", core: "#FEF9C3", kind: "kamuro" },
+    { main: "#34D399", sub: "#FDE047", core: "#ECFDF5", kind: "kiku" },
+    { main: "#C084FC", sub: "#F472B6", core: "#FAE8FF", kind: "star" }
+  ];
+  const GINKGO_VEINS = [-6.5, -3.2, 3.2, 6.5];
+  const MOMIJI_POINTS = [
+    [0, 4.2], [-2.1, 4.8], [-8.2, 6.4], [-5.4, 2.8], [-10.2, 0.8], [-13.4, -2.2],
+    [-9.6, -3.4], [-5.2, -3.0], [-8.8, -8.2], [-9.8, -11.8], [-6.2, -9.4], [-2.6, -5.8],
+    [-2.2, -11.2], [0, -15.4], [2.2, -11.2], [2.6, -5.8], [6.2, -9.4], [9.8, -11.8],
+    [8.8, -8.2], [5.2, -3.0], [9.6, -3.4], [13.4, -2.2], [10.2, 0.8], [5.4, 2.8],
+    [8.2, 6.4], [2.1, 4.8]
+  ];
+  const MOMIJI_VEINS = [[0, -13.2], [-8.2, -10.0], [8.2, -10.0], [-11.2, -1.8], [11.2, -1.8], [-6.6, 5.4], [6.6, 5.4]];
+  const SNOW_BRANCH_FRACS = [0.45, 0.72];
 
   window.SEASON_ASSETS = {
     sakura: "assets/hero-spring.jpg",
@@ -62,11 +95,6 @@
 
   function createSeasonalParticle(seasonKey, w, h, randomY) {
     if (seasonKey === "sakura") {
-      const palettes = [
-        { base: "#FFE8F0", mid: "#FFB7CE", tip: "#FF8DB2", edge: "rgba(190, 48, 102, 0.52)", vein: "rgba(219, 39, 119, 0.35)" },
-        { base: "#FFF5F8", mid: "#FFD1DF", tip: "#FFAAC5", edge: "rgba(199, 54, 110, 0.48)", vein: "rgba(236, 72, 153, 0.30)" },
-        { base: "#FFE0EC", mid: "#FFA8C4", tip: "#F472B6", edge: "rgba(175, 34, 92, 0.55)", vein: "rgba(219, 39, 119, 0.35)" }
-      ];
       return {
         x: Math.random() * w,
         y: randomY ? Math.random() * h : -22,
@@ -79,17 +107,10 @@
         flipSpeed: 0.022 + Math.random() * 0.030,
         swayPhase: Math.random() * Math.PI * 2,
         swayAmp: 0.45 + Math.random() * 0.60,
-        pal: palettes[Math.floor(Math.random() * palettes.length)],
+        pal: SAKURA_PALETTES[Math.floor(Math.random() * SAKURA_PALETTES.length)],
         alpha: 0.84 + Math.random() * 0.14
       };
     } else if (seasonKey === "autumn") {
-      const palettes = [
-        { fill: "#D9261C", fillDark: "#8F140E", vein: "#FCA5A5", stem: "#7C2D12", type: "momiji" },
-        { fill: "#E03C1F", fillDark: "#991B1B", vein: "#FDBA74", stem: "#7C2D12", type: "momiji" },
-        { fill: "#EA580C", fillDark: "#9A3412", vein: "#FDE047", stem: "#78350F", type: "momiji" },
-        { fill: "#C83E2B", fillDark: "#7F1D1D", vein: "#FECACA", stem: "#7C2D12", type: "momiji" },
-        { fill: "#EAB308", fillDark: "#B45309", vein: "#FEF9C3", stem: "#854D0E", type: "ginkgo" }
-      ];
       return {
         x: Math.random() * w,
         y: randomY ? Math.random() * h : -28,
@@ -102,7 +123,7 @@
         flipSpeed: 0.018 + Math.random() * 0.025,
         swayPhase: Math.random() * Math.PI * 2,
         swayAmp: 0.55 + Math.random() * 0.70,
-        pal: palettes[Math.floor(Math.random() * palettes.length)],
+        pal: AUTUMN_PALETTES[Math.floor(Math.random() * AUTUMN_PALETTES.length)],
         alpha: 0.88 + Math.random() * 0.12
       };
     } else if (seasonKey === "summer") {
@@ -115,7 +136,7 @@
         vy: -(0.22 + Math.random() * 0.35),
         swayPhase: Math.random() * Math.PI * 2,
         swayAmp: 0.2,
-        color: ["#FDE047", "#FB7185", "#38BDF8", "#FBBF24"][Math.floor(Math.random() * 4)],
+        color: SUMMER_EMBER_COLORS[Math.floor(Math.random() * SUMMER_EMBER_COLORS.length)],
         alpha: 0.28 + Math.random() * 0.32
       };
     } else {
@@ -138,15 +159,7 @@
   }
 
   function createFireworkRocket(w, h, delayFrames, xOverride) {
-    const palettes = [
-      { main: "#FDE047", sub: "#FB923C", core: "#FFFFFF", kind: "kiku" },
-      { main: "#FB7185", sub: "#F43F5E", core: "#FFE4E6", kind: "botan" },
-      { main: "#38BDF8", sub: "#818CF8", core: "#E0F2FE", kind: "botan" },
-      { main: "#FBBF24", sub: "#F59E0B", core: "#FEF9C3", kind: "kamuro" },
-      { main: "#34D399", sub: "#FDE047", core: "#ECFDF5", kind: "kiku" },
-      { main: "#C084FC", sub: "#F472B6", core: "#FAE8FF", kind: "star" }
-    ];
-    const pal = palettes[Math.floor(Math.random() * palettes.length)];
+    const pal = FIREWORK_PALETTES[Math.floor(Math.random() * FIREWORK_PALETTES.length)];
     const startX = xOverride !== undefined ? xOverride : w * (0.08 + Math.random() * 0.84);
     return {
       x: startX,
@@ -236,7 +249,7 @@
       ctx.stroke();
       ctx.strokeStyle = pal.vein;
       ctx.lineWidth = 0.55;
-      [-6.5, -3.2, 3.2, 6.5].forEach(tx => {
+      GINKGO_VEINS.forEach(tx => {
         ctx.beginPath();
         ctx.moveTo(0, 5.2);
         ctx.quadraticCurveTo(tx * 0.5, -1, tx, -7.8);
@@ -257,23 +270,16 @@
       ctx.strokeStyle = pal.fillDark;
       ctx.lineWidth = 0.65;
       ctx.lineJoin = "round";
-      const pts = [
-        [0, 4.2], [-2.1, 4.8], [-8.2, 6.4], [-5.4, 2.8], [-10.2, 0.8], [-13.4, -2.2],
-        [-9.6, -3.4], [-5.2, -3.0], [-8.8, -8.2], [-9.8, -11.8], [-6.2, -9.4], [-2.6, -5.8],
-        [-2.2, -11.2], [0, -15.4], [2.2, -11.2], [2.6, -5.8], [6.2, -9.4], [9.8, -11.8],
-        [8.8, -8.2], [5.2, -3.0], [9.6, -3.4], [13.4, -2.2], [10.2, 0.8], [5.4, 2.8],
-        [8.2, 6.4], [2.1, 4.8]
-      ];
       ctx.beginPath();
-      ctx.moveTo(pts[0][0], pts[0][1]);
-      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+      ctx.moveTo(MOMIJI_POINTS[0][0], MOMIJI_POINTS[0][1]);
+      for (let i = 1; i < MOMIJI_POINTS.length; i++) ctx.lineTo(MOMIJI_POINTS[i][0], MOMIJI_POINTS[i][1]);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
       ctx.strokeStyle = pal.vein;
       ctx.lineWidth = 0.65;
       ctx.lineCap = "round";
-      [[0, -13.2], [-8.2, -10.0], [8.2, -10.0], [-11.2, -1.8], [11.2, -1.8], [-6.6, 5.4], [6.6, 5.4]].forEach(vt => {
+      MOMIJI_VEINS.forEach(vt => {
         ctx.beginPath();
         ctx.moveTo(0, 3.6);
         ctx.lineTo(vt[0], vt[1]);
@@ -290,8 +296,7 @@
   }
 
   // Authentic 6-Pointed Dendritic Crystalline Snowflakes (雪の結晶)
-  function drawRealisticSnowflake(ctx, p) {
-    const isDark = document.body.classList.contains("dark-mode");
+  function drawRealisticSnowflake(ctx, p, isDark) {
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.globalAlpha = p.alpha;
@@ -312,7 +317,7 @@
         ctx.lineTo(0, -r);
         ctx.stroke();
         // Outer & inner dendritic side branches
-        [0.45, 0.72].forEach(frac => {
+        SNOW_BRANCH_FRACS.forEach(frac => {
           const yOff = -r * frac;
           const bLen = r * (frac < 0.6 ? 0.34 : 0.24);
           ctx.beginPath();
@@ -343,9 +348,10 @@
   }
 
   function spawnFireworkBurst(r) {
+    if (_fireworkSparks.length >= MAX_FIREWORK_SPARKS) return;
     const kind = r.pal.kind;
     const outerCount = kind === "kamuro" ? 56 : 48;
-    for (let k = 0; k < outerCount; k++) {
+    for (let k = 0; k < outerCount && _fireworkSparks.length < MAX_FIREWORK_SPARKS; k++) {
       const ang = (Math.PI * 2 * k) / outerCount + (Math.random() - 0.5) * 0.04;
       const spd = (kind === "kamuro" ? 1.8 : 2.3) + Math.random() * 1.5;
       _fireworkSparks.push({
@@ -361,7 +367,7 @@
     }
     // Inner peony pistil ring
     const innerCount = 24;
-    for (let k = 0; k < innerCount; k++) {
+    for (let k = 0; k < innerCount && _fireworkSparks.length < MAX_FIREWORK_SPARKS; k++) {
       const ang = (Math.PI * 2 * k) / innerCount;
       const spd = 1.05 + Math.random() * 0.65;
       _fireworkSparks.push({
@@ -410,9 +416,10 @@
 
     const heroCanvas = document.getElementById("heroSeasonalCanvas");
     const bodyCanvas = document.getElementById("bodySeasonalCanvas");
-    if (!heroCanvas || !bodyCanvas) return;
+    if (!heroCanvas || !heroCanvas.parentElement || !bodyCanvas) return;
 
     const hRect = heroCanvas.parentElement.getBoundingClientRect();
+    const isDark = document.body.classList.contains("dark-mode");
     const heroVisible = hRect.bottom > 0 && hRect.width > 0 && hRect.height > 0;
     if (heroVisible) {
       const targetW = Math.max(320, Math.floor(hRect.width));
@@ -553,7 +560,7 @@
 
           if (sKey === "sakura") drawRealisticSakuraPetal(ctx, p);
           else if (sKey === "autumn") drawRealisticAutumnLeaf(ctx, p);
-          else drawRealisticSnowflake(ctx, p);
+          else drawRealisticSnowflake(ctx, p, isDark);
         });
       };
 

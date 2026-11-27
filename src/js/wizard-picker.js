@@ -68,91 +68,24 @@
   }
 
   function buildWizardDynamicMuniContent(box, en) {
-    if (!box || (box.vw >= 295 && !_wizardMapPrefId)) return { html: "", sig: "none" };
-    const prefPaths = window.JAPAN_PREF_PATHS || {};
-    const munisByPref = window.JAPAN_MUNIS_BY_PREF || window.JAPAN_CITIES_BY_PREF || {};
-    const xMin = box.vx - box.vw * 0.12;
-    const xMax = box.vx + box.vw * 1.12;
-    const yMin = box.vy - box.vh * 0.12;
-    const yMax = box.vy + box.vh * 1.12;
-
-    const visPrefs = [];
-    if (box.vw >= 295 && _wizardMapPrefId && prefPaths[_wizardMapPrefId]) {
-      visPrefs.push(_wizardMapPrefId);
-    } else {
-      Object.keys(prefPaths).forEach(pId => {
-        const b = prefPaths[pId].bbox;
-        if (b && b[2] >= xMin && b[0] <= xMax && b[3] >= yMin && b[1] <= yMax) {
-          visPrefs.push(pId);
-        }
-      });
-    }
-    if (visPrefs.length === 0) return { html: "", sig: "empty" };
-
-    const lodTier = box.vw < 45 ? 4 : (box.vw < 85 ? 3 : (box.vw < 145 ? 2 : 1));
     const selSet = new Set(_wizardSelected.map(x => x.key.toLowerCase()));
     const selSig = _wizardSelected.map(x => x.key).join(",");
-    const sig = `${visPrefs.sort().join(",")}|${lodTier}|${Math.round(box.vx / 20)},${Math.round(box.vy / 20)}|${selSig}|${en ? "en" : "ja"}`;
-
-    const polyStroke = Math.max(0.14, Math.min(0.55, box.vw / 260)).toFixed(2);
-    const lblSizeNum = Math.max(0.95, Math.min(4.0, box.vw / 46));
-    const lblSize = lblSizeNum.toFixed(2);
-    const lblStroke = (lblSizeNum * 0.30).toFixed(2);
-
-    const polys = [];
-    const labelCandidates = [];
-    const seenIds = new Set();
-
-    visPrefs.forEach(pId => {
-      const list = munisByPref[pId] || [];
-      const prefObj = window.getPrefectureById ? window.getPrefectureById(pId) : null;
-      const prefTitle = prefObj ? (en ? prefObj.nameEn : prefObj.nameJa) : pId;
-      list.forEach((m, idx) => {
-        const gId = m.geoId || m.id;
-        if (!gId || seenIds.has(gId)) return;
-        const geo = window.JAPAN_CITY_PATHS && window.JAPAN_CITY_PATHS[gId];
-        if (!geo || !geo.d || !geo.bbox) return;
-        const b = geo.bbox;
-        if (b[2] < xMin || b[0] > xMax || b[3] < yMin || b[1] > yMax) return;
-        seenIds.add(gId);
-
-        const isSel = selSet.has(String(m.nameEn).toLowerCase()) || selSet.has(String(m.id).toLowerCase()) || (m.rawNameEn && selSet.has(String(m.rawNameEn).toLowerCase()));
-        const dispLabel = en ? (m.rawNameEn || m.nameEn) : (m.rawNameJa || m.nameJa);
-        polys.push(`<path class="wiz-map-city${isSel ? " selected" : ""}" data-place-id="${window.escapeAttr(m.id)}" d="${geo.d}" stroke-width="${polyStroke}" stroke-linejoin="round" onclick="wizardTogglePlaceId(this.dataset.placeId)"><title>${window.escapeHtml(`${dispLabel} (${prefTitle})`)}</title></path>`);
-
-        const cx = geo.cx;
-        const cy = geo.cy;
-        if (cx >= box.vx - box.vw * 0.05 && cx <= box.vx + box.vw * 1.05 && cy >= box.vy - box.vh * 0.05 && cy <= box.vy + box.vh * 1.05) {
-          const areaEst = Math.max(0.1, (b[2] - b[0]) * (b[3] - b[1]));
-          const isCityOrWard = m.isShi || m.muniType === "ward";
-          const isMajor = idx < 4;
-          const cutoff = lodTier === 4 ? 0 : (lodTier === 3 ? (box.vw * box.vw) / 1350 : (box.vw * box.vw) / 340);
-          if (lodTier >= 4 || (lodTier >= 3 && (isCityOrWard || areaEst > cutoff)) || isMajor || (lodTier >= 2 && isCityOrWard) || areaEst > cutoff) {
-            labelCandidates.push({
-              name: dispLabel,
-              cx,
-              cy,
-              prio: (isMajor ? 400 : 0) + (isCityOrWard ? 160 : 0) + areaEst
-            });
-          }
-        }
-      });
+    return window.renderMunicipalityLodLayer({
+      box,
+      en,
+      focusedPrefId: _wizardMapPrefId,
+      maxStroke: 0.55,
+      strokeDivisor: 260,
+      tier3AreaDivisor: 1350,
+      maxLabelsByTier: { 4: 160, 3: 90, 2: 42, 1: 18 },
+      sigExtra: selSig,
+      buildPathHtml: ({ muni, geo, dispLabel, prefTitle, polyStroke }) => {
+        const isSel = selSet.has(String(muni.nameEn).toLowerCase()) ||
+          selSet.has(String(muni.id).toLowerCase()) ||
+          (muni.rawNameEn && selSet.has(String(muni.rawNameEn).toLowerCase()));
+        return `<path class="wiz-map-city${isSel ? " selected" : ""}" data-place-id="${window.escapeAttr(muni.id)}" d="${geo.d}" stroke-width="${polyStroke}" stroke-linejoin="round" onclick="wizardTogglePlaceId(this.dataset.placeId)"><title>${window.escapeHtml(`${dispLabel} (${prefTitle})`)}</title></path>`;
+      }
     });
-
-    labelCandidates.sort((a, b) => b.prio - a.prio);
-    const maxLabels = lodTier === 4 ? 160 : (lodTier === 3 ? 90 : (lodTier === 2 ? 42 : 18));
-    const minDistX = lblSizeNum * (lodTier === 4 ? 3.2 : (lodTier === 3 ? 4.4 : 6.0));
-    const minDistY = lblSizeNum * (lodTier === 4 ? 1.15 : 1.40);
-    const accepted = [];
-    const labelsHtml = [];
-    for (let i = 0; i < labelCandidates.length && accepted.length < maxLabels; i++) {
-      const c = labelCandidates[i];
-      if (accepted.some(a => Math.abs(a.cx - c.cx) < minDistX && Math.abs(a.cy - c.cy) < minDistY)) continue;
-      accepted.push(c);
-      labelsHtml.push(`<text class="gmaps-muni-label" x="${c.cx}" y="${c.cy}" text-anchor="middle" font-size="${lblSize}" style="stroke-width:${lblStroke}px;">${window.escapeHtml(c.name)}</text>`);
-    }
-
-    return { html: polys.join("") + labelsHtml.join(""), sig };
   }
 
   window.updateWizardDynamicMuniLayer = function(svgEl) {
@@ -544,7 +477,11 @@
     _wizardDragIdx = idx;
     if (evt && evt.dataTransfer) {
       evt.dataTransfer.effectAllowed = "move";
-      try { evt.dataTransfer.setData("text/plain", String(idx)); } catch (_e) {}
+      try {
+        evt.dataTransfer.setData("text/plain", String(idx));
+      } catch (err) {
+        console.warn("[JP Trip Planner] Drag dataTransfer error:", err);
+      }
     }
     if (evt && evt.currentTarget && evt.currentTarget.classList) {
       evt.currentTarget.classList.add("is-dragging");
@@ -780,12 +717,14 @@
       });
     });
 
-    document.addEventListener("pointerup", () => {
+    const endWizDrag = () => {
       if (_wizMapDrag && _wizMapDrag.moved) {
         setTimeout(() => { _wizSuppressClick = false; }, 60);
       }
       _wizMapDrag = null;
-    });
+    };
+    document.addEventListener("pointerup", endWizDrag);
+    document.addEventListener("pointercancel", endWizDrag);
 
     document.addEventListener("click", evt => {
       if (_wizSuppressClick && evt && evt.target && evt.target.closest && evt.target.closest("#wizardJapanMapSvg")) {

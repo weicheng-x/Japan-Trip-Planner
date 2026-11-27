@@ -92,7 +92,9 @@ function createWindow() {
             hasWizardZoom: typeof window.wizardZoomMap === "function",
             hasDisambiguate: typeof window.disambiguateLocationInput === "function",
             hasDismissPlaceCard: typeof window.dismissMapPlaceCard === "function",
-            hasRomanization: typeof window.normalizeJapanRomaji === "function"
+            hasRomanization: typeof window.normalizeJapanRomaji === "function",
+            appVersion: window.APP_VERSION || "",
+            hasSharedLod: typeof window.renderMunicipalityLodLayer === "function"
           };
         })()`);
         console.log("SMOKE_PROBE:", JSON.stringify(probe));
@@ -101,7 +103,7 @@ function createWindow() {
           app.exit(1);
           return;
         }
-        if (!probe.heroImgComplete || probe.presetCount !== 7 || probe.hasCustomBlankInCatalog || !probe.hasFeb2027 || !probe.hasDesktopAPI || !probe.hasAutoPopulateGuides || !probe.hasTransitLegEditor || probe.prefectureCount !== 47 || probe.prefCatalogCount !== 47 || probe.cityCatalogCount < 75 || probe.prefGeoCount !== 47 || probe.cityGeoCount < 1765 || probe.shiCount !== 792 || probe.muniCount < 1740 || probe.cityHotelsCount !== 80 || probe.prefHotelsCount !== 47 || probe.wizardCityCount !== 12 || !probe.hasReorderDay || !probe.hasReorderWizard || !probe.hasWizardZoom || !probe.hasDisambiguate || !probe.hasDismissPlaceCard || !probe.hasRomanization) {
+        if (!probe.heroImgComplete || probe.presetCount !== 7 || probe.hasCustomBlankInCatalog || !probe.hasFeb2027 || !probe.hasDesktopAPI || !probe.hasAutoPopulateGuides || !probe.hasTransitLegEditor || probe.prefectureCount !== 47 || probe.prefCatalogCount !== 47 || probe.cityCatalogCount < 75 || probe.prefGeoCount !== 47 || probe.cityGeoCount < 1765 || probe.shiCount !== 792 || probe.muniCount < 1740 || probe.cityHotelsCount !== 80 || probe.prefHotelsCount !== 47 || probe.wizardCityCount !== 12 || !probe.hasReorderDay || !probe.hasReorderWizard || !probe.hasWizardZoom || !probe.hasDisambiguate || !probe.hasDismissPlaceCard || !probe.hasRomanization || probe.appVersion !== "2.2.0" || !probe.hasSharedLod) {
           console.error("SMOKE_FAILED_ASSERTIONS", probe);
           app.exit(1);
           return;
@@ -227,6 +229,7 @@ ipcMain.handle("load-state", async () => {
     const raw = fs.readFileSync(p, "utf8");
     return JSON.parse(raw);
   } catch (e) {
+    console.warn("[JP Trip Planner] Failed to load desktop state:", e && e.message);
     return null;
   }
 });

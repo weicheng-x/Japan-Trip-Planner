@@ -7,8 +7,9 @@ window.filterFoodKey = function(key) {
 };
 
 window.toggleFoodTried = function(id) {
+  const sid = String(id);
   [state.dataEn.food, state.dataJa.food].forEach(arr => {
-    const item = (arr || []).find(f => f.id === id);
+    const item = (arr || []).find(f => String(f.id) === sid);
     if (item) item.tried = !item.tried;
   });
   window.saveState();
@@ -16,9 +17,10 @@ window.toggleFoodTried = function(id) {
 };
 
 window.deleteFood = function(id) {
+  const sid = String(id);
   window.pushUndoSnapshot("Delete gourmet spot");
-  state.dataEn.food = (state.dataEn.food || []).filter(f => f.id !== id);
-  state.dataJa.food = (state.dataJa.food || []).filter(f => f.id !== id);
+  state.dataEn.food = (state.dataEn.food || []).filter(f => String(f.id) !== sid);
+  state.dataJa.food = (state.dataJa.food || []).filter(f => String(f.id) !== sid);
   window.saveState();
   window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(window.isEn() ? "🗑️ Removed gourmet spot" : "🗑️ グルメカードを削除しました");
@@ -37,8 +39,9 @@ window.addCustomFood = function() {
     window.showToast(en ? "Please enter a specialty dish name" : "料理名を入力してください");
     return;
   }
+  window.pushUndoSnapshot("Add gourmet spot");
   const resolvedPlace = place || "Custom Spot";
-  const newId = Date.now();
+  const newId = typeof window.makeNumericUid === "function" ? window.makeNumericUid() : Date.now();
   const tbEn = typeof window.resolveTabelogUrlForItem === "function"
     ? window.resolveTabelogUrlForItem({ place: resolvedPlace, region: regVal, tabelogUrl: rawTbUrl }, false)
     : rawTbUrl;
@@ -76,6 +79,9 @@ window.renderGourmet = function() {
 
   const regCounts = {};
   foodList.forEach(f => { regCounts[f.region] = (regCounts[f.region] || 0) + 1; });
+  if (state.activeFoodKey !== "ALL" && state.activeFoodKey !== "EASY_ONLY" && !regCounts[state.activeFoodKey]) {
+    state.activeFoodKey = "ALL";
+  }
   const dynamicPills = [{ key: "ALL", label: en ? `All Spots (${foodList.length})` : `すべて (${foodList.length})` }];
   Object.entries(regCounts).forEach(([rName, cnt]) => { dynamicPills.push({ key: rName, label: `${rName} (${cnt})` }); });
   dynamicPills.push({ key: "EASY_ONLY", label: en ? "🟢 Station Walkable" : "🟢 駅チカ徒歩圏" });
@@ -131,10 +137,10 @@ window.renderGourmet = function() {
           <p style="font-size:12.5px;color:var(--ink-muted);margin-top:8px;">${window.escapeHtml(f.note)}</p>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:9px;border-top:1px solid var(--border);">
-          <button type="button" class="btn" style="padding:4px 10px;font-size:12px;" onclick="toggleFoodTried(${Number(f.id)})">
+          <button type="button" class="btn" style="padding:4px 10px;font-size:12px;" data-id="${window.escapeAttr(String(f.id))}" onclick="toggleFoodTried(this.dataset.id)">
             ${f.tried ? (en ? "✅ Visited" : "✅ 訪問済") : (en ? "☐ Wishlist / Visited" : "☐ 行きたい / 訪問済")}
           </button>
-          <button type="button" class="btn btn-danger" style="padding:4px 8px;font-size:11.5px;" onclick="deleteFood(${Number(f.id)})">🗑️</button>
+          <button type="button" class="btn btn-danger" style="padding:4px 8px;font-size:11.5px;" data-id="${window.escapeAttr(String(f.id))}" onclick="deleteFood(this.dataset.id)">🗑️</button>
         </div>
       </div>
     `;
@@ -177,7 +183,8 @@ window.addAccessRow = function() {
     window.showToast(en ? "Enter both a route/PDF name and URL" : "名称とURLを入力してください");
     return;
   }
-  const obj = { id: "acc_" + Date.now(), area, day: en ? "Custom" : "カスタム", place, url, note, isExisting: true };
+  window.pushUndoSnapshot("Add transit link");
+  const obj = { id: typeof window.makeUid === "function" ? window.makeUid("acc") : ("acc_" + Date.now()), area, day: en ? "Custom" : "カスタム", place, url, note, isExisting: true };
   state.dataEn.access.unshift(Object.assign({}, obj));
   state.dataJa.access.unshift(Object.assign({}, obj));
   window.saveState();
@@ -198,6 +205,9 @@ window.renderAccessTable = function() {
 
   const areaCounts = {};
   accessList.forEach(a => { areaCounts[a.area] = (areaCounts[a.area] || 0) + 1; });
+  if (state.activeAccessKey !== "ALL" && !areaCounts[state.activeAccessKey]) {
+    state.activeAccessKey = "ALL";
+  }
   const pills = [{ key: "ALL", label: en ? `All Areas (${accessList.length})` : `全エリア (${accessList.length})` }];
   Object.entries(areaCounts).forEach(([aName, cnt]) => { pills.push({ key: aName, label: `${aName} (${cnt})` }); });
 
@@ -280,7 +290,8 @@ window.addGuideRow = function() {
     window.showToast(en ? "Enter both a guide title and URL" : "観光地名とURLを入力してください");
     return;
   }
-  const obj = { id: "gd_" + Date.now(), area, day: en ? "Custom" : "カスタム", location, url, note, isExisting: true };
+  window.pushUndoSnapshot("Add sightseeing guide");
+  const obj = { id: typeof window.makeUid === "function" ? window.makeUid("gd") : ("gd_" + Date.now()), area, day: en ? "Custom" : "カスタム", location, url, note, isExisting: true };
   state.dataEn.guides.unshift(Object.assign({}, obj));
   state.dataJa.guides.unshift(Object.assign({}, obj));
   window.saveState();
@@ -328,6 +339,9 @@ window.renderGuidesTable = function() {
 
   const areaCounts = {};
   guidesList.forEach(g => { areaCounts[g.area] = (areaCounts[g.area] || 0) + 1; });
+  if (state.activeGuideKey !== "ALL" && !areaCounts[state.activeGuideKey]) {
+    state.activeGuideKey = "ALL";
+  }
   const pills = [{ key: "ALL", label: en ? `All Regions (${guidesList.length})` : `全エリア (${guidesList.length})` }];
   Object.entries(areaCounts).forEach(([aName, cnt]) => { pills.push({ key: aName, label: `${aName} (${cnt})` }); });
 
@@ -381,14 +395,16 @@ window.addShoppingItem = function() {
   const name = (document.getElementById("newShopName")?.value || "").trim();
   const url = (document.getElementById("newShopUrl")?.value || "").trim();
   const store = (document.getElementById("newShopStore")?.value || "").trim();
-  const price = Math.max(0, parseFloat(document.getElementById("newShopPrice")?.value || "0") || 0);
+  const price = Math.round(Math.max(0, parseFloat(document.getElementById("newShopPrice")?.value || "0") || 0));
   const qty = Math.max(1, parseInt(document.getElementById("newShopQty")?.value || "1", 10) || 1);
 
   if (!name) {
     window.showToast(en ? "Please enter an item name" : "商品名を入力してください");
     return;
   }
-  state.shoppingList.push({ id: "shop_" + Date.now(), name, url, store, price, qty, bought: false });
+  window.pushUndoSnapshot("Add shopping item");
+  const newShopId = typeof window.makeUid === "function" ? window.makeUid("shop") : ("shop_" + Date.now());
+  state.shoppingList.push({ id: newShopId, name, url, store, price, qty, bought: false });
   window.saveState();
   window.refreshActiveViews ? window.refreshActiveViews() : window.renderAll();
   window.showToast(en ? `🛍️ Added "${name}" to Shopping List` : `🛍️ 「${name}」を買い物リストに追加しました`);
@@ -397,7 +413,7 @@ window.addShoppingItem = function() {
 window.updateShoppingItem = function(id, field, val) {
   const item = (state.shoppingList || []).find(x => x.id === id);
   if (!item) return;
-  if (field === "price") item.price = Math.max(0, parseFloat(val) || 0);
+  if (field === "price") item.price = Math.round(Math.max(0, parseFloat(val) || 0));
   else if (field === "qty") item.qty = Math.max(1, parseInt(val, 10) || 1);
   else if (field === "bought") item.bought = !!val;
   else item[field] = val;

@@ -3,16 +3,52 @@
 (function() {
   let _locCache = { sig: "", result: null };
   let _lastDynamicMuniSig = "";
+  const _gazMatcherCache = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+  const _gazMatchCache = new Map();
+
+  function getGazMatcher(g) {
+    if (_gazMatcherCache && _gazMatcherCache.has(g)) return _gazMatcherCache.get(g);
+    const m = typeof window.compileGazetteerEntryMatcher === "function"
+      ? window.compileGazetteerEntryMatcher(g.keys)
+      : null;
+    if (_gazMatcherCache && m) _gazMatcherCache.set(g, m);
+    return m;
+  }
 
   window.findMatchingGazetteerStops = function(rawText) {
+    const rawStr = String(rawText || "");
+    if (!rawStr.trim()) return [];
+    const hitRaw = _gazMatchCache.get(rawStr);
+    if (hitRaw) return hitRaw.slice();
+
     const prep = typeof window.prepareGazetteerText === "function"
-      ? window.prepareGazetteerText(rawText)
-      : { rawLower: String(rawText || "").toLowerCase().trim(), normText: String(rawText || "").toLowerCase().trim() };
+      ? window.prepareGazetteerText(rawStr)
+      : {
+        rawLower: rawStr.toLowerCase().trim(),
+        normText: rawStr.toLowerCase().trim(),
+        hasNonAscii: /[^\x00-\x7F]/.test(rawStr),
+        hasAscii: /[a-z0-9]/i.test(rawStr)
+      };
     if (!prep.rawLower) return [];
+
+    const hitPrep = _gazMatchCache.get(prep.rawLower);
+    if (hitPrep) {
+      if (_gazMatchCache.size < 2000) _gazMatchCache.set(rawStr, hitPrep);
+      return hitPrep.slice();
+    }
 
     const matches = [];
     (window.JAPAN_GAZETTEER || []).forEach(g => {
-      if (g.id === prep.rawLower || g.keys.some(k => window.gazetteerKeyMatches(prep, k))) {
+      if (g.id === prep.rawLower) {
+        matches.push(g);
+        return;
+      }
+      const matcher = getGazMatcher(g);
+      if (matcher) {
+        const hitCjk = prep.hasNonAscii && matcher.cjkKeys.some(k => prep.rawLower.includes(k));
+        const hitAscii = !hitCjk && prep.hasAscii && matcher.asciiRx && matcher.asciiRx.test(prep.normText);
+        if (hitCjk || hitAscii) matches.push(g);
+      } else if (g.keys.some(k => window.gazetteerKeyMatches(prep, k))) {
         matches.push(g);
       }
     });
@@ -24,7 +60,12 @@
       : matches;
 
     const specificPrefs = new Set(filteredAomori.filter(m => !m.isPrefFallback && m.prefId).map(m => m.prefId));
-    return filteredAomori.filter(m => !m.isPrefFallback || !specificPrefs.has(m.prefId));
+    const result = filteredAomori.filter(m => !m.isPrefFallback || !specificPrefs.has(m.prefId));
+
+    if (_gazMatchCache.size >= 2000) _gazMatchCache.clear();
+    _gazMatchCache.set(prep.rawLower, result);
+    if (rawStr !== prep.rawLower) _gazMatchCache.set(rawStr, result);
+    return result.slice();
   };
 
   function getStopsForDayStrict(d) {
@@ -326,9 +367,14 @@
     });
   }
 
-  // Progressive Level-of-Detail (LOD) Municipalities Layer: zooming in reveals all 1,747 MLIT cities (市), wards (区), towns (町) & villages (村) with zero gaps
-  window.buildDynamicCityLayerContent = function(box, en, focusedPrefId) {
+  // Shared Progressive Level-of-Detail (LOD) Municipalities Layer for both Overview Map & Wizard Map Picker
+  window.renderMunicipalityLodLayer = function(opts) {
+    const cfg = opts || {};
+    const box = cfg.box;
+    const en = !!cfg.en;
+    const focusedPrefId = cfg.focusedPrefId || null;
     if (!box || (box.vw >= 295 && !focusedPrefId)) return { html: "", sig: "none" };
+
     const prefPaths = window.JAPAN_PREF_PATHS || {};
     const munisByPref = window.JAPAN_MUNIS_BY_PREF || window.JAPAN_CITIES_BY_PREF || {};
     const xMin = box.vx - box.vw * 0.12;
@@ -350,9 +396,10 @@
     if (visPrefs.length === 0) return { html: "", sig: "empty" };
 
     const lodTier = box.vw < 45 ? 4 : (box.vw < 85 ? 3 : (box.vw < 145 ? 2 : 1));
-    const sig = `${visPrefs.sort().join(",")}|${lodTier}|${Math.round(box.vx / 20)},${Math.round(box.vy / 20)}|${en ? "en" : "ja"}`;
+    const sigExtra = cfg.sigExtra ? `|${cfg.sigExtra}` : "";
+    const sig = `${visPrefs.sort().join(",")}|${lodTier}|${Math.round(box.vx / 20)},${Math.round(box.vy / 20)}${sigExtra}|${en ? "en" : "ja"}`;
 
-    const polyStroke = Math.max(0.14, Math.min(0.62, box.vw / 250)).toFixed(2);
+    const polyStroke = Math.max(0.14, Math.min(cfg.maxStroke || 0.62, box.vw / (cfg.strokeDivisor || 250))).toFixed(2);
     const lblSizeNum = Math.max(0.95, Math.min(4.0, box.vw / 46));
     const lblSize = lblSizeNum.toFixed(2);
     const lblStroke = (lblSizeNum * 0.30).toFixed(2);
@@ -360,6 +407,7 @@
     const polys = [];
     const labelCandidates = [];
     const seenIds = new Set();
+    const tier3Div = cfg.tier3AreaDivisor || 1400;
 
     visPrefs.forEach(pId => {
       const list = munisByPref[pId] || [];
@@ -374,10 +422,8 @@
         if (b[2] < xMin || b[0] > xMax || b[3] < yMin || b[1] > yMax) return;
         seenIds.add(gId);
 
-        const safeGeoId = window.escapeAttr(gId);
-        const safePrefId = window.escapeAttr(pId);
         const dispLabel = en ? (muni.rawNameEn || muni.nameEn) : (muni.rawNameJa || muni.nameJa);
-        polys.push(`<path class="gmaps-muni-poly" data-geo-id="${safeGeoId}" data-pref-id="${safePrefId}" d="${geo.d}" stroke-width="${polyStroke}" stroke-linejoin="round" onclick="selectMapCityGeo(this.dataset.geoId)"><title>${window.escapeHtml(`${dispLabel} (${prefTitle})`)}</title></path>`);
+        polys.push(cfg.buildPathHtml({ muni, gId, prefId: pId, geo, dispLabel, prefTitle, polyStroke }));
 
         const cx = geo.cx;
         const cy = geo.cy;
@@ -385,7 +431,7 @@
           const areaEst = Math.max(0.1, (b[2] - b[0]) * (b[3] - b[1]));
           const isCityOrWard = muni.isShi || muni.muniType === "ward";
           const isCapitalOrMajor = idx < 4;
-          const areaCutoff = lodTier === 4 ? 0 : (lodTier === 3 ? (box.vw * box.vw) / 1400 : (box.vw * box.vw) / 340);
+          const areaCutoff = lodTier === 4 ? 0 : (lodTier === 3 ? (box.vw * box.vw) / tier3Div : (box.vw * box.vw) / 340);
           if (lodTier >= 4 || (lodTier >= 3 && (isCityOrWard || areaEst > areaCutoff)) || isCapitalOrMajor || (lodTier >= 2 && isCityOrWard) || areaEst > areaCutoff) {
             labelCandidates.push({
               gId,
@@ -399,9 +445,9 @@
       });
     });
 
-    // Greedy collision cull for crisp readable labels at any zoom depth (reveals all towns & villages on deep zoom)
     labelCandidates.sort((a, b) => b.prio - a.prio);
-    const maxLabels = lodTier === 4 ? 180 : (lodTier === 3 ? 95 : (lodTier === 2 ? 45 : 18));
+    const labelCaps = cfg.maxLabelsByTier || { 4: 180, 3: 95, 2: 45, 1: 18 };
+    const maxLabels = labelCaps[lodTier] || 18;
     const minDistX = lblSizeNum * (lodTier === 4 ? 3.2 : (lodTier === 3 ? 4.4 : 6.0));
     const minDistY = lblSizeNum * (lodTier === 4 ? 1.15 : 1.40);
     const accepted = [];
@@ -409,8 +455,7 @@
 
     for (let i = 0; i < labelCandidates.length && accepted.length < maxLabels; i++) {
       const c = labelCandidates[i];
-      const clash = accepted.some(a => Math.abs(a.cx - c.cx) < minDistX && Math.abs(a.cy - c.cy) < minDistY);
-      if (clash) continue;
+      if (accepted.some(a => Math.abs(a.cx - c.cx) < minDistX && Math.abs(a.cy - c.cy) < minDistY)) continue;
       accepted.push(c);
       labelsHtml.push(`<text class="gmaps-muni-label" x="${c.cx}" y="${c.cy}" text-anchor="middle" font-size="${lblSize}" style="stroke-width:${lblStroke}px;">${window.escapeHtml(c.name)}</text>`);
     }
@@ -419,6 +464,20 @@
       html: polys.join("") + labelsHtml.join(""),
       sig
     };
+  };
+
+  window.buildDynamicCityLayerContent = function(box, en, focusedPrefId) {
+    return window.renderMunicipalityLodLayer({
+      box,
+      en,
+      focusedPrefId,
+      maxStroke: 0.62,
+      strokeDivisor: 250,
+      tier3AreaDivisor: 1400,
+      maxLabelsByTier: { 4: 180, 3: 95, 2: 45, 1: 18 },
+      buildPathHtml: ({ gId, prefId, geo, dispLabel, prefTitle, polyStroke }) =>
+        `<path class="gmaps-muni-poly" data-geo-id="${window.escapeAttr(gId)}" data-pref-id="${window.escapeAttr(prefId)}" d="${geo.d}" stroke-width="${polyStroke}" stroke-linejoin="round" onclick="selectMapCityGeo(this.dataset.geoId)"><title>${window.escapeHtml(`${dispLabel} (${prefTitle})`)}</title></path>`
+    });
   };
 
   window.updateDynamicCityLayerForViewBox = function(svgEl) {
@@ -792,7 +851,7 @@
           if (!pref) return "";
           const isActive = activePrefId === pId;
           const cnt = pStops.length;
-          return `<button type="button" class="pill map-pref-chip ${isActive ? "active" : ""}" data-pref-id="${window.escapeAttr(pId)}" onclick="focusMapPrefecture('${window.escapeAttr(pId)}')" title="${window.escapeAttr(en ? `Highlight & zoom to ${pref.nameEn}` : `${pref.nameJa}の境界を拡大表示`)}">📍 ${window.escapeHtml(en ? pref.nameEn : pref.nameJa)} (${cnt})${cnt >= 2 ? " 🔍" : ""}</button>`;
+          return `<button type="button" class="pill map-pref-chip ${isActive ? "active" : ""}" data-pref-id="${window.escapeAttr(pId)}" onclick="focusMapPrefecture(this.dataset.prefId)" title="${window.escapeAttr(en ? `Highlight & zoom to ${pref.nameEn}` : `${pref.nameJa}の境界を拡大表示`)}">📍 ${window.escapeHtml(en ? pref.nameEn : pref.nameJa)} (${cnt})${cnt >= 2 ? " 🔍" : ""}</button>`;
         }).join("")}
       </div>
     ` : "";
